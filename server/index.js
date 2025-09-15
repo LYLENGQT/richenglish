@@ -29,7 +29,7 @@ const dbConfig = {
   host: process.env.DB_HOST || 'localhost',
   user: process.env.DB_USER || 'root',
   password: process.env.DB_PASSWORD || '',
-  database: process.env.DB_NAME || 'rich_english_portal',
+  database: process.env.DB_NAME || 'richenglish',
   waitForConnections: true,
   connectionLimit: 10,
   queueLimit: 0
@@ -97,10 +97,16 @@ const upload = multer({ storage, fileFilter: pdfOnly, limits: { fileSize: 50 * 1
         id INT AUTO_INCREMENT PRIMARY KEY,
         title VARCHAR(255) NOT NULL,
         filename VARCHAR(255) NOT NULL,
+        original_filename VARCHAR(255) NULL,
         path VARCHAR(512) NOT NULL,
         uploaded_by INT,
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
       ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+    `);
+    // Ensure original_filename exists for older tables
+    await pool.execute(`
+      ALTER TABLE books 
+      ADD COLUMN IF NOT EXISTS original_filename VARCHAR(255) NULL AFTER filename;
     `);
   } catch (err) {
     console.error('Failed ensuring books table:', err);
@@ -514,8 +520,8 @@ app.post('/api/books', authenticateToken, requireAdmin, upload.single('file'), a
     const title = req.body.title || req.file.originalname.replace(/\.pdf$/i, '');
     const storedPath = path.relative(__dirname, req.file.path).replace(/\\/g, '/');
     const [result] = await pool.execute(
-      'INSERT INTO books (title, filename, path, uploaded_by) VALUES (?, ?, ?, ?)',
-      [title, req.file.filename, storedPath, req.user.id || null]
+      'INSERT INTO books (title, filename, original_filename, path, uploaded_by) VALUES (?, ?, ?, ?, ?)',
+      [title, req.file.filename, req.file.originalname, storedPath, req.user.id || null]
     );
     res.json({ id: result.insertId, title });
   } catch (error) {
@@ -531,6 +537,31 @@ app.get('/api/books', authenticateToken, async (req, res) => {
   } catch (error) {
     console.error('Books list error:', error);
     res.status(500).json({ error: 'Failed to fetch books' });
+  }
+});
+
+// Admin: reindex any files on disk that are not in DB
+app.post('/api/books/reindex', authenticateToken, requireAdmin, async (req, res) => {
+  try {
+    const filesOnDisk = fs.readdirSync(uploadsDir).filter((f) => f.toLowerCase().endsWith('.pdf'));
+    const [rows] = await pool.execute('SELECT filename FROM books');
+    const existing = new Set(rows.map((r) => r.filename));
+    let created = 0;
+    for (const fname of filesOnDisk) {
+      if (!existing.has(fname)) {
+        const title = fname.replace(/\.pdf$/i, '');
+        const relPath = path.relative(__dirname, path.join(uploadsDir, fname)).replace(/\\/g, '/');
+        await pool.execute(
+          'INSERT INTO books (title, filename, original_filename, path, uploaded_by) VALUES (?, ?, ?, ?, ?)',
+          [title, fname, fname, relPath, req.user.id || null]
+        );
+        created++;
+      }
+    }
+    res.json({ created });
+  } catch (error) {
+    console.error('Books reindex error:', error);
+    res.status(500).json({ error: 'Failed to reindex books' });
   }
 });
 

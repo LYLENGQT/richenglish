@@ -19,6 +19,7 @@ import Attendance from './components/Attendance';
 import MakeupClasses from './components/MakeupClasses';
 import Layout from './components/Layout';
 import BookViewer from './components/BookViewer';
+import Books from './components/Books';
 
 // Context
 export const AuthContext = createContext();
@@ -129,6 +130,7 @@ function AppRoutes() {
         <Route path="classes" element={<Classes />} />
         <Route path="attendance" element={<Attendance />} />
         <Route path="makeup-classes" element={<MakeupClasses />} />
+        <Route path="books" element={<Books />} />
         <Route path="books/:id" element={<BookViewer />} />
       </Route>
     </Routes>

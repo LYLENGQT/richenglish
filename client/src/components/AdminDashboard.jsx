@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import api from '../utils/api';
 import { Link } from 'react-router-dom';
 import { format } from 'date-fns';
-import { Link } from 'react-router-dom';
 import {
   UserGroupIcon,
   CalendarIcon,

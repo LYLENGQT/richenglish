@@ -1,6 +1,8 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import api from '../utils/api';
+import { GlobalWorkerOptions, getDocument } from 'pdfjs-dist';
+import workerSrc from 'pdfjs-dist/build/pdf.worker.mjs?url';
 
 // Note: This viewer renders PDFs onto a canvas per page to avoid selectable text.
 // It disables context menu and common keyboard shortcuts. Client-side measures
@@ -12,6 +14,7 @@ export default function BookViewer() {
   const [title, setTitle] = useState('');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [rendering, setRendering] = useState(false);
 
   useEffect(() => {
     let isMounted = true;
@@ -22,14 +25,21 @@ export default function BookViewer() {
         const book = list.data.find((b) => String(b.id) === String(id));
         if (book) setTitle(book.title);
 
-        // Dynamically import pdfjs to keep bundle small
-        const pdfjsLib = await import('pdfjs-dist');
-        const workerSrc = await import('pdfjs-dist/build/pdf.worker.min.js?url');
-        pdfjsLib.GlobalWorkerOptions.workerSrc = workerSrc.default;
-
-        const pdf = await pdfjsLib.getDocument({ url: `/api/books/${id}/stream`, withCredentials: false }).promise;
+        GlobalWorkerOptions.workerSrc = workerSrc;
+        setRendering(true);
+        // Fetch as binary via our axios instance (adds Authorization automatically)
+        const res = await api.get(`/books/${id}/stream`, { responseType: 'arraybuffer' });
+        const data = new Uint8Array(res.data);
+        // Quick sanity check: PDF files start with %PDF
+        const header = new TextDecoder('ascii').decode(data.slice(0, 4));
+        if (header !== '%PDF') {
+          throw new Error('Stream is not a PDF');
+        }
+        const pdf = await getDocument({ data }).promise;
+        console.log(`Loaded PDF with ${pdf.numPages} pages`);
         if (!isMounted) return;
         const container = containerRef.current;
+        if (!container) return; // Component not mounted yet
         container.innerHTML = '';
         for (let pageNum = 1; pageNum <= pdf.numPages; pageNum++) {
           const page = await pdf.getPage(pageNum);
@@ -43,9 +53,11 @@ export default function BookViewer() {
           await page.render({ canvasContext: ctx, viewport }).promise;
           container.appendChild(canvas);
         }
+        setRendering(false);
       } catch (e) {
         console.error(e);
         setError('Failed to load book');
+        setRendering(false);
       } finally {
         if (isMounted) setLoading(false);
       }
@@ -88,6 +100,7 @@ export default function BookViewer() {
   return (
     <div className="p-4 select-none" style={{ userSelect: 'none' }}>
       <h1 className="text-xl font-semibold mb-4">{title || 'Book'}</h1>
+      {rendering && <div className="p-6 text-blue-600">Rendering pages...</div>}
       <div ref={containerRef} className="max-w-4xl mx-auto" />
       <p className="text-sm text-gray-500 mt-4">
         Viewing only. Downloading, copying, printing, and selection are disabled.

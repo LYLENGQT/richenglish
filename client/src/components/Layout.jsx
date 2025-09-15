@@ -9,7 +9,8 @@ import {
   ClockIcon,
   ArrowRightOnRectangleIcon,
   Bars3Icon,
-  XMarkIcon
+  XMarkIcon,
+  BookOpenIcon
 } from '@heroicons/react/24/outline';
 import { useState } from 'react';
 
@@ -26,6 +27,7 @@ const Layout = () => {
       { name: 'Classes', href: '/portal/classes', icon: CalendarIcon },
       { name: 'Attendance', href: '/portal/attendance', icon: ClipboardDocumentListIcon },
       { name: 'Makeup Classes', href: '/portal/makeup-classes', icon: ClockIcon },
+      { name: 'Books', href: '/portal/books', icon: BookOpenIcon }
     ];
 
     // Add admin-only navigation items
