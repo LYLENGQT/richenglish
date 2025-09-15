@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import api from '../utils/api';
+import { Link } from 'react-router-dom';
 import { format } from 'date-fns';
 import { Link } from 'react-router-dom';
 import {
@@ -23,9 +24,14 @@ const AdminDashboard = () => {
   const [recentStudents, setRecentStudents] = useState([]);
   const [recentTeachers, setRecentTeachers] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [books, setBooks] = useState([]);
+  const [uploading, setUploading] = useState(false);
+  const [bookTitle, setBookTitle] = useState('');
+  const [bookFile, setBookFile] = useState(null);
 
   useEffect(() => {
     fetchDashboardData();
+    fetchBooks();
   }, []);
 
   const fetchDashboardData = async () => {
@@ -46,6 +52,15 @@ const AdminDashboard = () => {
       console.error('Error fetching dashboard data:', error);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const fetchBooks = async () => {
+    try {
+      const res = await api.get('/books');
+      setBooks(res.data);
+    } catch (error) {
+      console.error('Error fetching books:', error);
     }
   };
 
@@ -227,6 +242,60 @@ const AdminDashboard = () => {
             </div>
           </div>
         </div>
+
+        {/* Upload Book (PDF) */}
+        <div className="bg-white shadow rounded-lg">
+          <div className="px-4 py-5 sm:p-6">
+            <h3 className="text-lg leading-6 font-medium text-gray-900 mb-4">
+              Upload Book (PDF)
+            </h3>
+            <form
+              onSubmit={async (e) => {
+                e.preventDefault();
+                if (!bookFile) return;
+                setUploading(true);
+                try {
+                  const form = new FormData();
+                  if (bookTitle) form.append('title', bookTitle);
+                  form.append('file', bookFile);
+                  await api.post('/books', form, {
+                    headers: { 'Content-Type': 'multipart/form-data' }
+                  });
+                  setBookTitle('');
+                  setBookFile(null);
+                  await fetchBooks();
+                } catch (err) {
+                  console.error(err);
+                  alert('Upload failed');
+                } finally {
+                  setUploading(false);
+                }
+              }}
+              className="space-y-3"
+            >
+              <input
+                type="text"
+                placeholder="Title (optional)"
+                value={bookTitle}
+                onChange={(e) => setBookTitle(e.target.value)}
+                className="border p-2 rounded w-full"
+              />
+              <input
+                type="file"
+                accept="application/pdf"
+                onChange={(e) => setBookFile(e.target.files?.[0] || null)}
+                className="border p-2 rounded w-full"
+              />
+              <button
+                type="submit"
+                disabled={uploading}
+                className="bg-blue-600 text-white px-4 py-2 rounded disabled:opacity-50"
+              >
+                {uploading ? 'Uploading...' : 'Upload'}
+              </button>
+            </form>
+          </div>
+        </div>
       </div>
 
       {/* Quick Actions */}
@@ -316,6 +385,24 @@ const AdminDashboard = () => {
               </div>
             </Link>
           </div>
+        </div>
+      </div>
+
+      {/* Books List */}
+      <div className="bg-white shadow rounded-lg">
+        <div className="px-4 py-5 sm:p-6">
+          <h3 className="text-lg leading-6 font-medium text-gray-900 mb-4">Books</h3>
+          <ul className="divide-y divide-gray-200">
+            {books.map((b) => (
+              <li key={b.id} className="py-3 flex items-center justify-between">
+                <span className="text-gray-800">{b.title}</span>
+                <Link to={`/portal/books/${b.id}`} className="text-blue-600 hover:underline">View</Link>
+              </li>
+            ))}
+            {books.length === 0 && (
+              <li className="py-3 text-gray-500">No books uploaded yet.</li>
+            )}
+          </ul>
         </div>
       </div>
     </div>

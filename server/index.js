@@ -6,6 +6,7 @@ const jwt = require('jsonwebtoken');
 const multer = require('multer');
 const csv = require('csv-parser');
 const fs = require('fs');
+const path = require('path');
 require('dotenv').config();
 
 const app = express();
@@ -15,6 +16,13 @@ const PORT = process.env.PORT || 5000;
 app.use(cors());
 app.use(express.json());
 app.use(express.static('public'));
+app.use('/uploads/books', express.static(path.join(__dirname, 'uploads', 'books'), {
+  setHeaders: (res) => {
+    res.setHeader('Cache-Control', 'no-store');
+    res.setHeader('X-Content-Type-Options', 'nosniff');
+    res.setHeader('Content-Security-Policy', "frame-ancestors 'self'");
+  }
+}));
 
 // Database connection
 const dbConfig = {
@@ -49,6 +57,55 @@ const authenticateToken = (req, res, next) => {
     next();
   });
 };
+
+// Role guard
+const requireAdmin = (req, res, next) => {
+  if (!req.user || req.user.role !== 'admin') {
+    return res.status(403).json({ error: 'Admin access required' });
+  }
+  next();
+};
+
+// Ensure uploads directory exists
+const uploadsDir = path.join(__dirname, 'uploads', 'books');
+fs.mkdirSync(uploadsDir, { recursive: true });
+
+// Multer storage for PDFs
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => cb(null, uploadsDir),
+  filename: (req, file, cb) => {
+    const unique = Date.now() + '-' + Math.round(Math.random() * 1e9);
+    const ext = path.extname(file.originalname) || '.pdf';
+    cb(null, unique + ext);
+  }
+});
+
+const pdfOnly = (req, file, cb) => {
+  if (file.mimetype !== 'application/pdf') {
+    return cb(new Error('Only PDF files are allowed'));
+  }
+  cb(null, true);
+};
+
+const upload = multer({ storage, fileFilter: pdfOnly, limits: { fileSize: 50 * 1024 * 1024 } });
+
+// Initialize books table if not exists
+(async () => {
+  try {
+    await pool.execute(`
+      CREATE TABLE IF NOT EXISTS books (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        title VARCHAR(255) NOT NULL,
+        filename VARCHAR(255) NOT NULL,
+        path VARCHAR(512) NOT NULL,
+        uploaded_by INT,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+      ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+    `);
+  } catch (err) {
+    console.error('Failed ensuring books table:', err);
+  }
+})();
 
 // Routes
 
@@ -448,6 +505,56 @@ app.get('/api/dashboard/stats', authenticateToken, async (req, res) => {
   } catch (error) {
     console.error('Error fetching dashboard stats:', error);
     res.status(500).json({ error: 'Server error' });
+  }
+});
+
+// Books: upload (admin), list (auth), stream (auth)
+app.post('/api/books', authenticateToken, requireAdmin, upload.single('file'), async (req, res) => {
+  try {
+    const title = req.body.title || req.file.originalname.replace(/\.pdf$/i, '');
+    const storedPath = path.relative(__dirname, req.file.path).replace(/\\/g, '/');
+    const [result] = await pool.execute(
+      'INSERT INTO books (title, filename, path, uploaded_by) VALUES (?, ?, ?, ?)',
+      [title, req.file.filename, storedPath, req.user.id || null]
+    );
+    res.json({ id: result.insertId, title });
+  } catch (error) {
+    console.error('Book upload error:', error);
+    res.status(500).json({ error: 'Failed to upload book' });
+  }
+});
+
+app.get('/api/books', authenticateToken, async (req, res) => {
+  try {
+    const [rows] = await pool.execute('SELECT id, title, created_at FROM books ORDER BY created_at DESC');
+    res.json(rows);
+  } catch (error) {
+    console.error('Books list error:', error);
+    res.status(500).json({ error: 'Failed to fetch books' });
+  }
+});
+
+app.get('/api/books/:id/stream', authenticateToken, async (req, res) => {
+  try {
+    const { id } = req.params;
+    const [rows] = await pool.execute('SELECT * FROM books WHERE id = ?', [id]);
+    if (!rows.length) return res.status(404).json({ error: 'Not found' });
+    const book = rows[0];
+    const filePath = path.join(__dirname, book.path);
+    if (!fs.existsSync(filePath)) return res.status(404).json({ error: 'File missing' });
+
+    res.setHeader('Content-Type', 'application/pdf');
+    res.setHeader('Content-Disposition', `inline; filename="${book.filename}"`);
+    res.setHeader('Cache-Control', 'no-store');
+    res.setHeader('X-Content-Type-Options', 'nosniff');
+    res.setHeader('Pragma', 'no-cache');
+    res.setHeader('Expires', '0');
+
+    const stream = fs.createReadStream(filePath);
+    stream.pipe(res);
+  } catch (error) {
+    console.error('Book stream error:', error);
+    res.status(500).json({ error: 'Failed to stream book' });
   }
 });
 
