@@ -1,12 +1,14 @@
 const express = require('express');
-const mysql = require('mysql2/promise');
 const cors = require('cors');
 const bcrypt = require('bcryptjs');
-const jwt = require('jsonwebtoken');
 const multer = require('multer');
-const csv = require('csv-parser');
 const fs = require('fs');
 const path = require('path');
+const {
+  authenticateToken,
+  requireAdmin
+} = require('./middleware/authMiddleware');
+const pool = require('./database/db')
 require('dotenv').config();
 
 const app = express();
@@ -23,48 +25,6 @@ app.use('/uploads/books', express.static(path.join(__dirname, 'uploads', 'books'
     res.setHeader('Content-Security-Policy', "frame-ancestors 'self'");
   }
 }));
-
-// Database connection
-const dbConfig = {
-  host: process.env.DB_HOST || 'localhost',
-  user: process.env.DB_USER || 'root',
-  password: process.env.DB_PASSWORD || '',
-  database: process.env.DB_NAME || 'richenglish',
-  waitForConnections: true,
-  connectionLimit: 10,
-  queueLimit: 0
-};
-
-const pool = mysql.createPool(dbConfig);
-
-// JWT Secret
-const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key';
-
-// Auth middleware
-const authenticateToken = (req, res, next) => {
-  const authHeader = req.headers['authorization'];
-  const token = authHeader && authHeader.split(' ')[1];
-
-  if (!token) {
-    return res.status(401).json({ error: 'Access token required' });
-  }
-
-  jwt.verify(token, JWT_SECRET, (err, user) => {
-    if (err) {
-      return res.status(403).json({ error: 'Invalid token' });
-    }
-    req.user = user;
-    next();
-  });
-};
-
-// Role guard
-const requireAdmin = (req, res, next) => {
-  if (!req.user || req.user.role !== 'admin') {
-    return res.status(403).json({ error: 'Admin access required' });
-  }
-  next();
-};
 
 // Ensure uploads directory exists
 const uploadsDir = path.join(__dirname, 'uploads', 'books');
@@ -114,205 +74,18 @@ const upload = multer({ storage, fileFilter: pdfOnly, limits: { fileSize: 50 * 1
 })();
 
 // Routes
+const authRoutes = require('./routes/authRoutes')
+const studentsRoutes = require('./routes/studentRoutes')
+const classRoutes = require('./routes/classRoutes')
+const attendanceRoutes = require('./routes/attendanceRoutes')
+// const makeupClass = require('./routes/makeUpClassRoutes')
 
-// Auth routes
-app.post('/api/auth/login', async (req, res) => {
-  try {
-    const { email, password } = req.body;
-    
-    const [rows] = await pool.execute(
-      'SELECT * FROM teachers WHERE email = ?',
-      [email]
-    );
+app.use('/api/auth', authRoutes);
+app.use('/api/students', studentsRoutes)
+app.use('/api/classes', classRoutes)
+app.use('/api/attendance', attendanceRoutes)
+// app.use('/api/makeup-classes', makeupClass)
 
-    if (rows.length === 0) {
-      return res.status(401).json({ error: 'Invalid credentials' });
-    }
-
-    const teacher = rows[0];
-    const isValidPassword = await bcrypt.compare(password, teacher.password);
-
-    if (!isValidPassword) {
-      return res.status(401).json({ error: 'Invalid credentials' });
-    }
-
-    const token = jwt.sign(
-      { id: teacher.id, email: teacher.email, role: teacher.role },
-      JWT_SECRET,
-      { expiresIn: '24h' }
-    );
-
-    res.json({
-      token,
-      teacher: {
-        id: teacher.id,
-        name: teacher.name,
-        email: teacher.email,
-        role: teacher.role
-      }
-    });
-  } catch (error) {
-    console.error('Login error:', error);
-    res.status(500).json({ error: 'Server error' });
-  }
-});
-
-// Students routes
-app.get('/api/students', authenticateToken, async (req, res) => {
-  try {
-    const [rows] = await pool.execute(`
-      SELECT s.*, t.name as teacher_name 
-      FROM students s 
-      LEFT JOIN teachers t ON s.teacher_id = t.id 
-      ORDER BY s.name
-    `);
-    res.json(rows);
-  } catch (error) {
-    console.error('Error fetching students:', error);
-    res.status(500).json({ error: 'Server error' });
-  }
-});
-
-app.post('/api/students', authenticateToken, async (req, res) => {
-  try {
-    const {
-      name, age, nationality, manager_type, email, book,
-      category_level, class_type, platform, platform_link, teacher_id
-    } = req.body;
-
-    const [result] = await pool.execute(`
-      INSERT INTO students (name, age, nationality, manager_type, email, book, 
-                           category_level, class_type, platform, platform_link, teacher_id)
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-    `, [name, age, nationality, manager_type, email, book, 
-        category_level, class_type, platform, platform_link, teacher_id]);
-
-    res.json({ id: result.insertId, message: 'Student created successfully' });
-  } catch (error) {
-    console.error('Error creating student:', error);
-    res.status(500).json({ error: 'Server error' });
-  }
-});
-
-app.put('/api/students/:id', authenticateToken, async (req, res) => {
-  try {
-    const { id } = req.params;
-    const {
-      name, age, nationality, manager_type, email, book,
-      category_level, class_type, platform, platform_link, teacher_id
-    } = req.body;
-
-    await pool.execute(`
-      UPDATE students 
-      SET name=?, age=?, nationality=?, manager_type=?, email=?, book=?,
-          category_level=?, class_type=?, platform=?, platform_link=?, teacher_id=?
-      WHERE id=?
-    `, [name, age, nationality, manager_type, email, book,
-        category_level, class_type, platform, platform_link, teacher_id, id]);
-
-    res.json({ message: 'Student updated successfully' });
-  } catch (error) {
-    console.error('Error updating student:', error);
-    res.status(500).json({ error: 'Server error' });
-  }
-});
-
-app.delete('/api/students/:id', authenticateToken, async (req, res) => {
-  try {
-    const { id } = req.params;
-    await pool.execute('DELETE FROM students WHERE id = ?', [id]);
-    res.json({ message: 'Student deleted successfully' });
-  } catch (error) {
-    console.error('Error deleting student:', error);
-    res.status(500).json({ error: 'Server error' });
-  }
-});
-
-// Classes routes
-app.get('/api/classes', authenticateToken, async (req, res) => {
-  try {
-    const [rows] = await pool.execute(`
-      SELECT c.*, s.name as student_name, s.nationality, s.manager_type,
-             t.name as teacher_name
-      FROM classes c
-      JOIN students s ON c.student_id = s.id
-      JOIN teachers t ON c.teacher_id = t.id
-      ORDER BY c.start_time
-    `);
-    res.json(rows);
-  } catch (error) {
-    console.error('Error fetching classes:', error);
-    res.status(500).json({ error: 'Server error' });
-  }
-});
-
-app.post('/api/classes', authenticateToken, async (req, res) => {
-  try {
-    const {
-      student_id, teacher_id, start_time, end_time, duration_minutes,
-      days_of_week, start_date, end_date, status
-    } = req.body;
-
-    const [result] = await pool.execute(`
-      INSERT INTO classes (student_id, teacher_id, start_time, end_time, 
-                          duration_minutes, days_of_week, start_date, end_date, status)
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
-    `, [student_id, teacher_id, start_time, end_time, duration_minutes,
-        days_of_week, start_date, end_date, status || 'active']);
-
-    res.json({ id: result.insertId, message: 'Class created successfully' });
-  } catch (error) {
-    console.error('Error creating class:', error);
-    res.status(500).json({ error: 'Server error' });
-  }
-});
-
-// Attendance routes
-app.get('/api/attendance', authenticateToken, async (req, res) => {
-  try {
-    const { date, student_id } = req.query;
-    let query = `
-      SELECT a.*, s.name as student_name, c.start_time, c.end_time
-      FROM attendance a
-      JOIN students s ON a.student_id = s.id
-      JOIN classes c ON a.class_id = c.id
-    `;
-    const params = [];
-
-    if (date) {
-      query += ' WHERE DATE(a.date) = ?';
-      params.push(date);
-    }
-    if (student_id) {
-      query += date ? ' AND a.student_id = ?' : ' WHERE a.student_id = ?';
-      params.push(student_id);
-    }
-
-    query += ' ORDER BY a.date DESC, c.start_time';
-
-    const [rows] = await pool.execute(query, params);
-    res.json(rows);
-  } catch (error) {
-    console.error('Error fetching attendance:', error);
-    res.status(500).json({ error: 'Server error' });
-  }
-});
-
-app.post('/api/attendance', authenticateToken, async (req, res) => {
-  try {
-    const { class_id, student_id, teacher_id, date, status, minutes_attended, notes } = req.body;
-
-    const [result] = await pool.execute(`
-      INSERT INTO attendance (class_id, student_id, teacher_id, date, status, minutes_attended, notes)
-      VALUES (?, ?, ?, ?, ?, ?, ?)
-    `, [class_id, student_id, teacher_id, date, status, minutes_attended, notes]);
-
-    res.json({ id: result.insertId, message: 'Attendance recorded successfully' });
-  } catch (error) {
-    console.error('Error recording attendance:', error);
-    res.status(500).json({ error: 'Server error' });
-  }
-});
 
 // Makeup classes routes
 app.get('/api/makeup-classes', authenticateToken, async (req, res) => {
