@@ -1,6 +1,7 @@
 const express = require('express')
 const router = express.Router();
-const {teacherApplication, dashboardStats} = require('../controller/functionsController')
+const {dashboardStats} = require('../controller/functionsController')
+const {teacherApplication} = require('../controller/teacherController')
 const {
   authenticateToken,
 } = require('../middleware/authMiddleware');
