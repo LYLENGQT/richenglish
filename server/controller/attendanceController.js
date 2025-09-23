@@ -1,4 +1,10 @@
 const pool = require('../database/db');
+const {
+  UnathenticatedError,
+  BadRequestError,
+  NotFoundError,
+  UnathoizedError,
+} = require('../errors')
 
 const getAttendance = async (req, res)=>{
 try {

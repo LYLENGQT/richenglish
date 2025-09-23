@@ -43,6 +43,15 @@ const Teacher = {
   async delete(id) {
     await pool.execute('DELETE FROM teachers WHERE id = ?', [id]);
     return true;
+  },
+
+   findByEmail: async (email)=>{
+    const [rows] = await pool.execute(
+      'SELECT * FROM teachers WHERE email = ?',
+      [email]
+    );
+
+    return rows[0];
   }
 };
 

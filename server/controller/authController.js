@@ -2,26 +2,24 @@ const pool = require('../database/db')
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken')
 const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key';
+const {
+  UnathenticatedError,
+  BadRequestError,
+  NotFoundError,
+  UnathoizedError,
+} = require('../errors')
+const Teacher = require('../models/Teacher');
 
 const login = async (req, res) => {
-  try {
     const { email, password } = req.body;
     
-    const [rows] = await pool.execute(
-      'SELECT * FROM teachers WHERE email = ?',
-      [email]
-    );
+    const teacher = await Teacher.findByEmail(email)
+    
+    if(!teacher) throw new BadRequestError("Invalid Credentials")
 
-    if (rows.length === 0) {
-      return res.status(401).json({ error: 'Invalid credentials' });
-    }
-
-    const teacher = rows[0];
     const isValidPassword = await bcrypt.compare(password, teacher.password);
 
-    if (!isValidPassword) {
-      return res.status(401).json({ error: 'Invalid credentials' });
-    }
+    if (!isValidPassword) throw new BadRequestError("Invalid Credentials")
 
     const token = jwt.sign(
       { id: teacher.id, email: teacher.email, role: teacher.role },
@@ -38,10 +36,6 @@ const login = async (req, res) => {
         role: teacher.role
       }
     });
-  } catch (error) {
-    console.error('Login error:', error);
-    res.status(500).json({ error: 'Server error' });
-  }
 };
 
 module.exports = {

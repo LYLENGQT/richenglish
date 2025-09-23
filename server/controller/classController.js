@@ -1,4 +1,10 @@
 const pool = require('../database/db');
+const {
+  UnathenticatedError,
+  BadRequestError,
+  NotFoundError,
+  UnathoizedError,
+} = require('../errors')
 
 const getClass = async (req, res)=>{
 try {

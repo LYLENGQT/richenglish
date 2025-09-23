@@ -9,7 +9,13 @@ const multer = require('multer');
 const fs = require('fs');
 const path = require('path');
 
-router.use('/uploads/books', express.static(path.join(__dirname, 'uploads', 'books'), {
+const uploadsDir = path.join(__dirname, '../uploads/books');
+
+// Ensure the directory exists
+fs.mkdirSync(uploadsDir, { recursive: true });
+
+// Serve uploaded files securely
+router.use('/uploads/books', express.static(uploadsDir, {
   setHeaders: (res) => {
     res.setHeader('Cache-Control', 'no-store');
     res.setHeader('X-Content-Type-Options', 'nosniff');
@@ -17,9 +23,7 @@ router.use('/uploads/books', express.static(path.join(__dirname, 'uploads', 'boo
   }
 }));
 
-const uploadsDir = path.join(__dirname, 'uploads', 'books');
-fs.mkdirSync(uploadsDir, { recursive: true });
-
+// Configure Multer storage
 const storage = multer.diskStorage({
   destination: (req, file, cb) => cb(null, uploadsDir),
   filename: (req, file, cb) => {
@@ -29,6 +33,7 @@ const storage = multer.diskStorage({
   }
 });
 
+// PDF-only filter
 const pdfOnly = (req, file, cb) => {
   if (file.mimetype !== 'application/pdf') {
     return cb(new Error('Only PDF files are allowed'));
