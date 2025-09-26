@@ -105,6 +105,26 @@ CREATE TABLE substitute_classes (
     FOREIGN KEY (substitute_teacher_id) REFERENCES teachers(id) ON DELETE CASCADE
 );
 
+CREATE TABLE message (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    sender_id INT NOT NULL,
+    receiver_id INT NOT NULL,
+    message TEXT NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT fk_sender FOREIGN KEY (sender_id) REFERENCES teachers(id)
+        ON DELETE CASCADE ON UPDATE CASCADE,
+    CONSTRAINT fk_receiver FOREIGN KEY (receiver_id) REFERENCES teachers(id)
+        ON DELETE CASCADE ON UPDATE CASCADE
+);
+
+INSERT INTO message (sender_id, receiver_id, message)
+VALUES
+(1, 2, 'Hello! This is teacher 1 sending a message to teacher 2.'),
+(2, 1, 'Hi! This is teacher 2 replying to teacher 1.'),
+(1, 2, 'Can we meet tomorrow morning?'),
+(2, 1, 'Sure, tomorrow at 9 AM works for me.');
+
+
 -- Insert sample teacher data
 INSERT INTO teachers (name, email, password, role) VALUES 
 ('Teacher Mitch', 'teacher.mitch@richenglish.com', '$2b$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'teacher'),

@@ -10,6 +10,7 @@ import {
   ClockIcon,
   ChartBarIcon
 } from '@heroicons/react/24/outline';
+import ChatSideBar from '../components/ChatSideBar';
 
 const Dashboard = () => {
   const { state } = useContext(AuthContext);
@@ -253,6 +254,7 @@ const Dashboard = () => {
           </div>
         </div>
       </div>
+      <ChatSideBar />
     </div>
   );
 };

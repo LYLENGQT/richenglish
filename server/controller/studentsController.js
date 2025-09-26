@@ -61,6 +61,8 @@ try {
       category_level, class_type, platform, platform_link, teacher_id
     } = req.body;
 
+    console.log(req.user)
+
     await pool.execute(`
       UPDATE students 
       SET name=?, age=?, nationality=?, manager_type=?, email=?, book=?,

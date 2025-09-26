@@ -11,6 +11,7 @@ import {
   UsersIcon,
   AcademicCapIcon
 } from '@heroicons/react/24/outline';
+import ChatSideBar from '../components/ChatSideBar';
 
 const AdminDashboard = () => {
   const [stats, setStats] = useState({
@@ -404,6 +405,7 @@ const AdminDashboard = () => {
           </ul>
         </div>
       </div>
+      <ChatSideBar />
     </div>
   );
 };

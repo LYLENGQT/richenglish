@@ -1,10 +1,18 @@
 const pool = require('../database/db');
 
 const Teacher = {
-  async findAll() {
-    const [rows] = await pool.execute(
-      'SELECT id, name, email, role, created_at, updated_at FROM teachers ORDER BY name'
-    );
+  async findAll(id = null) {
+    let sql = "SELECT id, name, email, role, created_at, updated_at FROM teachers";
+    const params = []
+
+    if(id){
+      sql += ' WHERE id !=?'
+      params.push(id)
+    } 
+
+    sql += ' ORDER by name'
+
+    const [rows] = await pool.execute(sql, params);
     return rows;
   },
 

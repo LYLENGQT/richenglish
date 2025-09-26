@@ -5,6 +5,13 @@ const {
   NotFoundError,
   UnathoizedError,
 } = require('../errors')
+const path = require('path');
+const fs = require('fs');
+  
+const uploadsDir = path.join(__dirname, '../uploads/books');
+
+// Ensure the directory exists
+fs.mkdirSync(uploadsDir, { recursive: true });
 
 const addBooks = async (req, res)=>{
 try {
