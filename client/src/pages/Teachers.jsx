@@ -9,6 +9,7 @@ import {
   FunnelIcon,
   UserIcon
 } from '@heroicons/react/24/outline';
+import ChatSideBar from '../components/ChatSideBar';
 
 const Teachers = () => {
   const [teachers, setTeachers] = useState([]);
@@ -316,6 +317,8 @@ const Teachers = () => {
           </div>
         </div>
       )}
+
+      <ChatSideBar />
     </div>
   );
 };

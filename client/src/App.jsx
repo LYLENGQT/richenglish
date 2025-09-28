@@ -1,25 +1,32 @@
 import React, { createContext, useReducer, useContext } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { Toaster } from 'react-hot-toast';
+import {
+  QueryClient,
+  QueryClientProvider,
+  useQuery,
+} from '@tanstack/react-query'
+
+const queryClient = new QueryClient()
 
 // Components
-import LandingPage from './components/LandingPage';
-import About from './components/About';
-import TeacherApplication from './components/TeacherApplication';
-import FAQ from './components/FAQ';
-import TeacherLeaderboard from './components/TeacherLeaderboard';
-import Contact from './components/Contact';
-import Login from './components/Login';
-import Dashboard from './components/Dashboard';
-import AdminDashboard from './components/AdminDashboard';
-import Students from './components/Students';
-import Teachers from './components/Teachers';
-import Classes from './components/Classes';
-import Attendance from './components/Attendance';
-import MakeupClasses from './components/MakeupClasses';
-import Layout from './components/Layout';
-import BookViewer from './components/BookViewer';
-import Books from './components/Books';
+import LandingPage from './pages/LandingPage';
+import About from './pages/About';
+import TeacherApplication from './pages/TeacherApplication';
+import FAQ from './pages/FAQ';
+import TeacherLeaderboard from './pages/TeacherLeaderboard';
+import Contact from './pages/Contact';
+import Login from './pages/Login';
+import Dashboard from './pages/Dashboard';
+import AdminDashboard from './pages/AdminDashboard';
+import Students from './pages/Students';
+import Teachers from './pages/Teachers';
+import Classes from './pages/Classes';
+import Attendance from './pages/Attendance';
+import MakeupClasses from './pages/MakeupClasses';
+import Layout from './pages/Layout';
+import BookViewer from './pages/BookViewer';
+import Books from './pages/Books';
 
 // Context
 export const AuthContext = createContext();
@@ -140,6 +147,7 @@ function AppRoutes() {
 // Main App component
 function App() {
   return (
+    <QueryClientProvider client={queryClient}>
     <AuthProvider>
       <Router>
         <div className="min-h-screen bg-gray-50">
@@ -149,6 +157,7 @@ function App() {
         </div>
       </Router>
     </AuthProvider>
+    </QueryClientProvider>
   );
 }
 
