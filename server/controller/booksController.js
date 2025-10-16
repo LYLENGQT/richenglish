@@ -1,55 +1,70 @@
-const pool = require('../database/db')
+const pool = require("../database/db");
 const {
   UnathenticatedError,
   BadRequestError,
   NotFoundError,
   UnathoizedError,
-} = require('../errors')
-const path = require('path');
-const fs = require('fs');
-  
-const uploadsDir = path.join(__dirname, '../uploads/books');
+} = require("../errors");
+const path = require("path");
+const fs = require("fs");
+
+const uploadsDir = path.join(__dirname, "../uploads/books");
 
 // Ensure the directory exists
 fs.mkdirSync(uploadsDir, { recursive: true });
 
-const addBooks = async (req, res)=>{
-try {
-    const title = req.body.title || req.file.originalname.replace(/\.pdf$/i, '');
-    const storedPath = path.relative(__dirname, req.file.path).replace(/\\/g, '/');
+const addBooks = async (req, res) => {
+  try {
+    const title =
+      req.body.title || req.file.originalname.replace(/\.pdf$/i, "");
+    const storedPath = path
+      .relative(__dirname, req.file.path)
+      .replace(/\\/g, "/");
     const [result] = await pool.execute(
-      'INSERT INTO books (title, filename, original_filename, path, uploaded_by) VALUES (?, ?, ?, ?, ?)',
-      [title, req.file.filename, req.file.originalname, storedPath, req.user.id || null]
+      "INSERT INTO books (title, filename, original_filename, path, uploaded_by) VALUES (?, ?, ?, ?, ?)",
+      [
+        title,
+        req.file.filename,
+        req.file.originalname,
+        storedPath,
+        req.user.id || null,
+      ]
     );
     res.json({ id: result.insertId, title });
   } catch (error) {
-    console.error('Book upload error:', error);
-    res.status(500).json({ error: 'Failed to upload book' });
+    console.error("Book upload error:", error);
+    res.status(500).json({ error: "Failed to upload book" });
   }
-}
+};
 
-const getBooks = async (req, res)=>{
- try {
-    const [rows] = await pool.execute('SELECT id, title, created_at FROM books ORDER BY created_at DESC');
+const getBooks = async (req, res) => {
+  try {
+    const [rows] = await pool.execute(
+      "SELECT id, title, created_at FROM books ORDER BY created_at DESC"
+    );
     res.json(rows);
   } catch (error) {
-    console.error('Books list error:', error);
-    res.status(500).json({ error: 'Failed to fetch books' });
+    console.error("Books list error:", error);
+    res.status(500).json({ error: "Failed to fetch books" });
   }
-}
+};
 
-const bookReindex = async (req,res)=>{
-    try {
-    const filesOnDisk = fs.readdirSync(uploadsDir).filter((f) => f.toLowerCase().endsWith('.pdf'));
-    const [rows] = await pool.execute('SELECT filename FROM books');
+const bookReindex = async (req, res) => {
+  try {
+    const filesOnDisk = fs
+      .readdirSync(uploadsDir)
+      .filter((f) => f.toLowerCase().endsWith(".pdf"));
+    const [rows] = await pool.execute("SELECT filename FROM books");
     const existing = new Set(rows.map((r) => r.filename));
     let created = 0;
     for (const fname of filesOnDisk) {
       if (!existing.has(fname)) {
-        const title = fname.replace(/\.pdf$/i, '');
-        const relPath = path.relative(__dirname, path.join(uploadsDir, fname)).replace(/\\/g, '/');
+        const title = fname.replace(/\.pdf$/i, "");
+        const relPath = path
+          .relative(__dirname, path.join(uploadsDir, fname))
+          .replace(/\\/g, "/");
         await pool.execute(
-          'INSERT INTO books (title, filename, original_filename, path, uploaded_by) VALUES (?, ?, ?, ?, ?)',
+          "INSERT INTO books (title, filename, original_filename, path, uploaded_by) VALUES (?, ?, ?, ?, ?)",
           [title, fname, fname, relPath, req.user.id || null]
         );
         created++;
@@ -57,23 +72,27 @@ const bookReindex = async (req,res)=>{
     }
     res.json({ created });
   } catch (error) {
-    console.error('Books reindex error:', error);
-    res.status(500).json({ error: 'Failed to reindex books' });
+    console.error("Books reindex error:", error);
+    res.status(500).json({ error: "Failed to reindex books" });
   }
-}
+};
 
-const bookStream = async (req, res)=>{
-try {
-    const filesOnDisk = fs.readdirSync(uploadsDir).filter((f) => f.toLowerCase().endsWith('.pdf'));
-    const [rows] = await pool.execute('SELECT filename FROM books');
+const bookStream = async (req, res) => {
+  try {
+    const filesOnDisk = fs
+      .readdirSync(uploadsDir)
+      .filter((f) => f.toLowerCase().endsWith(".pdf"));
+    const [rows] = await pool.execute("SELECT filename FROM books");
     const existing = new Set(rows.map((r) => r.filename));
     let created = 0;
     for (const fname of filesOnDisk) {
       if (!existing.has(fname)) {
-        const title = fname.replace(/\.pdf$/i, '');
-        const relPath = path.relative(__dirname, path.join(uploadsDir, fname)).replace(/\\/g, '/');
+        const title = fname.replace(/\.pdf$/i, "");
+        const relPath = path
+          .relative(__dirname, path.join(uploadsDir, fname))
+          .replace(/\\/g, "/");
         await pool.execute(
-          'INSERT INTO books (title, filename, original_filename, path, uploaded_by) VALUES (?, ?, ?, ?, ?)',
+          "INSERT INTO books (title, filename, original_filename, path, uploaded_by) VALUES (?, ?, ?, ?, ?)",
           [title, fname, fname, relPath, req.user.id || null]
         );
         created++;
@@ -81,10 +100,9 @@ try {
     }
     res.json({ created });
   } catch (error) {
-    console.error('Books reindex error:', error);
-    res.status(500).json({ error: 'Failed to reindex books' });
+    console.error("Books reindex error:", error);
+    res.status(500).json({ error: "Failed to reindex books" });
   }
-}
+};
 
-
-module.exports = {bookStream, bookReindex, getBooks, addBooks}
+module.exports = { bookStream, bookReindex, getBooks, addBooks };

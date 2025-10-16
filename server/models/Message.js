@@ -1,7 +1,7 @@
-const pool = require('../database/db');
+const pool = require("../database/db");
 
 const MessageModel = {
-  async createMessage( senderId, receiverId, text ) {
+  async createMessage(senderId, receiverId, text) {
     const [result] = await pool.query(
       `INSERT INTO message (sender_id, receiver_id, message) VALUES (?, ?, ?)`,
       [senderId, receiverId, text]
@@ -9,7 +9,7 @@ const MessageModel = {
     return result;
   },
 
-  async getMessagesBetweenUsers( currentUserId, chatPartnerId ) {
+  async getMessagesBetweenUsers(currentUserId, chatPartnerId) {
     const [rows] = await pool.query(
       `
       SELECT 
@@ -30,12 +30,11 @@ const MessageModel = {
     return rows;
   },
 
-  async getMessagebyId(id){
-    const [rows] = await pool.query(`SELECT * FROM message WHERE id = ?`, [id])
+  async getMessagebyId(id) {
+    const [rows] = await pool.query(`SELECT * FROM message WHERE id = ?`, [id]);
 
     return rows;
-  }
+  },
 };
 
 module.exports = MessageModel;
-

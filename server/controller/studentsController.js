@@ -1,13 +1,13 @@
-const pool = require('../database/db');
+const pool = require("../database/db");
 const {
   UnathenticatedError,
   BadRequestError,
   NotFoundError,
   UnathoizedError,
-} = require('../errors')
+} = require("../errors");
 
-const getStudents = async (req, res)=>{
- try {
+const getStudents = async (req, res) => {
+  try {
     const [rows] = await pool.execute(`
       SELECT s.*, t.name as teacher_name 
       FROM students s 
@@ -16,66 +16,113 @@ const getStudents = async (req, res)=>{
     `);
     res.json(rows);
   } catch (error) {
-    console.error('Error fetching students:', error);
-    res.status(500).json({ error: 'Server error' });
+    console.error("Error fetching students:", error);
+    res.status(500).json({ error: "Server error" });
   }
-}
+};
 
-const addStudent = async (req,res)=>{
-try {
+const addStudent = async (req, res) => {
+  try {
     const {
-      name, age, nationality, manager_type, email, book,
-      category_level, class_type, platform, platform_link, teacher_id
+      name,
+      age,
+      nationality,
+      manager_type,
+      email,
+      book,
+      category_level,
+      class_type,
+      platform,
+      platform_link,
+      teacher_id,
     } = req.body;
 
-    const [result] = await pool.execute(`
+    const [result] = await pool.execute(
+      `
       INSERT INTO students (name, age, nationality, manager_type, email, book, 
                            category_level, class_type, platform, platform_link, teacher_id)
       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-    `, [name, age, nationality, manager_type, email, book, 
-        category_level, class_type, platform, platform_link, teacher_id]);
+    `,
+      [
+        name,
+        age,
+        nationality,
+        manager_type,
+        email,
+        book,
+        category_level,
+        class_type,
+        platform,
+        platform_link,
+        teacher_id,
+      ]
+    );
 
-    res.json({ id: result.insertId, message: 'Student created successfully' });
+    res.json({ id: result.insertId, message: "Student created successfully" });
   } catch (error) {
-    console.error('Error creating student:', error);
-    res.status(500).json({ error: 'Server error' });
+    console.error("Error creating student:", error);
+    res.status(500).json({ error: "Server error" });
   }
-}
+};
 
-const deleteStudent = async (req,res)=>{
-try {
+const deleteStudent = async (req, res) => {
+  try {
     const { id } = req.params;
-    await pool.execute('DELETE FROM students WHERE id = ?', [id]);
-    res.json({ message: 'Student deleted successfully' });
+    await pool.execute("DELETE FROM students WHERE id = ?", [id]);
+    res.json({ message: "Student deleted successfully" });
   } catch (error) {
-    console.error('Error deleting student:', error);
-    res.status(500).json({ error: 'Server error' });
+    console.error("Error deleting student:", error);
+    res.status(500).json({ error: "Server error" });
   }
-}
+};
 
-const updateStudent = async (req,res)=>{
-try {
+const updateStudent = async (req, res) => {
+  try {
     const { id } = req.params;
     const {
-      name, age, nationality, manager_type, email, book,
-      category_level, class_type, platform, platform_link, teacher_id
+      name,
+      age,
+      nationality,
+      manager_type,
+      email,
+      book,
+      category_level,
+      class_type,
+      platform,
+      platform_link,
+      teacher_id,
     } = req.body;
 
-    console.log(req.user)
+    console.log(req.user);
 
-    await pool.execute(`
+    await pool.execute(
+      `
       UPDATE students 
       SET name=?, age=?, nationality=?, manager_type=?, email=?, book=?,
           category_level=?, class_type=?, platform=?, platform_link=?, teacher_id=?
       WHERE id=?
-    `, [name, age, nationality, manager_type, email, book,
-        category_level, class_type, platform, platform_link, teacher_id, id]);
+    `,
+      [
+        name,
+        age,
+        nationality,
+        manager_type,
+        email,
+        book,
+        category_level,
+        class_type,
+        platform,
+        platform_link,
+        teacher_id,
+        id,
+      ]
+    );
 
-    res.json({ message: 'Student updated successfully' });
+    res.json({ message: "Student updated successfully" });
   } catch (error) {
-    console.error('Error updating student:', error);
-    res.status(500).json({ error: 'Server error' });
+    console.error("Error updating student:", error);
+    res.status(500).json({ error: "Server error" });
   }
-}
+};
 
-module.exports = {getStudents, addStudent, deleteStudent, updateStudent}
+module.exports = { getStudents, addStudent, deleteStudent, updateStudent };

@@ -1,43 +1,66 @@
-const pool = require('../database/db');
+const pool = require("../database/db");
 
 const ClassModel = {
   async findAll() {
-    const [rows] = await pool.execute('SELECT * FROM classes');
+    const [rows] = await pool.execute("SELECT * FROM classes");
     return rows;
   },
 
   async findById(id) {
-    const [rows] = await pool.execute('SELECT * FROM classes WHERE id = ?', [id]);
+    const [rows] = await pool.execute("SELECT * FROM classes WHERE id = ?", [
+      id,
+    ]);
     return rows[0];
   },
 
   async create(data) {
-    const [result] = await pool.execute(`
+    const [result] = await pool.execute(
+      `
       INSERT INTO classes (student_id, teacher_id, start_time, end_time, duration_minutes, days_of_week, start_date, end_date, status)
       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
-    `, [
-      data.student_id, data.teacher_id, data.start_time, data.end_time,
-      data.duration_minutes, data.days_of_week, data.start_date, data.end_date, data.status
-    ]);
+    `,
+      [
+        data.student_id,
+        data.teacher_id,
+        data.start_time,
+        data.end_time,
+        data.duration_minutes,
+        data.days_of_week,
+        data.start_date,
+        data.end_date,
+        data.status,
+      ]
+    );
     return result.insertId;
   },
 
   async update(id, data) {
-    await pool.execute(`
+    await pool.execute(
+      `
       UPDATE classes SET
       student_id=?, teacher_id=?, start_time=?, end_time=?, duration_minutes=?, days_of_week=?, start_date=?, end_date=?, status=?
       WHERE id=?
-    `, [
-      data.student_id, data.teacher_id, data.start_time, data.end_time,
-      data.duration_minutes, data.days_of_week, data.start_date, data.end_date, data.status, id
-    ]);
+    `,
+      [
+        data.student_id,
+        data.teacher_id,
+        data.start_time,
+        data.end_time,
+        data.duration_minutes,
+        data.days_of_week,
+        data.start_date,
+        data.end_date,
+        data.status,
+        id,
+      ]
+    );
     return true;
   },
 
   async delete(id) {
-    await pool.execute('DELETE FROM classes WHERE id = ?', [id]);
+    await pool.execute("DELETE FROM classes WHERE id = ?", [id]);
     return true;
-  }
+  },
 };
 
 module.exports = ClassModel;
