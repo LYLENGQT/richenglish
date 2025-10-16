@@ -1,7 +1,4 @@
-const pool = require('../database/db')
 const bcrypt = require('bcryptjs');
-const jwt = require('jsonwebtoken')
-const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key';
 const {
   UnathenticatedError,
   BadRequestError,
@@ -9,6 +6,9 @@ const {
   UnathoizedError,
 } = require('../errors')
 const Teacher = require('../models/Teacher');
+const Token = require('../models/Tokens')
+const {signAndStoreToken} = require('../helper/sign');
+const { StatusCodes } = require('http-status-codes');
 
 const login = async (req, res) => {
     const { email, password } = req.body;
@@ -21,11 +21,7 @@ const login = async (req, res) => {
 
     if (!isValidPassword) throw new BadRequestError("Invalid Credentials")
 
-    const token = jwt.sign(
-      { id: teacher.id, email: teacher.email, role: teacher.role },
-      JWT_SECRET,
-      { expiresIn: '24h' }
-    );
+    const token = await signAndStoreToken(teacher);
 
     res.json({
       token,
@@ -38,6 +34,17 @@ const login = async (req, res) => {
     });
 };
 
+const logout = async (req,res)=>{
+    const authHeader = req.headers['authorization'];
+    const token = authHeader && authHeader.split(' ')[1];
+    const {email} = req.user
+
+    const revokeToken = await Token.revoke(token, email)
+
+    res.status(StatusCodes.OK).json({success: revokeToken})
+}
+
 module.exports = {
-  login
+  login,
+  logout
 };

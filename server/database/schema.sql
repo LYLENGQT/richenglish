@@ -10,7 +10,7 @@ CREATE TABLE teachers (
     name VARCHAR(100) NOT NULL,
     email VARCHAR(100) UNIQUE NOT NULL,
     password VARCHAR(255) NOT NULL,
-    role ENUM('teacher', 'admin') DEFAULT 'teacher',
+    role ENUM('teacher', 'admin', 'super-admin') DEFAULT 'teacher',
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 );
@@ -33,6 +33,19 @@ CREATE TABLE students (
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     FOREIGN KEY (teacher_id) REFERENCES teachers(id) ON DELETE SET NULL
 );
+
+CREATE TABLE tokens (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    teacher_id INT NOT NULL,
+    token_type ENUM('access', 'refresh') DEFAULT 'access',
+    token VARCHAR(512) NOT NULL,
+    is_valid BOOLEAN DEFAULT TRUE,
+    expires_at TIMESTAMP NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (teacher_id) REFERENCES teachers(id)
+);
+
 
 -- Classes table
 CREATE TABLE classes (
@@ -129,6 +142,7 @@ VALUES
 INSERT INTO teachers (name, email, password, role) VALUES 
 ('Teacher Mitch', 'teacher.mitch@richenglish.com', '$2b$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'teacher'),
 ('Admin User', 'admin@richenglish.com', '$2b$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'admin');
+('Super Admin', 'richenglish@admin.com', '$2b$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'super-admin');
 
 -- Insert sample students based on CSV data
 INSERT INTO students (name, age, nationality, manager_type, email, book, category_level, class_type, platform, platform_link, teacher_id) VALUES 

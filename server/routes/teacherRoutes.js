@@ -12,5 +12,4 @@ router.use(authenticateToken)
 router.route('/').get(getTeachers).post(createTeacher)
 router.route('/:id').put(updateTeacher).delete(deleteTeacher)
 
-
 module.exports = router;

@@ -45,7 +45,7 @@ const upload = multer({ storage, fileFilter: pdfOnly, limits: { fileSize: 50 * 1
 
 router.use(authenticateToken)
 
-router.route('/').post(requireAdmin, upload.single('file'), addBooks).get(getBooks)
+router.route('/').post(requireAdmin('admin', 'super-admin'), upload.single('file'), addBooks).get(getBooks)
 router.post('/reindex', bookReindex)
 router.get('/:id/stream', bookStream)
 
