@@ -32,9 +32,9 @@ const ChatSideBar = () => {
     }
 
     return (
-        <div className="fixed bottom-0 left-0 z-50">
+        <div className="fixed bottom-0 right-0 z-50" >
 
-            <div className="flex flex-col">
+            <div className="flex flex-col -mb-3">
                 {/* Chat List Panel */}
                 <div className={`bg-white shadow-lg rounded-t-lg transition-all duration-300 ${
                     isOpen ? 'h-96' : 'h-12'

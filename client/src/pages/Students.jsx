@@ -8,6 +8,7 @@ import {
   MagnifyingGlassIcon,
   FunnelIcon
 } from '@heroicons/react/24/outline';
+import swal from 'sweetalert2';
 
 const Students = () => {
   const [students, setStudents] = useState([]);
@@ -84,17 +85,27 @@ const Students = () => {
     setShowModal(true);
   };
 
-  const handleDelete = async (id) => {
-    if (window.confirm('Are you sure you want to delete this student?')) {
-      try {
-        await api.delete(`/students/${id}`);
-        toast.success('Student deleted successfully');
-        fetchStudents();
-      } catch (error) {
-        toast.error('Failed to delete student');
-      }
+const handleDelete = async (id, name) => {
+  const result = await swal.fire({
+    title: 'Are you sure?',
+    text: `${name} will be deleted permanently!`,
+    icon: 'warning',
+    showCancelButton: true,
+    confirmButtonColor: '#dc2626',
+    cancelButtonColor: '#6b7280',
+    confirmButtonText: 'Yes, delete it!'
+  });
+
+  if (result.isConfirmed) {
+    try {
+      await api.delete(`/students/${id}`);
+      toast.success('Student deleted successfully');
+      fetchStudents();
+    } catch {
+      toast.error('Failed to delete student');
     }
-  };
+  }
+}
 
   const resetForm = () => {
     setFormData({
@@ -259,7 +270,7 @@ const Students = () => {
                       <PencilIcon className="h-5 w-5" />
                     </button>
                     <button
-                      onClick={() => handleDelete(student.id)}
+                      onClick={() => handleDelete(student.id, student.name)}
                       className="text-red-600 hover:text-red-900"
                     >
                       <TrashIcon className="h-5 w-5" />

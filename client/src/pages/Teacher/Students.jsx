@@ -1,0 +1,70 @@
+import React, { useState } from "react";
+import useAuthStore from "../../lib/zustand/authStore";
+import { PlusIcon } from "@heroicons/react/24/outline";
+import { useQuery } from "@tanstack/react-query";
+import { studentsQuery } from "../../lib/reaactquery/teacher";
+import { Skeleton } from "@/components/ui/skeleton";
+import toast from "react-hot-toast";
+import { DynamicTable } from "@/components/table/DynamicTable";
+import Swal from "sweetalert2";
+
+const Students = () => {
+  const { id } = useAuthStore();
+  const { data, isLoading, error } = useQuery({
+    ...studentsQuery(id),
+  });
+
+  if (isLoading) {
+    return (
+      <div className="space-y-6">
+        <div>
+          <Skeleton className="w-full h-96 mb-12 mt-5" />
+          <Skeleton className="w-full h-96" />
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    toast.error(error);
+  }
+
+  const studentsActions = [
+    {
+      label: "View",
+      onClick: (row) => alert(`Edit user: ${row.id}`),
+      variant: "outline",
+    },
+  ];
+
+  return (
+    <div className="space-y-6">
+      <div className="sm:flex sm:items-center sm:justify-between">
+        <div>
+          <h1 className="text-2xl font-bold text-gray-900">Students</h1>
+          <p className="mt-1 text-sm text-gray-500">Manage your Students</p>
+        </div>
+      </div>
+
+      <div className="bg-white rounded-lg shadow-lg p-4 max-h-[70vh] overflow-auto">
+        <DynamicTable
+          data={data.teacher_students}
+          actions={studentsActions}
+          excludeColumns={[
+            "id",
+            "teacher_id",
+            "updated_at",
+            "created_at",
+            "manager_type",
+            "class_type",
+            "book_type",
+            "book",
+          ]}
+          pagination={true}
+        />
+      </div>
+    </div>
+  );
+};
+
+export default Students;

@@ -29,6 +29,7 @@ const AdminDashboard = () => {
   const [bookTitle, setBookTitle] = useState('');
   const [bookFile, setBookFile] = useState(null);
 
+
   useEffect(() => {
     fetchDashboardData();
     fetchBooks();
@@ -200,12 +201,12 @@ const AdminDashboard = () => {
             </h3>
             <div className="flow-root">
               <ul className="-my-5 divide-y divide-gray-200">
-                {recentTeachers.map((teacher) => (
+                {recentTeachers.map((teacher) => (  
                   <li key={teacher.id} className="py-4">
                     <div className="flex items-center space-x-4">
                       <div className="flex-shrink-0">
                         <div className={`h-8 w-8 rounded-full flex items-center justify-center text-sm font-medium text-white ${
-                          teacher.role === 'admin' ? 'bg-purple-500' : 'bg-green-500'
+                          (teacher.role === 'admin' || teacher.role === 'super-admin') ? 'bg-purple-500' : 'bg-green-500'
                         }`}>
                           {teacher.name.charAt(0)}
                         </div>
@@ -220,7 +221,7 @@ const AdminDashboard = () => {
                       </div>
                       <div className="flex-shrink-0">
                         <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                          teacher.role === 'admin' 
+                          teacher.role === 'admin' || teacher.role === 'super-admin'
                             ? 'bg-purple-100 text-purple-800' 
                             : 'bg-green-100 text-green-800'
                         }`}>

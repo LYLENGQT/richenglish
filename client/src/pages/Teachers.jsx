@@ -10,6 +10,7 @@ import {
   UserIcon
 } from '@heroicons/react/24/outline';
 import ChatSideBar from '../components/ChatSideBar';
+import swal from 'sweetalert2'
 
 const Teachers = () => {
   const [teachers, setTeachers] = useState([]);
@@ -33,6 +34,7 @@ const Teachers = () => {
   const fetchTeachers = async () => {
     try {
       const response = await api.get('/teachers');
+      console.log(response)
       setTeachers(response.data);
     } catch (error) {
       toast.error('Failed to fetch teachers');
@@ -71,8 +73,18 @@ const Teachers = () => {
     setShowModal(true);
   };
 
-  const handleDelete = async (id) => {
-    if (window.confirm('Are you sure you want to delete this teacher?')) {
+  const handleDelete = async (id, name) => {
+      const result = await swal.fire({
+        title: 'Are you sure?',
+        text: `${name} will be deleted permanently!`,
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#dc2626',
+        cancelButtonColor: '#6b7280',
+        confirmButtonText: 'Yes, delete it!'
+      });
+
+    if (result.isConfirmed) {
       try {
         await api.delete(`/teachers/${id}`);
         toast.success('Teacher deleted successfully');
@@ -222,7 +234,7 @@ const Teachers = () => {
                       <PencilIcon className="h-5 w-5" />
                     </button>
                     <button
-                      onClick={() => handleDelete(teacher.id)}
+                      onClick={() => handleDelete(teacher.id, teacher.name)}
                       className="text-red-600 hover:text-red-900"
                     >
                       <TrashIcon className="h-5 w-5" />
