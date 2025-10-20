@@ -1,3 +1,4 @@
+const { StatusCodes } = require("http-status-codes");
 const pool = require("../database/db");
 const {
   UnathenticatedError,
@@ -5,20 +6,22 @@ const {
   NotFoundError,
   UnathoizedError,
 } = require("../errors");
+const Students = require("../models/Students");
 
 const getStudents = async (req, res) => {
-  try {
-    const [rows] = await pool.execute(`
-      SELECT s.*, t.name as teacher_name 
-      FROM students s 
-      LEFT JOIN teachers t ON s.teacher_id = t.id 
-      ORDER BY s.name
-    `);
-    res.json(rows);
-  } catch (error) {
-    console.error("Error fetching students:", error);
-    res.status(500).json({ error: "Server error" });
+  const { teacher_id } = req.query;
+
+  if (teacher_id) {
+    const teacher_students = await Students.findQuery({ teacher_id });
+
+    return res
+      .status(StatusCodes.OK)
+      .json({ length: teacher_students.length, teacher_students });
   }
+
+  const students = await Students.findAll();
+
+  return res.status(StatusCodes.OK).json({ length: students.length, students });
 };
 
 const addStudent = async (req, res) => {

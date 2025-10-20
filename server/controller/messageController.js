@@ -4,7 +4,7 @@ const {
   NotFoundError,
   UnathoizedError,
 } = require("../errors");
-const Teacher = require("../models/Teacher");
+const Teacher = require("../models/Users");
 const Message = require("../models/Message");
 const { StatusCodes } = require("http-status-codes");
 

@@ -39,9 +39,47 @@ const addBooks = async (req, res) => {
 
 const getBooks = async (req, res) => {
   try {
-    const [rows] = await pool.execute(
-      "SELECT id, title, created_at FROM books ORDER BY created_at DESC"
-    );
+    // Accepts query params: teacher_id, student_id, assigned
+    // Each param is optional; only applied when provided and non-empty.
+    const { teacher_id = null, student_id = null, assigned = null } = req.query;
+
+    const params = [];
+    let sql = `
+      SELECT DISTINCT
+        b.id,
+        b.title,
+        b.created_at
+      FROM books b
+      LEFT JOIN book_assignments ba ON ba.book_id = b.id
+      WHERE 1 = 1
+    `;
+
+    if (teacher_id !== undefined && teacher_id !== null && teacher_id !== "") {
+      sql += " AND ba.teacher_id = ?";
+      params.push(teacher_id);
+    }
+
+    if (student_id !== undefined && student_id !== null && student_id !== "") {
+      sql += " AND ba.student_id = ?";
+      params.push(student_id);
+    }
+
+    if (assigned !== undefined && assigned !== null && assigned !== "") {
+      const a = String(assigned).toLowerCase();
+      const isAssigned = a === "true" || a === "1" || a === "yes";
+      const isUnassigned = a === "false" || a === "0" || a === "no";
+
+      if (isAssigned) {
+        sql += " AND ba.id IS NOT NULL";
+      } else if (isUnassigned) {
+        sql += " AND ba.id IS NULL";
+      }
+      // if assigned provided but unrecognized value, ignore and do not filter
+    }
+
+    sql += " ORDER BY b.created_at DESC";
+
+    const [rows] = await pool.execute(sql, params);
     res.json(rows);
   } catch (error) {
     console.error("Books list error:", error);
@@ -105,4 +143,9 @@ const bookStream = async (req, res) => {
   }
 };
 
-module.exports = { bookStream, bookReindex, getBooks, addBooks };
+module.exports = {
+  bookStream,
+  bookReindex,
+  getBooks,
+  addBooks,
+};

@@ -1,3 +1,4 @@
+const { StatusCodes } = require("http-status-codes");
 const pool = require("../database/db");
 const {
   UnathenticatedError,
@@ -5,6 +6,11 @@ const {
   NotFoundError,
   UnathoizedError,
 } = require("../errors");
+const Student = require("../models/Students");
+const Class = require("../models/Class");
+const User = require("../models/Users");
+const Books = require("../models/Books");
+const AssignBook = require("../models/AssignBook");
 
 const dashboardStats = async (req, res) => {
   try {
@@ -33,4 +39,76 @@ const dashboardStats = async (req, res) => {
   }
 };
 
-module.exports = { dashboardStats };
+const dashboard = async (req, res) => {
+  const { id, role } = req.user;
+
+  const studentCount =
+    role === "teacher"
+      ? await Student.studentCount()
+      : await Student.studentCount(id);
+
+  const activeClass =
+    role === "teacher" ? await Class.findActive() : await Class.findActive(id);
+
+  let teacher = null;
+  if (role === "teacher") {
+    teacher = await User.findById(id);
+  } else {
+    const [teachers] = await pool.execute(
+      "SELECT name, status as total FROM `user` WHERE role = 'teacher'"
+    );
+    teacher = teachers;
+  }
+
+  const scheduleQuery =
+    role === "teacher"
+      ? "SELECT * FROM schedules WHERE status = 'scheduled'"
+      : "SELECT * FROM schedules WHERE status = 'scheduled' AND teacher_id = ?";
+
+  const params = role === "teacher" ? [] : [id];
+  const [schedule] = await pool.query(scheduleQuery, params);
+
+  let payouts = null;
+  if (role !== "teacher") {
+    const [result] = await pool.query("SELECT * FROM payouts");
+    payouts = result;
+  }
+
+  const books =
+    role === "teacher"
+      ? await AssignBook.findAll({ teacher_id: id })
+      : await Books.findAll();
+
+  let todayAttendance = null;
+
+  if (role === "teacher") {
+    const [result] = await pool.query(
+      "SELECT * FROM schedules WHERE teacher_id = ? AND DATE(date) = CURDATE()",
+      [id]
+    );
+    todayAttendance = [result[0]];
+  }
+
+  let pendingMakeups = null;
+  if (role === "teacher") {
+    const [result] = await pool.query(
+      'SELECT * FROM makeup_classes WHERE status = "scheduled" AND teacher_id = ?',
+      [id]
+    );
+    pendingMakeups = [result[0]];
+  }
+
+  res.status(StatusCodes.OK).json({
+    students: studentCount,
+    schedule: schedule,
+    books: books.length,
+    todayAttendance,
+    pendingMakeups: pendingMakeups,
+    activeClass,
+    payouts,
+    teacher,
+    activeClass,
+  });
+};
+
+module.exports = { dashboardStats, dashboard };

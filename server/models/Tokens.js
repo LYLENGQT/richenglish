@@ -3,7 +3,7 @@ const pool = require("../database/db");
 const Token = {
   async findAllByTeacherId(teacherId) {
     const [rows] = await pool.execute(
-      "SELECT id, token_type, token, is_valid, expires_at, created_at, updated_at FROM tokens WHERE teacher_id = ? ORDER BY created_at DESC",
+      "SELECT id, token_type, token, is_valid, expires_at, created_at, updated_at FROM tokens WHERE user_id = ? ORDER BY created_at DESC",
       [teacherId]
     );
     return rows;
@@ -11,7 +11,7 @@ const Token = {
 
   async findById(id) {
     const [rows] = await pool.execute(
-      "SELECT id, teacher_id, token_type, token, is_valid, expires_at, created_at, updated_at FROM tokens WHERE id = ?",
+      "SELECT id, user_id, token_type, token, is_valid, expires_at, created_at, updated_at FROM tokens WHERE id = ?",
       [id]
     );
     return rows[0];
@@ -19,7 +19,7 @@ const Token = {
 
   async create(teacherId, tokenType = "access", token, expiresAt) {
     const [result] = await pool.execute(
-      "INSERT INTO tokens (teacher_id, token_type, token, expires_at) VALUES (?, ?, ?, ?)",
+      "INSERT INTO tokens (user_id, token_type, token, expires_at) VALUES (?, ?, ?, ?)",
       [teacherId, tokenType, token, expiresAt]
     );
     return result.insertId;
@@ -46,9 +46,22 @@ const Token = {
     return rows[0];
   },
 
+  // new: find the user associated with a valid token
+  async findUserByToken(tokenString) {
+    const [rows] = await pool.execute(
+      `SELECT u.id, u.email, u.name, u.role
+       FROM tokens t
+       JOIN user u ON t.user_id = u.id
+       WHERE t.token = ? AND t.is_valid = 1 AND t.expires_at > NOW()
+       LIMIT 1`,
+      [tokenString]
+    );
+    return rows[0] || null;
+  },
+
   async revoke(token, email) {
     const [teachers] = await pool.execute(
-      "SELECT id FROM teachers WHERE email = ?",
+      "SELECT id FROM user WHERE email = ?",
       [email]
     );
 
@@ -59,13 +72,20 @@ const Token = {
     const teacherId = teachers[0].id;
 
     const [result] = await pool.execute(
-      "UPDATE tokens SET is_valid = 0 WHERE token = ? AND teacher_id = ?",
+      "UPDATE tokens SET is_valid = 0 WHERE token = ? AND user_id = ?",
       [token, teacherId]
     );
 
     return result.affectedRows > 0;
   },
 
+  async revokeViaToken(token) {
+    const [result] = await pool.execute(
+      "UPDATE tokens SET is_valid = 0 WHERE token = ?",
+      [token]
+    );
+    return result.affectedRows > 0;
+  },
   async validate(tokenString) {
     const [rows] = await pool.execute(
       "SELECT * FROM tokens WHERE token = ? AND is_valid = 1 AND expires_at > NOW()",

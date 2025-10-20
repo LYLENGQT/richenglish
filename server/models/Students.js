@@ -66,6 +66,31 @@ const Student = {
     await pool.execute("DELETE FROM students WHERE id = ?", [id]);
     return true;
   },
+
+  async studentCount(teacher_id = null) {
+    const query = teacher_id
+      ? "SELECT COUNT(*) AS count FROM students WHERE teacher_id = ?"
+      : "SELECT COUNT(*) AS count FROM students";
+
+    const [rows] = await pool.execute(query, teacher_id ? [teacher_id] : []);
+    return rows[0]?.count || 0;
+  },
+
+  async findQuery({ teacher_id }) {
+    if (!teacher_id) {
+      throw new Error("Invalid without query");
+    }
+
+    const query = `
+    SELECT *
+    FROM students
+    WHERE teacher_id = ?
+    ORDER BY name
+  `;
+
+    const [rows] = await pool.execute(query, [teacher_id]);
+    return rows;
+  },
 };
 
 module.exports = Student;

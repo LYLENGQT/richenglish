@@ -1,3 +1,4 @@
+const { StatusCodes } = require("http-status-codes");
 const pool = require("../database/db");
 const {
   UnathenticatedError,
@@ -101,7 +102,7 @@ const createTeacher = async (req, res) => {
 
     const [result] = await pool.execute(
       `
-      INSERT INTO teachers (name, email, password, role)
+      INSERT INTO user (name, email, password, role)
       VALUES (?, ?, ?, ?)
     `,
       [name, email, hashedPassword, role]
@@ -119,7 +120,7 @@ const updateTeacher = async (req, res) => {
     const { id } = req.params;
     const { name, email, password, role } = req.body;
 
-    let query = "UPDATE teachers SET name=?, email=?, role=?";
+    let query = "UPDATE user SET name=?, email=?, role=?";
     let params = [name, email, role];
 
     // Only update password if provided
@@ -143,7 +144,7 @@ const updateTeacher = async (req, res) => {
 const deleteTeacher = async (req, res) => {
   try {
     const { id } = req.params;
-    await pool.execute("DELETE FROM teachers WHERE id = ?", [id]);
+    await pool.execute("DELETE FROM user WHERE id = ?", [id]);
     res.json({ message: "Teacher deleted successfully" });
   } catch (error) {
     console.error("Error deleting teacher:", error);

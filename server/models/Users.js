@@ -1,9 +1,8 @@
 const pool = require("../database/db");
 
-const Teacher = {
+const User = {
   async findAll(id = null) {
-    let sql =
-      "SELECT id, name, email, role, created_at, updated_at FROM teachers";
+    let sql = "SELECT id, name, email, role, created_at, updated_at FROM user";
     const params = [];
 
     if (id) {
@@ -19,7 +18,7 @@ const Teacher = {
 
   async findById(id) {
     const [rows] = await pool.execute(
-      "SELECT id, name, email, role, created_at, updated_at FROM teachers WHERE id = ?",
+      "SELECT id, name, email, role, zoom_link, country, created_at, updated_at FROM user WHERE id = ?",
       [id]
     );
     return rows[0];
@@ -27,14 +26,14 @@ const Teacher = {
 
   async create(name, email, hashedPassword, role = "teacher") {
     const [result] = await pool.execute(
-      "INSERT INTO teachers (name, email, password, role) VALUES (?, ?, ?, ?)",
+      "INSERT INTO user (name, email, password, role) VALUES (?, ?, ?, ?)",
       [name, email, hashedPassword, role]
     );
     return result.insertId;
   },
 
   async update(id, name, email, role, hashedPassword = null) {
-    let query = "UPDATE teachers SET name=?, email=?, role=?";
+    let query = "UPDATE user SET name=?, email=?, role=?";
     let params = [name, email, role];
 
     if (hashedPassword) {
@@ -50,18 +49,25 @@ const Teacher = {
   },
 
   async delete(id) {
-    await pool.execute("DELETE FROM teachers WHERE id = ?", [id]);
+    await pool.execute("DELETE FROM user WHERE id = ?", [id]);
     return true;
   },
 
   findByEmail: async (email) => {
+    const [rows] = await pool.execute("SELECT * FROM user WHERE email = ?", [
+      email,
+    ]);
+
+    return rows[0];
+  },
+
+  async findAllTeacher() {
     const [rows] = await pool.execute(
-      "SELECT * FROM teachers WHERE email = ?",
-      [email]
+      "SELECT * FROM user WHERE role = `teacher`"
     );
 
     return rows[0];
   },
 };
 
-module.exports = Teacher;
+module.exports = User;
