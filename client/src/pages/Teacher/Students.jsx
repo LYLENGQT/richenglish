@@ -29,14 +29,6 @@ const Students = () => {
     toast.error(error);
   }
 
-  const studentsActions = [
-    {
-      label: "View",
-      onClick: (row) => alert(`Edit user: ${row.id}`),
-      variant: "outline",
-    },
-  ];
-
   return (
     <div className="space-y-6">
       <div className="sm:flex sm:items-center sm:justify-between">
@@ -49,7 +41,6 @@ const Students = () => {
       <div className="bg-white rounded-lg shadow-lg p-4 max-h-[70vh] overflow-auto">
         <DynamicTable
           data={data.teacher_students}
-          actions={studentsActions}
           excludeColumns={[
             "id",
             "teacher_id",

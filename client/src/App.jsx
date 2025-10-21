@@ -34,6 +34,9 @@ import TeacherClasses from "@/pages/Teacher/Classes";
 import TeacherMakeUpClass from "@/pages/Teacher/MakeUpClass";
 import TeacherBooks from "@/pages/Teacher/Books";
 import TeacherAttendance from "@/pages/Teacher/Attendance";
+import TeacherRecordings from "@/pages/Teacher/Recording";
+import TeacherReports from "@/pages/Teacher/Report";
+import TeacherSchedule from "@/pages/Teacher/Schedule";
 
 // admin portal
 import AdminDashboard from "./pages/Admin/Dashboard";
@@ -98,6 +101,24 @@ function App() {
               <Route
                 path="/portal/teacher/attendance"
                 element={<TeacherAttendance />}
+              />
+            </Route>
+            <Route element={<Layout />}>
+              <Route
+                path="/portal/teacher/recordings"
+                element={<TeacherRecordings />}
+              />
+            </Route>
+            <Route element={<Layout />}>
+              <Route
+                path="/portal/teacher/reports"
+                element={<TeacherReports />}
+              />
+            </Route>
+            <Route element={<Layout />}>
+              <Route
+                path="/portal/teacher/schedule"
+                element={<TeacherSchedule />}
               />
             </Route>
           </Route>

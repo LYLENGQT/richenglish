@@ -9,6 +9,12 @@ import {
   Bars3Icon,
   XMarkIcon,
   BookOpenIcon,
+  BanknotesIcon,
+  FolderOpenIcon,
+  VideoCameraIcon,
+  MagnifyingGlassIcon,
+  Cog6ToothIcon,
+  UsersIcon,
 } from "@heroicons/react/24/outline";
 import useAuthStore from "../lib/zustand/authStore";
 import { logout } from "../lib/axios/auth";
@@ -21,41 +27,190 @@ const Layout = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const { id, name, email, role } = useAuthStore();
 
-  const getNavigation = () => {
-    const baseNavigation = [
-      { name: "Dashboard", href: `/portal/${role}/dashboard`, icon: HomeIcon },
-      {
-        name: "Students",
-        href: `/portal/${role}/students`,
-        icon: UserGroupIcon,
-      },
-      { name: "Classes", href: `/portal/${role}/classes`, icon: CalendarIcon },
-      {
-        name: "Attendance",
-        href: `/portal/${role}/attendance`,
-        icon: ClipboardDocumentListIcon,
-      },
-      {
-        name: "Makeup Classes",
-        href: `/portal/${role}/makeup-classes`,
-        icon: ClockIcon,
-      },
-      { name: "Books", href: `/portal/${role}/books`, icon: BookOpenIcon },
-    ];
-
-    // Add admin-only navigation items
-    if (role === "admin") {
-      baseNavigation.splice(1, 0, {
-        name: "Teachers",
-        href: `/portal/${role}/teachers`,
-        icon: UserGroupIcon,
-      });
+  const getNavigation = (role) => {
+    if (role === "teacher") {
+      return [
+        {
+          name: "Dashboard",
+          href: `/portal/${role}/dashboard`,
+          icon: HomeIcon,
+        },
+        {
+          name: "My Students",
+          href: `/portal/${role}/students`,
+          icon: UserGroupIcon,
+        },
+        {
+          name: "My Schedule",
+          href: `/portal/${role}/schedule`,
+          icon: CalendarIcon,
+        },
+        {
+          name: "Classes",
+          href: `/portal/${role}/classes`,
+          icon: CalendarIcon,
+        },
+        {
+          name: "Makeup Classes",
+          href: `/portal/${role}/makeup-classes`,
+          icon: ClockIcon,
+        },
+        {
+          name: "Attendance",
+          href: `/portal/${role}/attendance`,
+          icon: ClipboardDocumentListIcon,
+        },
+        { name: "Books", href: `/portal/${role}/books`, icon: BookOpenIcon },
+        {
+          name: "Recordings",
+          href: `/portal/${role}/recordings`,
+          icon: VideoCameraIcon,
+        },
+        {
+          name: "Reports",
+          href: `/portal/${role}/reports`,
+          icon: FolderOpenIcon,
+        },
+      ];
     }
 
-    return baseNavigation;
+    if (role === "admin") {
+      return [
+        {
+          name: "Dashboard",
+          href: `/portal/${role}/dashboard`,
+          icon: HomeIcon,
+        },
+        { name: "Teachers", href: `/portal/${role}/teachers`, icon: UsersIcon },
+        {
+          name: "Students",
+          href: `/portal/${role}/students`,
+          icon: UserGroupIcon,
+        },
+        {
+          name: "Schedules",
+          href: `/portal/${role}/schedules`,
+          icon: CalendarIcon,
+        },
+        {
+          name: "Attendance",
+          href: `/portal/${role}/attendance`,
+          icon: ClipboardDocumentListIcon,
+        },
+        {
+          name: "Reports",
+          href: `/portal/${role}/reports`,
+          icon: FolderOpenIcon,
+        },
+        {
+          name: "Payout Summary",
+          href: `/portal/${role}/payouts`,
+          icon: BanknotesIcon,
+        },
+        {
+          name: "Screenshots",
+          href: `/portal/${role}/screenshots`,
+          icon: VideoCameraIcon,
+        },
+        {
+          name: "Recordings",
+          href: `/portal/${role}/recordings`,
+          icon: VideoCameraIcon,
+        },
+        {
+          name: "Books Archive",
+          href: `/portal/${role}/books`,
+          icon: BookOpenIcon,
+        },
+        {
+          name: "Search",
+          href: `/portal/${role}/search`,
+          icon: MagnifyingGlassIcon,
+        },
+      ];
+    }
+
+    if (role === "superadmin") {
+      return [
+        {
+          name: "Dashboard",
+          href: `/portal/${role}/dashboard`,
+          icon: HomeIcon,
+        },
+        { name: "Teachers", href: `/portal/${role}/teachers`, icon: UsersIcon },
+        { name: "Admins", href: `/portal/${role}/admins`, icon: UsersIcon },
+        {
+          name: "Students",
+          href: `/portal/${role}/students`,
+          icon: UserGroupIcon,
+        },
+        {
+          name: "Schedules",
+          href: `/portal/${role}/schedules`,
+          icon: CalendarIcon,
+        },
+        {
+          name: "Books Management",
+          href: `/portal/${role}/books`,
+          icon: BookOpenIcon,
+        },
+        {
+          name: "Assign Books",
+          href: `/portal/${role}/assign-books`,
+          icon: BookOpenIcon,
+        },
+        {
+          name: "Curriculum Access",
+          href: `/portal/${role}/curriculum`,
+          icon: FolderOpenIcon,
+        },
+        {
+          name: "Attendance",
+          href: `/portal/${role}/attendance`,
+          icon: ClipboardDocumentListIcon,
+        },
+        {
+          name: "Reports",
+          href: `/portal/${role}/reports`,
+          icon: FolderOpenIcon,
+        },
+        {
+          name: "Salary Management",
+          href: `/portal/${role}/salary`,
+          icon: BanknotesIcon,
+        },
+        {
+          name: "Payout Overview",
+          href: `/portal/${role}/payouts`,
+          icon: BanknotesIcon,
+        },
+        {
+          name: "Screenshots",
+          href: `/portal/${role}/screenshots`,
+          icon: VideoCameraIcon,
+        },
+        {
+          name: "Recordings",
+          href: `/portal/${role}/recordings`,
+          icon: VideoCameraIcon,
+        },
+        {
+          name: "Search",
+          href: `/portal/${role}/search`,
+          icon: MagnifyingGlassIcon,
+        },
+        {
+          name: "Settings",
+          href: `/portal/${role}/settings`,
+          icon: Cog6ToothIcon,
+        },
+      ];
+    }
+
+    return [];
   };
 
-  const navigation = getNavigation();
+  const navigation = getNavigation(role);
 
   const handleLogout = async () => {
     try {

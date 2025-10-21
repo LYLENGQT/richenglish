@@ -12,31 +12,18 @@ import { useQuery } from "@tanstack/react-query";
 import { dashboardQuery } from "../../lib/reaactquery/teacher";
 import { Skeleton } from "@/components/ui/skeleton";
 import toast from "react-hot-toast";
-import { Calendar } from "@/components/ui/calendar";
-import { CustomCalendar } from "@/components/ui/custom-calendar";
-import { dateConfig } from "@/lib/date-config";
-import { CalendarLegend } from "@/components/ui/calendar-legend";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import DynamicCalendar from "@/components/calendar/DynamicCalendar";
+import { transformCalendarEvents } from "@/utils/transformCalendarEvents.jsx";
 
 const Dashboard = () => {
   const { data, isLoading, error } = useQuery({
     ...dashboardQuery(),
   });
+  const navigate = useNavigate();
 
-  const [selectedDate, setSelectedDate] = useState(null);
+  const { name, role } = useAuthStore();
 
-  const scheduleDates =
-    data?.schedule?.map((item) => new Date(item.date)) || [];
-  const attendanceDates =
-    data?.todayAttendance?.map((item) => new Date(item.date)) || [];
-  const pendingDates =
-    data?.pendingMakeups?.map((item) => new Date(item.makeup_date)) || [];
-
-  const allDates = [...scheduleDates, ...attendanceDates, ...pendingDates];
-
-  const { name } = useAuthStore();
-
-  // defensive values
   const dashboard = data?.dashboard || {};
   const teacher = dashboard?.teacher || {};
   const totalStudents = dashboard?.students ?? 0;
@@ -55,6 +42,8 @@ const Dashboard = () => {
     : dashboard?.pendingMakeups
     ? 1
     : 0;
+
+  const calendarEvents = transformCalendarEvents(data?.dashboard);
 
   const statCards = [
     {
@@ -98,11 +87,13 @@ const Dashboard = () => {
     toast.error(error);
   }
 
+  const onClickOVerview = (id, kind) => {
+    navigate(`/portal/${role}/${getRouteForKind(kind)}/${id}`);
+  };
+
   return (
     <div className="space-y-6">
-      {/* Header Card */}
       <div className="bg-white rounded-lg shadow p-4 flex items-center gap-4">
-        {/* Avatar / Initials */}
         <div className="flex items-center justify-center w-14 h-14 rounded-full bg-indigo-600 text-white text-base font-semibold">
           {teacher?.name
             ? teacher.name
@@ -193,21 +184,43 @@ const Dashboard = () => {
 
       <div className="flex flex-col-reverse lg:flex-row gap-6">
         <div className="w-full lg:w-2/3">
-          <div className="bg-white rounded-lg shadow-lg p-4 max-h-[70vh] overflow-auto">
-            <CustomCalendar
-              data={data?.dashboard}
-              config={dateConfig}
-              onDateSelect={() => console.log("TEST")}
-            />
-          </div>
+          <div className="bg-white rounded-lg shadow-lg p-4 max-h-[70vh] overflow-auto"></div>
         </div>
 
         <div className="w-full lg:w-1/3">
-          <div className="bg-white rounded-lg shadow-lg p-4 max-h-[70vh] overflow-auto">
-            <h2 className="text-lg font-semibold text-slate-900 mb-3">
-              Legend
-            </h2>
-            <CalendarLegend config={dateConfig} />
+          <div className="bg-white rounded-lg shadow-lg p-4 max-h-[70vh] overflow-visible">
+            <div className="flex flex-wrap items-center gap-3 justify-between px-1 mb-4">
+              <div className="flex items-center gap-2">
+                <span
+                  className="w-3 h-3 rounded-sm"
+                  style={{ backgroundColor: "#3b82f6" }}
+                ></span>
+                <span className="text-xs text-gray-600">Scheduled Class</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <span
+                  className="w-3 h-3 rounded-sm"
+                  style={{ backgroundColor: "#10b981" }}
+                ></span>
+                <span className="text-xs text-gray-600">Today Class</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <span
+                  className="w-3 h-3 rounded-sm"
+                  style={{ backgroundColor: "#f59e0b" }}
+                ></span>
+                <span className="text-xs text-gray-600">Makeup Class</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <span
+                  className="w-3 h-3 rounded-sm"
+                  style={{ backgroundColor: "#8b5cf6" }}
+                ></span>
+                <span className="text-xs text-gray-600">Active Class</span>
+              </div>
+            </div>
+
+            <DynamicCalendar size="full" dates={calendarEvents} />
           </div>
         </div>
       </div>
