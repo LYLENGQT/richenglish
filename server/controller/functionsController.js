@@ -95,7 +95,11 @@ const dashboard = async (req, res) => {
       'SELECT * FROM makeup_classes WHERE status = "scheduled" AND teacher_id = ?',
       [id]
     );
-    pendingMakeups = [result[0]];
+    pendingMakeups = result.map(({ makeup_date, makeup_time, ...rest }) => ({
+      date: makeup_date,
+      start_time: makeup_time,
+      ...rest,
+    }));
   }
 
   res.status(StatusCodes.OK).json({

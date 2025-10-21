@@ -13,8 +13,9 @@ import { dashboardQuery } from "../../lib/reaactquery/teacher";
 import { Skeleton } from "@/components/ui/skeleton";
 import toast from "react-hot-toast";
 import { Link, useNavigate } from "react-router-dom";
-import DynamicCalendar from "@/components/calendar/DynamicCalendar";
-import { transformCalendarEvents } from "@/utils/transformCalendarEvents.jsx";
+import { DynamicCalendar } from "@/components/calendar/DynamicCalendar";
+import useFormatClass from "@/hook/useFormatClass";
+import useFormatDate from "@/hook/useFormatdate";
 
 const Dashboard = () => {
   const { data, isLoading, error } = useQuery({
@@ -24,26 +25,71 @@ const Dashboard = () => {
 
   const { name, role } = useAuthStore();
 
+  const classes = useFormatClass(
+    data?.dashboard?.activeClass,
+    { backgroundColor: "#22c55e", color: "white" },
+    (id, date) => console.log(`Clicked ${id} on ${date.toLocaleDateString()}`),
+    (data) => (
+      <div className="text-xs">
+        <p className="font-semibold">Class</p>
+        {data.startTime && (
+          <p className="text-muted-foreground">
+            {data.startTime} - {data.endTime}
+          </p>
+        )}
+      </div>
+    )
+  );
+  const schedule = useFormatDate(
+    data?.dashboard?.schedule,
+    { backgroundColor: "#8b5cf6", color: "white" },
+    (id, date) => console.log(`Clicked ${id} on ${date.toLocaleDateString()}`),
+    (data) => (
+      <div className="text-xs">
+        <p className="font-semibold">Scheduled Class</p>
+        {data.startTime && (
+          <p className="text-muted-foreground">
+            {data.startTime} - {data.endTime}
+          </p>
+        )}
+      </div>
+    )
+  );
+
+  const makeUpClass = useFormatDate(
+    data?.dashboard?.pendingMakeups,
+    { backgroundColor: "#ef4444", color: "white" },
+    (id, date) => console.log(`Clicked ${id} on ${date.toLocaleDateString()}`),
+    (data) => (
+      <div className="text-xs">
+        <p className="font-semibold">Make-up Class</p>
+        {data.startTime && (
+          <p className="text-muted-foreground">{data.startTime}</p>
+        )}
+      </div>
+    )
+  );
+
   const dashboard = data?.dashboard || {};
   const teacher = dashboard?.teacher || {};
   const totalStudents = dashboard?.students ?? 0;
   const activeClassesCount = Array.isArray(dashboard?.activeClass)
-    ? dashboard.activeClass.length
-    : dashboard?.activeClass
-    ? 1
-    : 0;
-  const todayAttendanceCount = Array.isArray(dashboard?.todayAttendance)
-    ? dashboard.todayAttendance.length
-    : dashboard?.todayAttendance
-    ? 1
-    : 0;
-  const pendingMakeupsCount = Array.isArray(dashboard?.pendingMakeups)
-    ? dashboard.pendingMakeups.length
-    : dashboard?.pendingMakeups
+    ? dashboard.activeClass.filter((item) => item !== null).length
+    : dashboard?.activeClass && dashboard.activeClass !== null
     ? 1
     : 0;
 
-  const calendarEvents = transformCalendarEvents(data?.dashboard);
+  const todayAttendanceCount = Array.isArray(dashboard?.todayAttendance)
+    ? dashboard.todayAttendance.filter((item) => item !== null).length
+    : dashboard?.todayAttendance && dashboard.todayAttendance !== null
+    ? 1
+    : 0;
+
+  const pendingMakeupsCount = Array.isArray(dashboard?.pendingMakeups)
+    ? dashboard.pendingMakeups.filter((item) => item !== null).length
+    : dashboard?.pendingMakeups && dashboard.pendingMakeups !== null
+    ? 1
+    : 0;
 
   const statCards = [
     {
@@ -86,10 +132,6 @@ const Dashboard = () => {
   if (error) {
     toast.error(error);
   }
-
-  const onClickOVerview = (id, kind) => {
-    navigate(`/portal/${role}/${getRouteForKind(kind)}/${id}`);
-  };
 
   return (
     <div className="space-y-6">
@@ -189,38 +231,10 @@ const Dashboard = () => {
 
         <div className="w-full lg:w-1/3">
           <div className="bg-white rounded-lg shadow-lg p-4 max-h-[70vh] overflow-visible">
-            <div className="flex flex-wrap items-center gap-3 justify-between px-1 mb-4">
-              <div className="flex items-center gap-2">
-                <span
-                  className="w-3 h-3 rounded-sm"
-                  style={{ backgroundColor: "#3b82f6" }}
-                ></span>
-                <span className="text-xs text-gray-600">Scheduled Class</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <span
-                  className="w-3 h-3 rounded-sm"
-                  style={{ backgroundColor: "#10b981" }}
-                ></span>
-                <span className="text-xs text-gray-600">Today Class</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <span
-                  className="w-3 h-3 rounded-sm"
-                  style={{ backgroundColor: "#f59e0b" }}
-                ></span>
-                <span className="text-xs text-gray-600">Makeup Class</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <span
-                  className="w-3 h-3 rounded-sm"
-                  style={{ backgroundColor: "#8b5cf6" }}
-                ></span>
-                <span className="text-xs text-gray-600">Active Class</span>
-              </div>
-            </div>
-
-            <DynamicCalendar size="full" dates={calendarEvents} />
+            <DynamicCalendar
+              size="full"
+              dates={[...makeUpClass, ...schedule, ...classes]}
+            />
           </div>
         </div>
       </div>

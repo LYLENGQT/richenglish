@@ -6,43 +6,96 @@ import {
   Navigate,
 } from "react-router-dom";
 
-// import Dashboard from './pages/Dashboard';
-// import AdminDashboard from './pages/AdminDashboard';
-// import Students from './pages/Students';
-// import Teachers from './pages/Teachers';
-// import Classes from './pages/Classes';
-// import Attendance from './pages/Attendance';
-// import MakeupClasses from './pages/MakeupClasses';
-// import Layout from './pages/Layout';
-// import BookViewer from './pages/BookViewer';
-// import Books from './pages/Books';
+// import Dashboard from '@/pages/Dashboard';
+// import AdminDashboard from '@/pages/AdminDashboard';
+// import Students from '@/pages/Students';
+// import Teachers from '@/pages/Teachers';
+// import Classes from '@/pages/Classes';
+// import Attendance from '@/pages/Attendance';
+// import MakeupClasses from '@/pages/MakeupClasses';
+// import Layout from '@/pages/Layout';
+// import BookViewer from '@/pages/BookViewer';
+// import Books from '@/pages/Books';
 
 // public
-import LandingPage from "./pages/Public/LandingPage";
-import About from "./pages/Public/About";
-import FAQ from "./pages/Public/FAQ";
-import Contact from "./pages/Public/Contact";
-import Login from "./pages/Public/Login";
-import TeacherApplication from "./pages/Public/TeacherApplication";
-import TeacherLeaderboard from "./pages/Public/TeacherLeaderboard";
-import NotFound from "./pages/Public/NotFound";
+import LandingPage from "@/pages/Public/LandingPage";
+import About from "@/pages/Public/About";
+import FAQ from "@/pages/Public/FAQ";
+import Contact from "@/pages/Public/Contact";
+import Login from "@/pages/Public/Login";
+import TeacherApplication from "@/pages/Public/TeacherApplication";
+import TeacherLeaderboard from "@/pages/Public/TeacherLeaderboard";
+import NotFound from "@/pages/Public/NotFound";
 
 // teacher portal
-import TeacherDashboard from "./pages/Teacher/Dashboard";
+import TeacherDashboard from "@/pages/Teacher/Dashboard";
 import TeacherStudents from "@/pages/Teacher/Students";
+import TeacherStudentDetail from "@/pages/Teacher/details/StudentDetail";
 import TeacherClasses from "@/pages/Teacher/Classes";
+import ClassDetail from "@/pages/Teacher/details/ClassDetail";
 import TeacherMakeUpClass from "@/pages/Teacher/MakeUpClass";
+import MakeupClassDetail from "@/pages/Teacher/details/MakeupClassDetail";
 import TeacherBooks from "@/pages/Teacher/Books";
+import BookDetail from "@/pages/Teacher/details/BookDetail";
 import TeacherAttendance from "@/pages/Teacher/Attendance";
 import TeacherRecordings from "@/pages/Teacher/Recording";
+import RecordingDetail from "@/pages/Teacher/details/RecordingDetail";
 import TeacherReports from "@/pages/Teacher/Report";
 import TeacherSchedule from "@/pages/Teacher/Schedule";
 
 // admin portal
-import AdminDashboard from "./pages/Admin/Dashboard";
+import AdminDashboard from "@/pages/Admin/Dashboard";
+import AdminTeachers from "@/pages/Admin/Teachers";
+import AdminStudents from "@/pages/Admin/Students";
+import AdminStudentDetail from "@/pages/Admin/Details/StudentDetail";
+import AdminTeacherDetail from "@/pages/Admin/Details/TeacherDetail";
+import ScheduleDetailAdmin from "@/pages/Admin/Details/ScheduleDetail";
+import AttendanceDetailAdmin from "@/pages/Admin/Details/AttendanceDetail";
+import ReportDetailAdmin from "@/pages/Admin/Details/ReportDetail";
+import PayoutDetailAdmin from "@/pages/Admin/Details/PayoutDetail";
+import ScreenshotDetailAdmin from "@/pages/Admin/Details/ScreenshotDetail";
+import RecordingDetailAdmin from "@/pages/Admin/Details/RecordingDetail";
+import BookDetailAdmin from "@/pages/Admin/BookDetail";
+import AdminSchedules from "@/pages/Admin/Schedules";
+import AdminAttendance from "@/pages/Admin/Attendance";
+import AdminReports from "@/pages/Admin/Reports";
+import AdminPayouts from "@/pages/Admin/Payouts";
+import AdminScreenshots from "@/pages/Admin/Screenshots";
+import AdminRecordings from "@/pages/Admin/Recordings";
+import AdminBooks from "@/pages/Admin/Books";
+import AdminSearch from "@/pages/Admin/Search";
 
 // super admin portal
-import SuperAdminDashboard from "./pages/SuperAdmin/Dashboard";
+import SuperAdminDashboard from "@/pages/SuperAdmin/Dashboard";
+import SuperAdminTeachers from "@/pages/SuperAdmin/Teachers";
+import SuperAdminAdmins from "@/pages/SuperAdmin/Admins";
+import SuperAdminStudents from "@/pages/SuperAdmin/Students";
+import SuperAdminStudentDetail from "@/pages/SuperAdmin/Details/StudentDetail";
+import SuperAdminTeacherDetail from "@/pages/SuperAdmin/Details/TeacherDetail";
+import SuperAdminAdminDetail from "@/pages/SuperAdmin/Details/AdminDetail";
+import SuperAdminSchedules from "@/pages/SuperAdmin/Schedules";
+import SuperAdminBooks from "@/pages/SuperAdmin/Books";
+import SuperAdminAssignBooks from "@/pages/SuperAdmin/AssignBooks";
+import SuperAdminCurriculum from "@/pages/SuperAdmin/Curriculum";
+import SuperAdminAttendance from "@/pages/SuperAdmin/Attendance";
+import SuperAdminReports from "@/pages/SuperAdmin/Reports";
+import SuperAdminSalary from "@/pages/SuperAdmin/Salary";
+import SuperAdminPayouts from "@/pages/SuperAdmin/Payouts";
+import SuperAdminScreenshots from "@/pages/SuperAdmin/Screenshots";
+import SuperAdminRecordings from "@/pages/SuperAdmin/Recordings";
+import SuperAdminSearch from "@/pages/SuperAdmin/Search";
+import SuperAdminSettings from "@/pages/SuperAdmin/Settings";
+import ScheduleDetailSuper from "@/pages/SuperAdmin/Details/ScheduleDetail";
+import BookDetailSuper from "@/pages/SuperAdmin/BookDetail";
+import AssignBookDetailSuper from "@/pages/SuperAdmin/Details/AssignBookDetail";
+import CurriculumDetailSuper from "@/pages/SuperAdmin/Details/CurriculumDetail";
+import AttendanceDetailSuper from "@/pages/SuperAdmin/Details/AttendanceDetail";
+import ReportDetailSuper from "@/pages/SuperAdmin/Details/ReportDetail";
+import SalaryDetailSuper from "@/pages/SuperAdmin/Details/SalaryDetail";
+import PayoutDetailSuper from "@/pages/SuperAdmin/Details/PayoutDetail";
+import ScreenshotDetailSuper from "@/pages/SuperAdmin/Details/ScreenshotDetail";
+import RecordingDetailSuper from "@/pages/SuperAdmin/Details/RecordingDetail";
+import SettingsDetailSuper from "@/pages/SuperAdmin/Details/SettingsDetail";
 
 // components
 import ProtectedRoute from "./components/ProtecTedRoute";
@@ -75,50 +128,54 @@ function App() {
                 path="/portal/teacher/dashboard"
                 element={<TeacherDashboard />}
               />
-            </Route>
-            <Route element={<Layout />}>
               <Route
                 path="/portal/teacher/students"
                 element={<TeacherStudents />}
               />
-            </Route>
-            <Route element={<Layout />}>
               <Route
                 path="/portal/teacher/classes"
                 element={<TeacherClasses />}
               />
-            </Route>
-            <Route element={<Layout />}>
+              <Route
+                path="/portal/teacher/classes/:id"
+                element={<ClassDetail />}
+              />
               <Route
                 path="/portal/teacher/makeup-classes"
                 element={<TeacherMakeUpClass />}
               />
-            </Route>
-            <Route element={<Layout />}>
+              <Route
+                path="/portal/teacher/makeup-classes/:id"
+                element={<MakeupClassDetail />}
+              />
               <Route path="/portal/teacher/books" element={<TeacherBooks />} />
-            </Route>
-            <Route element={<Layout />}>
+              <Route
+                path="/portal/teacher/books/:id"
+                element={<BookDetail />}
+              />
               <Route
                 path="/portal/teacher/attendance"
                 element={<TeacherAttendance />}
               />
-            </Route>
-            <Route element={<Layout />}>
               <Route
                 path="/portal/teacher/recordings"
                 element={<TeacherRecordings />}
               />
-            </Route>
-            <Route element={<Layout />}>
+              <Route
+                path="/portal/teacher/recordings/:id"
+                element={<RecordingDetail />}
+              />
               <Route
                 path="/portal/teacher/reports"
                 element={<TeacherReports />}
               />
-            </Route>
-            <Route element={<Layout />}>
               <Route
                 path="/portal/teacher/schedule"
                 element={<TeacherSchedule />}
+              />
+              <Route
+                path="/portal/teacher/students/:id"
+                element={<TeacherStudentDetail />}
               />
             </Route>
           </Route>
@@ -128,6 +185,70 @@ function App() {
           >
             <Route element={<Layout />}>
               <Route path="/portal/admin" element={<AdminDashboard />} />
+              <Route
+                path="/portal/admin/teachers"
+                element={<AdminTeachers />}
+              />
+              <Route
+                path="/portal/admin/students"
+                element={<AdminStudents />}
+              />
+              <Route
+                path="/portal/admin/schedules"
+                element={<AdminSchedules />}
+              />
+              <Route
+                path="/portal/admin/schedules/:id"
+                element={<ScheduleDetailAdmin />}
+              />
+              <Route
+                path="/portal/admin/attendance"
+                element={<AdminAttendance />}
+              />
+              <Route
+                path="/portal/admin/attendance/:id"
+                element={<AttendanceDetailAdmin />}
+              />
+              <Route path="/portal/admin/reports" element={<AdminReports />} />
+              <Route
+                path="/portal/admin/reports/:id"
+                element={<ReportDetailAdmin />}
+              />
+              <Route path="/portal/admin/payouts" element={<AdminPayouts />} />
+              <Route
+                path="/portal/admin/payouts/:id"
+                element={<PayoutDetailAdmin />}
+              />
+              <Route
+                path="/portal/admin/screenshots"
+                element={<AdminScreenshots />}
+              />
+              <Route
+                path="/portal/admin/screenshots/:id"
+                element={<ScreenshotDetailAdmin />}
+              />
+              <Route
+                path="/portal/admin/recordings"
+                element={<AdminRecordings />}
+              />
+              <Route
+                path="/portal/admin/recordings/:id"
+                element={<RecordingDetailAdmin />}
+              />
+              <Route path="/portal/admin/books" element={<AdminBooks />} />
+              <Route
+                path="/portal/admin/books/:id"
+                element={<BookDetailAdmin />}
+              />
+              <Route path="/portal/admin/search" element={<AdminSearch />} />
+              <Route
+                path="/portal/admin/students/:id"
+                element={<AdminStudentDetail />}
+              />
+              <Route
+                path="/portal/admin/teachers/:id"
+                element={<AdminTeacherDetail />}
+              />
             </Route>
           </Route>
 
@@ -136,6 +257,122 @@ function App() {
               <Route
                 path="/portal/super-admin"
                 element={<SuperAdminDashboard />}
+              />
+              <Route
+                path="/portal/super-admin/teachers"
+                element={<SuperAdminTeachers />}
+              />
+              <Route
+                path="/portal/super-admin/admins"
+                element={<SuperAdminAdmins />}
+              />
+              <Route
+                path="/portal/super-admin/students"
+                element={<SuperAdminStudents />}
+              />
+              <Route
+                path="/portal/super-admin/schedules"
+                element={<SuperAdminSchedules />}
+              />
+              <Route
+                path="/portal/super-admin/schedules/:id"
+                element={<ScheduleDetailSuper />}
+              />
+              <Route
+                path="/portal/super-admin/books"
+                element={<SuperAdminBooks />}
+              />
+              <Route
+                path="/portal/super-admin/books/:id"
+                element={<BookDetailSuper />}
+              />
+              <Route
+                path="/portal/super-admin/assign-books"
+                element={<SuperAdminAssignBooks />}
+              />
+              <Route
+                path="/portal/super-admin/assign-books/:id"
+                element={<AssignBookDetailSuper />}
+              />
+              <Route
+                path="/portal/super-admin/curriculum"
+                element={<SuperAdminCurriculum />}
+              />
+              <Route
+                path="/portal/super-admin/curriculum/:id"
+                element={<CurriculumDetailSuper />}
+              />
+              <Route
+                path="/portal/super-admin/attendance"
+                element={<SuperAdminAttendance />}
+              />
+              <Route
+                path="/portal/super-admin/attendance/:id"
+                element={<AttendanceDetailSuper />}
+              />
+              <Route
+                path="/portal/super-admin/reports"
+                element={<SuperAdminReports />}
+              />
+              <Route
+                path="/portal/super-admin/reports/:id"
+                element={<ReportDetailSuper />}
+              />
+              <Route
+                path="/portal/super-admin/salary"
+                element={<SuperAdminSalary />}
+              />
+              <Route
+                path="/portal/super-admin/salary/:id"
+                element={<SalaryDetailSuper />}
+              />
+              <Route
+                path="/portal/super-admin/payouts"
+                element={<SuperAdminPayouts />}
+              />
+              <Route
+                path="/portal/super-admin/payouts/:id"
+                element={<PayoutDetailSuper />}
+              />
+              <Route
+                path="/portal/super-admin/screenshots"
+                element={<SuperAdminScreenshots />}
+              />
+              <Route
+                path="/portal/super-admin/screenshots/:id"
+                element={<ScreenshotDetailSuper />}
+              />
+              <Route
+                path="/portal/super-admin/recordings"
+                element={<SuperAdminRecordings />}
+              />
+              <Route
+                path="/portal/super-admin/recordings/:id"
+                element={<RecordingDetailSuper />}
+              />
+              <Route
+                path="/portal/super-admin/search"
+                element={<SuperAdminSearch />}
+              />
+              <Route
+                path="/portal/super-admin/settings"
+                element={<SuperAdminSettings />}
+              />
+              <Route
+                path="/portal/super-admin/settings/:id"
+                element={<SettingsDetailSuper />}
+              />
+              <Route
+                path="/portal/super-admin/students/:id"
+                element={<SuperAdminStudentDetail />}
+              />
+              <Route
+                path="/portal/super-admin/teachers/:id"
+                element={<SuperAdminTeacherDetail />}
+              />
+              <Route
+                path="/portal/super-admin/admins/:id"
+                element={<SuperAdminAdminDetail />}
               />
             </Route>
           </Route>

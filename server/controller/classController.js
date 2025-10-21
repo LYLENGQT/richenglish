@@ -1,3 +1,4 @@
+const { StatusCodes } = require("http-status-codes");
 const pool = require("../database/db");
 const {
   UnathenticatedError,
@@ -5,18 +6,31 @@ const {
   NotFoundError,
   UnathoizedError,
 } = require("../errors");
+const ClassModel = require("../models/Class");
 
 const getClass = async (req, res) => {
   try {
-    const [rows] = await pool.execute(`
-      SELECT c.*, s.name as student_name, s.nationality, s.manager_type,
-             t.name as teacher_name
-      FROM classes c
-      JOIN students s ON c.student_id = s.id
-      JOIN teachers t ON c.teacher_id = t.id
-      ORDER BY c.start_time
-    `);
-    res.json(rows);
+    // const [rows] = await pool.execute(`
+    //   SELECT c.*, s.name as student_name, s.nationality, s.manager_type,
+    //          t.name as teacher_name
+    //   FROM classes c
+    //   JOIN students s ON c.student_id = s.id
+    //   JOIN teachers t ON c.teacher_id = t.id
+    //   ORDER BY c.start_time
+    // `);
+    // res.json(rows);
+
+    const { id, role } = req.user;
+
+    if (role === "teacher") {
+      const classes = await ClassModel.findActive(id);
+
+      return res.status(StatusCodes.OK).json(classes);
+    }
+
+    const classes = await ClassModel.findAll();
+
+    return res.status(StatusCodes.OK).json(classes);
   } catch (error) {
     console.error("Error fetching classes:", error);
     res.status(500).json({ error: "Server error" });

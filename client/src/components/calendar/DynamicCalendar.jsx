@@ -1,3 +1,4 @@
+import React from "react";
 import { useState } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import {
@@ -10,12 +11,9 @@ import {
   addMonths,
   subMonths,
 } from "date-fns";
+import { cn } from "@/lib/utils";
 
-function cn(...classes) {
-  return classes.filter(Boolean).join(" ");
-}
-
-export default function DynamicCalendar({ dates, size = "md", className }) {
+export const DynamicCalendar = ({ dates, size = "md", className }) => {
   const [currentMonth, setCurrentMonth] = useState(new Date());
   const [hoveredId, setHoveredId] = useState(null);
 
@@ -76,20 +74,20 @@ export default function DynamicCalendar({ dates, size = "md", className }) {
   return (
     <div
       className={cn(
-        "rounded-lg border border-gray-200 bg-white p-4 shadow-sm",
+        "rounded-lg border border-border bg-card p-4 shadow-sm",
         config.container,
         className
       )}
     >
       <div className="mb-4 flex items-center justify-between">
-        <h2 className={cn("font-semibold text-gray-900", config.header)}>
+        <h2 className={cn("font-semibold text-foreground", config.header)}>
           {format(currentMonth, "MMMM yyyy")}
         </h2>
         <div className="flex gap-1">
           <button
             onClick={handlePrevMonth}
             className={cn(
-              "rounded-md hover:bg-gray-100 transition-colors flex items-center justify-center",
+              "rounded-md hover:bg-muted transition-colors",
               config.navButton
             )}
             aria-label="Previous month"
@@ -99,7 +97,7 @@ export default function DynamicCalendar({ dates, size = "md", className }) {
           <button
             onClick={handleNextMonth}
             className={cn(
-              "rounded-md hover:bg-gray-100 transition-colors flex items-center justify-center",
+              "rounded-md hover:bg-muted transition-colors",
               config.navButton
             )}
             aria-label="Next month"
@@ -114,7 +112,7 @@ export default function DynamicCalendar({ dates, size = "md", className }) {
           <div
             key={day}
             className={cn(
-              "text-center font-medium text-gray-500",
+              "text-center font-medium text-muted-foreground",
               config.dayHeader
             )}
           >
@@ -155,11 +153,11 @@ export default function DynamicCalendar({ dates, size = "md", className }) {
                   setHoveredId(null);
                 }}
                 className={cn(
-                  "w-full rounded-md transition-colors font-medium flex items-center justify-center",
+                  "w-full rounded-md transition-colors font-medium",
                   config.dayCell,
                   isCurrentMonth
-                    ? "text-gray-900 hover:bg-gray-100 cursor-pointer"
-                    : "text-gray-400 opacity-50 cursor-not-allowed",
+                    ? "text-foreground hover:bg-muted cursor-pointer"
+                    : "text-muted-foreground opacity-50 cursor-not-allowed",
                   !dateItem && "opacity-30"
                 )}
                 style={dateStyle}
@@ -170,8 +168,12 @@ export default function DynamicCalendar({ dates, size = "md", className }) {
               </button>
 
               {isHovered && dateItem && dateItem.onHover && (
-                <div className="absolute top-full left-1/2 -translate-x-1/2 z-50 mt-2 bg-white border border-gray-200 rounded-md shadow-lg p-2 whitespace-nowrap">
-                  {dateItem.onHover(dateItem.id)}
+                <div className="absolute top-full left-1/2 -translate-x-1/2 z-50 mt-2 bg-popover border border-border rounded-md shadow-lg p-2 whitespace-nowrap">
+                  {dateItem.onHover({
+                    id: dateItem.id,
+                    startTime: dateItem.startTime,
+                    endTime: dateItem.endTime,
+                  })}
                 </div>
               )}
             </div>
@@ -180,4 +182,4 @@ export default function DynamicCalendar({ dates, size = "md", className }) {
       </div>
     </div>
   );
-}
+};
