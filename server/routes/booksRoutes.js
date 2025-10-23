@@ -5,6 +5,7 @@ const {
   bookReindex,
   getBooks,
   addBooks,
+  getOneBook,
 } = require("../controller/booksController");
 const {
   authenticateToken,
@@ -63,5 +64,6 @@ router
   .get(getBooks);
 router.post("/reindex", bookReindex);
 router.get("/:id/stream", bookStream);
+router.route("/:id").get(getOneBook);
 
 module.exports = router;

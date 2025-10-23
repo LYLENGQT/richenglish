@@ -7,12 +7,14 @@ import { Skeleton } from "@/components/ui/skeleton";
 import toast from "react-hot-toast";
 import { DynamicTable } from "@/components/table/DynamicTable";
 import Swal from "sweetalert2";
+import { useNavigate } from "react-router-dom";
 
 const Students = () => {
   const { id } = useAuthStore();
   const { data, isLoading, error } = useQuery({
     ...studentsQuery(id),
   });
+  const navigate = useNavigate();
 
   if (isLoading) {
     return (
@@ -52,6 +54,13 @@ const Students = () => {
             "book",
           ]}
           pagination={true}
+          actions={[
+            {
+              label: "View",
+              onClick: (row) => navigate(`/portal/teacher/students/${row.id}`),
+              variant: "outline",
+            },
+          ]}
         />
       </div>
     </div>

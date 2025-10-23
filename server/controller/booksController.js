@@ -7,6 +7,7 @@ const {
 } = require("../errors");
 const path = require("path");
 const fs = require("fs");
+const { StatusCodes } = require("http-status-codes");
 
 const uploadsDir = path.join(__dirname, "../uploads/books");
 
@@ -89,11 +90,16 @@ const getBooks = async (req, res) => {
 
 const bookReindex = async (req, res) => {
   try {
+    console.log("Starting book reindex...");
     const filesOnDisk = fs
       .readdirSync(uploadsDir)
       .filter((f) => f.toLowerCase().endsWith(".pdf"));
+    console.log(`Found ${filesOnDisk.length} PDF files on disk`);
+
     const [rows] = await pool.execute("SELECT filename FROM books");
     const existing = new Set(rows.map((r) => r.filename));
+    console.log(`Found ${existing.size} books already in database`);
+
     let created = 0;
     for (const fname of filesOnDisk) {
       if (!existing.has(fname)) {
@@ -101,13 +107,17 @@ const bookReindex = async (req, res) => {
         const relPath = path
           .relative(__dirname, path.join(uploadsDir, fname))
           .replace(/\\/g, "/");
+
+        console.log(`Inserting new book: ${title}`);
         await pool.execute(
           "INSERT INTO books (title, filename, original_filename, path, uploaded_by) VALUES (?, ?, ?, ?, ?)",
-          [title, fname, fname, relPath, req.user.id || null]
+          [title, fname, fname, relPath, req.user?.id || null]
         );
         created++;
       }
     }
+
+    console.log(`Reindex complete. ${created} new books added.`);
     res.json({ created });
   } catch (error) {
     console.error("Books reindex error:", error);
@@ -117,11 +127,17 @@ const bookReindex = async (req, res) => {
 
 const bookStream = async (req, res) => {
   try {
+    console.log("Running bookStream (currently reindex logic)");
+
     const filesOnDisk = fs
       .readdirSync(uploadsDir)
       .filter((f) => f.toLowerCase().endsWith(".pdf"));
+    console.log(`Found ${filesOnDisk.length} PDF files on disk`);
+
     const [rows] = await pool.execute("SELECT filename FROM books");
     const existing = new Set(rows.map((r) => r.filename));
+    console.log(`Found ${existing.size} books already in database`);
+
     let created = 0;
     for (const fname of filesOnDisk) {
       if (!existing.has(fname)) {
@@ -129,18 +145,36 @@ const bookStream = async (req, res) => {
         const relPath = path
           .relative(__dirname, path.join(uploadsDir, fname))
           .replace(/\\/g, "/");
+
+        console.log(`Inserting new book: ${title}`);
         await pool.execute(
           "INSERT INTO books (title, filename, original_filename, path, uploaded_by) VALUES (?, ?, ?, ?, ?)",
-          [title, fname, fname, relPath, req.user.id || null]
+          [title, fname, fname, relPath, req.user?.id || null]
         );
         created++;
       }
     }
+
+    console.log(`Stream logic complete. ${created} new books added.`);
     res.json({ created });
   } catch (error) {
-    console.error("Books reindex error:", error);
+    console.error("Books stream error:", error);
     res.status(500).json({ error: "Failed to reindex books" });
   }
+};
+
+const getOneBook = async (req, res) => {
+  const { id } = req.params;
+
+  const [rows] = await pool.execute("SELECT * FROM books WHERE id = ?", [id]);
+
+  if (rows.length === 0) {
+    throw new BadRequestError("Invalid");
+  }
+
+  const book = rows[0];
+
+  res.status(StatusCodes.OK).json(book);
 };
 
 module.exports = {
@@ -148,4 +182,5 @@ module.exports = {
   bookReindex,
   getBooks,
   addBooks,
+  getOneBook,
 };

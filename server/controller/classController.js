@@ -23,7 +23,7 @@ const getClass = async (req, res) => {
     const { id, role } = req.user;
 
     if (role === "teacher") {
-      const classes = await ClassModel.findActive(id);
+      const classes = await ClassModel.findAllDynamic(id);
 
       return res.status(StatusCodes.OK).json(classes);
     }

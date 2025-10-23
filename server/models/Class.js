@@ -74,6 +74,19 @@ const ClassModel = {
     const [rows] = await pool.query(query, params);
     return rows;
   },
+
+  async findAllDynamic(teache_id = null) {
+    let query = `SELECT * FROM classes`;
+    let params = [];
+
+    if (teache_id !== undefined && teache_id !== null) {
+      query += ` WHERE teacher_id = ?`;
+      params.push(teache_id);
+    }
+
+    const [rows] = await pool.query(query, params);
+    return rows;
+  },
 };
 
 module.exports = ClassModel;
