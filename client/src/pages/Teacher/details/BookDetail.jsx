@@ -192,16 +192,14 @@ export default function BookDetail() {
     // Disable pointer events for copying
     container.style.pointerEvents = "auto";
 
-    // Add event listeners - capture phase to catch before any other handlers
-    document.addEventListener("contextmenu", preventContextMenu, true);
-    document.addEventListener("keydown", preventShortcuts, { capture: true });
-    document.addEventListener("keyup", preventShortcuts, { capture: true });
-    document.addEventListener("keypress", preventShortcuts, { capture: true });
+    // Add event listeners
+    document.addEventListener("contextmenu", preventContextMenu);
+    document.addEventListener("keydown", preventShortcuts, true);
     container.addEventListener("contextmenu", preventEvent);
 
     // Block copy event
-    document.addEventListener("copy", preventEvent, true);
-    document.addEventListener("cut", preventEvent, true);
+    document.addEventListener("copy", preventEvent);
+    document.addEventListener("cut", preventEvent);
 
     // Prevent image dragging
     const images = container.getElementsByTagName("img");
@@ -229,19 +227,11 @@ export default function BookDetail() {
       container.removeEventListener("dragstart", preventEvent);
       container.removeEventListener("drag", preventEvent);
       container.removeEventListener("drop", preventEvent);
-      document.removeEventListener("contextmenu", preventContextMenu, true);
-      document.removeEventListener("keydown", preventShortcuts, {
-        capture: true,
-      });
-      document.removeEventListener("keyup", preventShortcuts, {
-        capture: true,
-      });
-      document.removeEventListener("keypress", preventShortcuts, {
-        capture: true,
-      });
+      document.removeEventListener("contextmenu", preventContextMenu);
+      document.removeEventListener("keydown", preventShortcuts, true);
       container.removeEventListener("contextmenu", preventEvent);
-      document.removeEventListener("copy", preventEvent, true);
-      document.removeEventListener("cut", preventEvent, true);
+      document.removeEventListener("copy", preventEvent);
+      document.removeEventListener("cut", preventEvent);
       document.head.removeChild(style);
     };
   }, []);
@@ -260,6 +250,207 @@ export default function BookDetail() {
       document.removeEventListener("visibilitychange", handleVisibilityChange);
     };
   }, []);
+
+  // Enhanced protection useEffect - Add this to your component
+  useEffect(() => {
+    const container = containerRef.current;
+    if (!container) return;
+
+    // Prevent all default events
+    const preventEvent = (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      return false;
+    };
+
+    // Block right-click globally
+    const preventContextMenu = (e) => {
+      e.preventDefault();
+      return false;
+    };
+
+    // Enhanced keyboard shortcut blocker
+    const preventShortcuts = (e) => {
+      const key = e.key.toLowerCase();
+      const keyCode = e.keyCode || e.which;
+
+      // F12 (keyCode 123) - DevTools
+      if (keyCode === 123 || e.key === "F12") {
+        e.preventDefault();
+        e.stopPropagation();
+        e.stopImmediatePropagation();
+        console.warn("Developer tools are disabled");
+        return false;
+      }
+
+      // Ctrl+Shift+I, Ctrl+Shift+J, Ctrl+Shift+C (DevTools)
+      if (e.ctrlKey && e.shiftKey && ["i", "j", "c"].includes(key)) {
+        e.preventDefault();
+        e.stopPropagation();
+        e.stopImmediatePropagation();
+        console.warn("Developer tools are disabled");
+        return false;
+      }
+
+      // Ctrl+Shift+S (Save As)
+      if (e.ctrlKey && e.shiftKey && key === "s") {
+        e.preventDefault();
+        e.stopPropagation();
+        e.stopImmediatePropagation();
+        console.warn("Save is disabled");
+        return false;
+      }
+
+      // Ctrl+U (View Source)
+      if (e.ctrlKey && key === "u") {
+        e.preventDefault();
+        e.stopPropagation();
+        e.stopImmediatePropagation();
+        console.warn("View source is disabled");
+        return false;
+      }
+
+      // Ctrl+S (Save), Ctrl+P (Print), Ctrl+C (Copy), Ctrl+A (Select All), Ctrl+X (Cut)
+      const ctrl = e.ctrlKey || e.metaKey;
+      if (ctrl && ["s", "p", "c", "a", "x"].includes(key)) {
+        e.preventDefault();
+        e.stopPropagation();
+        e.stopImmediatePropagation();
+        console.warn("This action is disabled");
+        return false;
+      }
+
+      // PrintScreen
+      if (key === "printscreen" || keyCode === 44) {
+        e.preventDefault();
+        e.stopPropagation();
+        e.stopImmediatePropagation();
+        console.warn("Screenshots are disabled");
+        return false;
+      }
+
+      // Mac screenshots (Cmd+Shift+3/4/5)
+      if (e.metaKey && e.shiftKey && ["3", "4", "5"].includes(key)) {
+        e.preventDefault();
+        e.stopPropagation();
+        e.stopImmediatePropagation();
+        console.warn("Screenshots are disabled");
+        return false;
+      }
+
+      return true;
+    };
+
+    // Detect DevTools opening by checking window dimensions
+    const detectDevTools = () => {
+      const threshold = 160;
+      const widthThreshold = window.outerWidth - window.innerWidth > threshold;
+      const heightThreshold =
+        window.outerHeight - window.innerHeight > threshold;
+
+      if (widthThreshold || heightThreshold) {
+        document.body.innerHTML =
+          "<h1 style='text-align:center; margin-top:50px; color: #dc2626;'>⚠️ Developer tools detected. Please close DevTools to continue.</h1>";
+      }
+    };
+
+    // Check periodically for DevTools
+    const devToolsInterval = setInterval(detectDevTools, 1000);
+
+    // Disable drag events
+    container.addEventListener("dragstart", preventEvent);
+    container.addEventListener("drag", preventEvent);
+    container.addEventListener("drop", preventEvent);
+
+    // Disable selection via inline styles
+    container.style.userSelect = "none";
+    container.style.webkitUserSelect = "none";
+    container.style.msUserSelect = "none";
+    container.style.mozUserSelect = "none";
+    container.style.webkitTouchCallout = "none";
+
+    // Add event listeners - capture phase to catch before any other handlers
+    document.addEventListener("contextmenu", preventContextMenu, true);
+    document.addEventListener("keydown", preventShortcuts, { capture: true });
+    document.addEventListener("keyup", preventShortcuts, { capture: true });
+    document.addEventListener("keypress", preventShortcuts, { capture: true });
+    container.addEventListener("contextmenu", preventEvent);
+
+    // Block copy, cut, and select events
+    document.addEventListener("copy", preventEvent, true);
+    document.addEventListener("cut", preventEvent, true);
+    document.addEventListener("selectstart", preventEvent, true);
+
+    // Prevent image dragging
+    const preventImageDrag = () => {
+      const images = container.getElementsByTagName("img");
+      Array.from(images).forEach((img) => {
+        img.addEventListener("dragstart", preventEvent);
+      });
+    };
+    preventImageDrag();
+
+    // Add global CSS to prevent selection
+    const style = document.createElement("style");
+    style.innerHTML = `
+    * {
+      -webkit-user-select: none !important;
+      -moz-user-select: none !important;
+      -ms-user-select: none !important;
+      user-select: none !important;
+    }
+    canvas {
+      pointer-events: auto !important;
+    }
+  `;
+    document.head.appendChild(style);
+
+    // Cleanup function
+    return () => {
+      clearInterval(devToolsInterval);
+      container.removeEventListener("dragstart", preventEvent);
+      container.removeEventListener("drag", preventEvent);
+      container.removeEventListener("drop", preventEvent);
+      document.removeEventListener("contextmenu", preventContextMenu, true);
+      document.removeEventListener("keydown", preventShortcuts, {
+        capture: true,
+      });
+      document.removeEventListener("keyup", preventShortcuts, {
+        capture: true,
+      });
+      document.removeEventListener("keypress", preventShortcuts, {
+        capture: true,
+      });
+      container.removeEventListener("contextmenu", preventEvent);
+      document.removeEventListener("copy", preventEvent, true);
+      document.removeEventListener("cut", preventEvent, true);
+      document.removeEventListener("selectstart", preventEvent, true);
+      if (document.head.contains(style)) {
+        document.head.removeChild(style);
+      }
+    };
+  }, []);
+
+  // Optional: Detect page blur (screenshot attempts)
+  useEffect(() => {
+    const handleVisibilityChange = () => {
+      if (document.hidden) {
+        console.warn("Window lost focus - possible screenshot attempt");
+      }
+    };
+
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+
+    return () => {
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
+    };
+  }, []);
+
+  // Also add right-click prevention to each canvas when rendering:
+  // canvas.oncontextmenu = (e) => {
+  //   e.preventDefault();
+  //   return false;
+  // };
 
   if (isLoading) {
     return (
