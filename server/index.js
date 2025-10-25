@@ -59,6 +59,7 @@ const makeupClass = require("./routes/makeUpClassRoutes");
 const functionRoutes = require("./routes/functionRoutes");
 const messageRoutes = require("./routes/messageRoutes");
 const scheduleRoutes = require("./routes/scheduleRoues");
+const notificationRoutes = require("./routes/notificationsRoutes");
 
 app.use("/api/auth", authRoutes);
 app.use("/api/students", studentsRoutes);
@@ -69,6 +70,7 @@ app.use("/api/books", bookRoutes);
 app.use("/api/makeup-classes", makeupClass);
 app.use("/api/message", messageRoutes);
 app.use("/api/schedule", scheduleRoutes);
+app.use("/api/notification", notificationRoutes);
 app.use("/api", functionRoutes);
 
 // Health check

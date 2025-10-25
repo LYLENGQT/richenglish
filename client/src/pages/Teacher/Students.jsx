@@ -8,6 +8,7 @@ import toast from "react-hot-toast";
 import { DynamicTable } from "@/components/table/DynamicTable";
 import Swal from "sweetalert2";
 import { useNavigate } from "react-router-dom";
+import { Badge } from "@/components/ui/badge";
 
 const Students = () => {
   const { id } = useAuthStore();
@@ -58,7 +59,20 @@ const Students = () => {
             {
               label: "View",
               onClick: (row) => navigate(`/portal/teacher/students/${row.id}`),
-              variant: "outline",
+              variant: "link",
+            },
+          ]}
+          columns={[
+            {
+              accessorKey: "nationality",
+              header: "Nationality",
+              cell: ({ row }) => (
+                <Badge variant="default">{row.original.nationality}</Badge>
+              ),
+            },
+            {
+              accessorKey: "student_identification",
+              header: "ID",
             },
           ]}
         />

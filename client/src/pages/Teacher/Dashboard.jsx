@@ -16,6 +16,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { DynamicCalendar } from "@/components/calendar/DynamicCalendar";
 import useFormatClass from "@/hook/useFormatClass";
 import useFormatDate from "@/hook/useFormatdate";
+import DashboardHeader from "@/components/DashboardHeader";
 
 const Dashboard = () => {
   const { data, isLoading, error } = useQuery({
@@ -23,7 +24,7 @@ const Dashboard = () => {
   });
   const navigate = useNavigate();
 
-  const { name, role } = useAuthStore();
+  const { name } = useAuthStore();
 
   const classes = useFormatClass(
     data?.dashboard?.activeClass,
@@ -135,61 +136,7 @@ const Dashboard = () => {
 
   return (
     <div className="space-y-6">
-      <div className="bg-white rounded-lg shadow p-4 flex items-center gap-4">
-        <div className="flex items-center justify-center w-14 h-14 rounded-full bg-indigo-600 text-white text-base font-semibold">
-          {teacher?.name
-            ? teacher.name
-                .split(" ")
-                .map((n) => n[0])
-                .slice(0, 2)
-                .join("")
-            : name
-                ?.split(" ")
-                .map((n) => n[0])
-                .slice(0, 2)
-                .join("")}
-        </div>
-        <div className="flex-1">
-          <h1 className="text-xl font-semibold text-gray-900">
-            Teacher Dashboard
-          </h1>
-
-          <p className="mt-1 text-xs text-gray-500 flex items-center gap-3">
-            {teacher?.zoom_link ? (
-              <Link
-                to={teacher.zoom_link}
-                onClick={(e) => {
-                  e.preventDefault();
-                  try {
-                    window.open(
-                      teacher.zoom_link,
-                      "_blank",
-                      "noopener,noreferrer"
-                    );
-                  } catch {
-                    // fallback to router navigation
-                    window.location.href = teacher.zoom_link;
-                  }
-                }}
-                className="inline-flex items-center gap-2 px-3 py-1 text-xs bg-indigo-50 text-indigo-700 rounded-full hover:bg-indigo-100"
-              >
-                <LinkIcon className="w-4 h-4" />
-                Join Zoom
-              </Link>
-            ) : (
-              <span className="text-xs text-slate-400">
-                Zoom link: ...Pending
-              </span>
-            )}
-          </p>
-        </div>
-        <div className="text-right">
-          <div className="text-xs text-slate-500">Teacher</div>
-          <div className="text-base font-medium text-slate-900">
-            {teacher?.name || name}
-          </div>
-        </div>
-      </div>
+      <DashboardHeader name={name} notifications={[]} />
 
       {/* Stats Grid */}
       <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
