@@ -95,6 +95,69 @@ const Books = {
     );
     return rows[0] || null;
   },
+  async getBooks() {
+    const [rows] = await pool.query(
+      "SELECT * FROM books ORDER BY created_at DESC"
+    );
+    return rows;
+  },
+
+  // Get one book by ID
+  async getBookById(id) {
+    const [rows] = await pool.query("SELECT * FROM books WHERE id = ?", [id]);
+    return rows[0] || null;
+  },
+
+  // Insert a new book
+  async createBook({
+    id,
+    title,
+    filename,
+    original_filename,
+    path,
+    uploaded_by,
+  }) {
+    const [result] = await pool.query(
+      `INSERT INTO books (id, title, filename, original_filename, path, uploaded_by)
+       VALUES (?, ?, ?, ?, ?, ?)`,
+      [
+        id,
+        title,
+        filename,
+        original_filename || null,
+        path,
+        uploaded_by || null,
+      ]
+    );
+    return result;
+  },
+
+  // Update a book
+  async updateBook(
+    id,
+    { title, filename, original_filename, path, uploaded_by }
+  ) {
+    const [result] = await pool.query(
+      `UPDATE books
+       SET title = ?, filename = ?, original_filename = ?, path = ?, uploaded_by = ?
+       WHERE id = ?`,
+      [
+        title,
+        filename,
+        original_filename || null,
+        path,
+        uploaded_by || null,
+        id,
+      ]
+    );
+    return result;
+  },
+
+  // Delete a book
+  async deleteBook(id) {
+    const [result] = await pool.query("DELETE FROM books WHERE id = ?", [id]);
+    return result;
+  },
 };
 
 module.exports = Books;

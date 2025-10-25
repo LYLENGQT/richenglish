@@ -1,186 +1,97 @@
-const pool = require("../database/db");
-const {
-  UnathenticatedError,
-  BadRequestError,
-  NotFoundError,
-  UnathoizedError,
-} = require("../errors");
+const Books = require("../models/Books");
+const { v4: uuidv4 } = require("uuid");
 const path = require("path");
 const fs = require("fs");
 const { StatusCodes } = require("http-status-codes");
 
+// Directory for uploaded books
 const uploadsDir = path.join(__dirname, "../uploads/books");
-
-// Ensure the directory exists
 fs.mkdirSync(uploadsDir, { recursive: true });
 
-const addBooks = async (req, res) => {
-  try {
-    const title =
-      req.body.title || req.file.originalname.replace(/\.pdf$/i, "");
-    const storedPath = path
-      .relative(__dirname, req.file.path)
-      .replace(/\\/g, "/");
-    const [result] = await pool.execute(
-      "INSERT INTO books (title, filename, original_filename, path, uploaded_by) VALUES (?, ?, ?, ?, ?)",
-      [
-        title,
-        req.file.filename,
-        req.file.originalname,
-        storedPath,
-        req.user.id || null,
-      ]
-    );
-    res.json({ id: result.insertId, title });
-  } catch (error) {
-    console.error("Book upload error:", error);
-    res.status(500).json({ error: "Failed to upload book" });
-  }
+const addBook = async (req, res) => {
+  const id = uuidv4().slice(0, 10);
+  const title = req.body.title || req.file.originalname.replace(/\.pdf$/i, "");
+  const storedPath = path
+    .relative(__dirname, req.file.path)
+    .replace(/\\/g, "/");
+
+  await Books.createBook({
+    id,
+    title,
+    filename: req.file.filename,
+    original_filename: req.file.originalname,
+    path: storedPath,
+    uploaded_by: req.user.id || null,
+  });
+
+  res.status(StatusCodes.CREATED).json({ id, title });
 };
 
 const getBooks = async (req, res) => {
-  try {
-    // Accepts query params: teacher_id, student_id, assigned
-    // Each param is optional; only applied when provided and non-empty.
-    const { teacher_id = null, student_id = null, assigned = null } = req.query;
-
-    const params = [];
-    let sql = `
-      SELECT DISTINCT
-        b.id,
-        b.title,
-        b.created_at
-      FROM books b
-      LEFT JOIN book_assignments ba ON ba.book_id = b.id
-      WHERE 1 = 1
-    `;
-
-    if (teacher_id !== undefined && teacher_id !== null && teacher_id !== "") {
-      sql += " AND ba.teacher_id = ?";
-      params.push(teacher_id);
-    }
-
-    if (student_id !== undefined && student_id !== null && student_id !== "") {
-      sql += " AND ba.student_id = ?";
-      params.push(student_id);
-    }
-
-    if (assigned !== undefined && assigned !== null && assigned !== "") {
-      const a = String(assigned).toLowerCase();
-      const isAssigned = a === "true" || a === "1" || a === "yes";
-      const isUnassigned = a === "false" || a === "0" || a === "no";
-
-      if (isAssigned) {
-        sql += " AND ba.id IS NOT NULL";
-      } else if (isUnassigned) {
-        sql += " AND ba.id IS NULL";
-      }
-      // if assigned provided but unrecognized value, ignore and do not filter
-    }
-
-    sql += " ORDER BY b.created_at DESC";
-
-    const [rows] = await pool.execute(sql, params);
-    res.json(rows);
-  } catch (error) {
-    console.error("Books list error:", error);
-    res.status(500).json({ error: "Failed to fetch books" });
-  }
+  const books = await Books.findAll();
+  res.json(books);
 };
 
-const bookReindex = async (req, res) => {
-  try {
-    console.log("Starting book reindex...");
-    const filesOnDisk = fs
-      .readdirSync(uploadsDir)
-      .filter((f) => f.toLowerCase().endsWith(".pdf"));
-    console.log(`Found ${filesOnDisk.length} PDF files on disk`);
-
-    const [rows] = await pool.execute("SELECT filename FROM books");
-    const existing = new Set(rows.map((r) => r.filename));
-    console.log(`Found ${existing.size} books already in database`);
-
-    let created = 0;
-    for (const fname of filesOnDisk) {
-      if (!existing.has(fname)) {
-        const title = fname.replace(/\.pdf$/i, "");
-        const relPath = path
-          .relative(__dirname, path.join(uploadsDir, fname))
-          .replace(/\\/g, "/");
-
-        console.log(`Inserting new book: ${title}`);
-        await pool.execute(
-          "INSERT INTO books (title, filename, original_filename, path, uploaded_by) VALUES (?, ?, ?, ?, ?)",
-          [title, fname, fname, relPath, req.user?.id || null]
-        );
-        created++;
-      }
-    }
-
-    console.log(`Reindex complete. ${created} new books added.`);
-    res.json({ created });
-  } catch (error) {
-    console.error("Books reindex error:", error);
-    res.status(500).json({ error: "Failed to reindex books" });
-  }
+const getBook = async (req, res) => {
+  const book = await Books.findById(req.params.id);
+  if (!book)
+    return res.status(StatusCodes.NOT_FOUND).json({ error: "Book not found" });
+  res.json(book);
 };
 
-const bookStream = async (req, res) => {
-  try {
-    console.log("Running bookStream (currently reindex logic)");
+const updateBook = async (req, res) => {
+  const { title, filename, original_filename, path: filePath } = req.body;
+  const result = await Books.updateBook(req.params.id, {
+    title,
+    filename,
+    original_filename,
+    path: filePath,
+    uploaded_by: req.user.id || null,
+  });
 
-    const filesOnDisk = fs
-      .readdirSync(uploadsDir)
-      .filter((f) => f.toLowerCase().endsWith(".pdf"));
-    console.log(`Found ${filesOnDisk.length} PDF files on disk`);
+  if (result.affectedRows === 0)
+    return res.status(StatusCodes.NOT_FOUND).json({ error: "Book not found" });
 
-    const [rows] = await pool.execute("SELECT filename FROM books");
-    const existing = new Set(rows.map((r) => r.filename));
-    console.log(`Found ${existing.size} books already in database`);
-
-    let created = 0;
-    for (const fname of filesOnDisk) {
-      if (!existing.has(fname)) {
-        const title = fname.replace(/\.pdf$/i, "");
-        const relPath = path
-          .relative(__dirname, path.join(uploadsDir, fname))
-          .replace(/\\/g, "/");
-
-        console.log(`Inserting new book: ${title}`);
-        await pool.execute(
-          "INSERT INTO books (title, filename, original_filename, path, uploaded_by) VALUES (?, ?, ?, ?, ?)",
-          [title, fname, fname, relPath, req.user?.id || null]
-        );
-        created++;
-      }
-    }
-
-    console.log(`Stream logic complete. ${created} new books added.`);
-    res.json({ created });
-  } catch (error) {
-    console.error("Books stream error:", error);
-    res.status(500).json({ error: "Failed to reindex books" });
-  }
+  res.json({ message: "Book updated" });
 };
 
-const getOneBook = async (req, res) => {
+const deleteBook = async (req, res) => {
+  const result = await Books.deleteBook(req.params.id);
+  if (result.affectedRows === 0)
+    return res.status(StatusCodes.NOT_FOUND).json({ error: "Book not found" });
+
+  res.json({ message: "Book deleted" });
+};
+
+const streamBook = async (req, res) => {
   const { id } = req.params;
+  const book = await Books.findById(id);
 
-  const [rows] = await pool.execute("SELECT * FROM books WHERE id = ?", [id]);
+  if (!book)
+    return res.status(StatusCodes.NOT_FOUND).json({ error: "Book not found" });
 
-  if (rows.length === 0) {
-    throw new BadRequestError("Invalid");
-  }
+  const filePath = path.join(__dirname, "..", book.path);
+  if (!fs.existsSync(filePath))
+    return res.status(StatusCodes.NOT_FOUND).json({ error: "File not found" });
 
-  const book = rows[0];
+  res.setHeader("Content-Type", "application/pdf");
+  res.setHeader("Content-Disposition", "inline");
 
-  res.status(StatusCodes.OK).json(book);
+  const stream = fs.createReadStream(filePath);
+  stream.pipe(res);
+
+  // Optional: handle stream errors (can also let middleware catch them)
+  stream.on("error", (err) => {
+    console.error("Stream error:", err);
+    res.status(StatusCodes.INTERNAL_SERVER_ERROR).end("Failed to stream book");
+  });
 };
 
 module.exports = {
-  bookStream,
-  bookReindex,
+  addBook,
   getBooks,
-  addBooks,
-  getOneBook,
+  getBook,
+  updateBook,
+  deleteBook,
+  streamBook,
 };
