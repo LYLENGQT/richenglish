@@ -28,32 +28,6 @@ const Books = () => {
   return (
     <div>
       <div className="bg-white rounded-lg shadow p-4 flex items-center gap-4">
-        <div className="flex items-center justify-center w-14 h-14 rounded-full bg-indigo-600 text-white text-base font-semibold">
-          {name
-            ? name
-                .split(" ")
-                .map((n) => n[0])
-                .slice(0, 2)
-                .join("")
-            : name
-                ?.split(" ")
-                .map((n) => n[0])
-                .slice(0, 2)
-                .join("")}
-        </div>
-        <div className="flex-1">
-          <h1 className="text-xl font-semibold text-gray-900">
-            Teacher Dashboard
-          </h1>
-        </div>
-        <div className="text-right">
-          <div className="text-xs text-slate-500">Teacher</div>
-          <div className="text-base font-medium text-slate-900">
-            {name || name}
-          </div>
-        </div>
-      </div>
-      <div className="bg-white rounded-lg shadow p-4 flex items-center gap-4">
         {data?.length === 0 ? (
           <p className="text-muted-foreground">No books found.</p>
         ) : (

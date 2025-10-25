@@ -47,8 +47,6 @@ const Classes = () => {
 
   return (
     <div className="space-y-6 h-dvh">
-      <DashboardHeader name={name} notifications={[]} />
-
       <div className="flex gap-3">
         <div className="bg-white rounded-lg shadow p-4 basis-[60%]">
           <DynamicCalendar dates={classes} size="full" />

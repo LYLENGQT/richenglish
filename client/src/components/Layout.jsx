@@ -20,6 +20,8 @@ import useAuthStore from "../lib/zustand/authStore";
 import { logout } from "../lib/axios/auth";
 import { useState } from "react";
 import toast from "react-hot-toast";
+import ChatSideBar from "./ChatSideBar";
+import DashboardHeader from "./DashboardHeader";
 
 const Layout = () => {
   const navigate = useNavigate();
@@ -130,7 +132,7 @@ const Layout = () => {
       ];
     }
 
-    if (role === "superadmin") {
+    if (role === "super-admin") {
       return [
         {
           name: "Dashboard",
@@ -350,7 +352,9 @@ const Layout = () => {
         <main className="flex-1 relative overflow-y-auto focus:outline-none">
           <div className="py-6">
             <div className="sm:mx-auto  px-4 sm:px-6 md:px-8">
+              <DashboardHeader />
               <Outlet />
+              <ChatSideBar />
             </div>
           </div>
         </main>

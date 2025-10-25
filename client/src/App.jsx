@@ -184,7 +184,10 @@ function App() {
             element={<ProtectedRoute allowedRoles={["admin", "super-admin"]} />}
           >
             <Route element={<Layout />}>
-              <Route path="/portal/admin" element={<AdminDashboard />} />
+              <Route
+                path="/portal/admin/dashboard"
+                element={<AdminDashboard />}
+              />
               <Route
                 path="/portal/admin/teachers"
                 element={<AdminTeachers />}
@@ -255,7 +258,7 @@ function App() {
           <Route element={<ProtectedRoute allowedRoles={["super-admin"]} />}>
             <Route element={<Layout />}>
               <Route
-                path="/portal/super-admin"
+                path="/portal/super-admin/dashboard"
                 element={<SuperAdminDashboard />}
               />
               <Route

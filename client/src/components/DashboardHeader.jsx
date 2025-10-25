@@ -32,7 +32,7 @@ const DashboardHeader = ({ name: defaultName = "User" }) => {
   const handleMarkRead = (id) => mutation.mutate({ id, is_read: 1 });
 
   return (
-    <div className="flex items-center justify-between p-4 bg-white shadow-md rounded-lg w-full">
+    <div className="flex items-center justify-between p-4 bg-white shadow-md rounded-lg w-full mb-3">
       <div className="flex items-center gap-4">
         <div
           className="flex items-center justify-center w-12 h-12 rounded-full bg-indigo-600 text-white font-semibold text-lg"
