@@ -15,7 +15,7 @@ import toast from "react-hot-toast";
 import { Link, useNavigate } from "react-router-dom";
 import { DynamicCalendar } from "@/components/calendar/DynamicCalendar";
 import useFormatClass from "@/hook/useFormatClass";
-import useFormatDate from "@/hook/useFormatdate";
+import useFormatDate from "@/hook/useFormatDate";
 import DashboardHeader from "@/components/DashboardHeader";
 
 const Dashboard = () => {
