@@ -1,12 +1,7 @@
 const { StatusCodes } = require("http-status-codes");
 const TeacherApplication = require("../models/TeacherApplication");
 const { BadRequestError, UnathoizedError } = require("../errors");
-
-const ensureSuperAdmin = (user) => {
-  if (!user || user.role !== "super-admin") {
-    throw new UnathoizedError("Only super admin can perform this action");
-  }
-};
+const { sendMail } = require("../lib/nodemailer");
 
 const createApplication = async (req, res) => {
   const {
@@ -65,19 +60,21 @@ const createApplication = async (req, res) => {
   });
 
   res.status(StatusCodes.CREATED).json(application);
+
+  await sendMail(
+    email,
+    "Your Teaching Application Received",
+    `Hello ${firstName},\n\nThank you for applying as a teacher. Our team will review your application and get back to you within 1–3 days.\n\nBest regards,\nYour Team`
+  );
 };
 
 const getApplications = async (req, res) => {
-  ensureSuperAdmin(req.user);
-
   const { status } = req.query;
   const applications = await TeacherApplication.findAll({ status });
   res.status(StatusCodes.OK).json(applications);
 };
 
 const updateApplicationStatus = async (req, res) => {
-  ensureSuperAdmin(req.user);
-
   const { id } = req.params;
   const { status } = req.body || {};
 
@@ -91,7 +88,23 @@ const updateApplicationStatus = async (req, res) => {
     throw new BadRequestError("Application not found");
   }
 
+  const { email, first_name: firstName } = updated;
+
   res.status(StatusCodes.OK).json(updated);
+
+  if (status === "approved") {
+    await sendMail(
+      email,
+      "Congratulations! Your Rich English Application is Approved 🎉",
+      `Hello ${firstName},\n\nWe are pleased to inform you that your teacher application at Rich English has been approved!\n\nOur team will contact you soon with onboarding details and your account setup instructions.\n\nBest regards,\nRich English Team`
+    );
+  } else if (status === "rejected") {
+    await sendMail(
+      email,
+      "Update on Your Rich English Teacher Application",
+      `Hello ${firstName},\n\nWe appreciate the time and effort you took to apply at Rich English.\n\nUnfortunately, we are unable to move forward with your application at this time. Please feel free to reapply in the future.\n\nBest regards,\nRich English Team`
+    );
+  }
 };
 
 module.exports = {
@@ -99,4 +112,3 @@ module.exports = {
   getApplications,
   updateApplicationStatus,
 };
-
