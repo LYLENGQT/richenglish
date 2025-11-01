@@ -14,185 +14,6 @@ CREATE FUNCTION gen_short_uuid()
 RETURNS CHAR(10) DETERMINISTIC
 RETURN LEFT(REPLACE(UUID(),'-',''),10)$$
 
--- user
-DROP TRIGGER IF EXISTS before_user_insert$$
-CREATE TRIGGER before_user_insert
-BEFORE INSERT ON `user`
-FOR EACH ROW
-BEGIN
-  IF NEW.id IS NULL OR NEW.id = '' THEN
-    SET NEW.id = gen_short_uuid();
-  END IF;
-END$$
-
--- students
-DROP TRIGGER IF EXISTS before_students_insert$$
-CREATE TRIGGER before_students_insert
-BEFORE INSERT ON students
-FOR EACH ROW
-BEGIN
-  IF NEW.id IS NULL OR NEW.id = '' THEN
-    SET NEW.id = gen_short_uuid();
-  END IF;
-  IF NEW.student_identification IS NULL OR NEW.student_identification = '' THEN
-    SET NEW.student_identification = CONCAT('STD', SUBSTRING(gen_short_uuid(),1,7));
-  END IF;
-END$$
-
--- schedules
-DROP TRIGGER IF EXISTS before_schedules_insert$$
-CREATE TRIGGER before_schedules_insert
-BEFORE INSERT ON schedules
-FOR EACH ROW
-BEGIN
-  IF NEW.id IS NULL OR NEW.id = '' THEN
-    SET NEW.id = gen_short_uuid();
-  END IF;
-END$$
-
--- tokens
-DROP TRIGGER IF EXISTS before_tokens_insert$$
-CREATE TRIGGER before_tokens_insert
-BEFORE INSERT ON tokens
-FOR EACH ROW
-BEGIN
-  IF NEW.id IS NULL OR NEW.id = '' THEN
-    SET NEW.id = gen_short_uuid();
-  END IF;
-END$$
-
--- classes
-DROP TRIGGER IF EXISTS before_classes_insert$$
-CREATE TRIGGER before_classes_insert
-BEFORE INSERT ON classes
-FOR EACH ROW
-BEGIN
-  IF NEW.id IS NULL OR NEW.id = '' THEN
-    SET NEW.id = gen_short_uuid();
-  END IF;
-END$$
-
--- attendance
-DROP TRIGGER IF EXISTS before_attendance_insert$$
-CREATE TRIGGER before_attendance_insert
-BEFORE INSERT ON attendance
-FOR EACH ROW
-BEGIN
-  IF NEW.id IS NULL OR NEW.id = '' THEN
-    SET NEW.id = gen_short_uuid();
-  END IF;
-END$$
-
--- makeup_classes
-DROP TRIGGER IF EXISTS before_makeup_classes_insert$$
-CREATE TRIGGER before_makeup_classes_insert
-BEFORE INSERT ON makeup_classes
-FOR EACH ROW
-BEGIN
-  IF NEW.id IS NULL OR NEW.id = '' THEN
-    SET NEW.id = gen_short_uuid();
-  END IF;
-END$$
-
--- substitute_classes
-DROP TRIGGER IF EXISTS before_substitute_classes_insert$$
-CREATE TRIGGER before_substitute_classes_insert
-BEFORE INSERT ON substitute_classes
-FOR EACH ROW
-BEGIN
-  IF NEW.id IS NULL OR NEW.id = '' THEN
-    SET NEW.id = gen_short_uuid();
-  END IF;
-END$$
-
--- message
-DROP TRIGGER IF EXISTS before_message_insert$$
-CREATE TRIGGER before_message_insert
-BEFORE INSERT ON message
-FOR EACH ROW
-BEGIN
-  IF NEW.id IS NULL OR NEW.id = '' THEN
-    SET NEW.id = gen_short_uuid();
-  END IF;
-END$$
-
--- books
-DROP TRIGGER IF EXISTS before_books_insert$$
-CREATE TRIGGER before_books_insert
-BEFORE INSERT ON books
-FOR EACH ROW
-BEGIN
-  IF NEW.id IS NULL OR NEW.id = '' THEN
-    SET NEW.id = gen_short_uuid();
-  END IF;
-END$$
-
--- book_assignments
-DROP TRIGGER IF EXISTS before_book_assignments_insert$$
-CREATE TRIGGER before_book_assignments_insert
-BEFORE INSERT ON book_assignments
-FOR EACH ROW
-BEGIN
-  IF NEW.id IS NULL OR NEW.id = '' THEN
-    SET NEW.id = gen_short_uuid();
-  END IF;
-END$$
-
--- payouts
-DROP TRIGGER IF EXISTS before_payouts_insert$$
-CREATE TRIGGER before_payouts_insert
-BEFORE INSERT ON payouts
-FOR EACH ROW
-BEGIN
-  IF NEW.id IS NULL OR NEW.id = '' THEN
-    SET NEW.id = gen_short_uuid();
-  END IF;
-END$$
-
--- notifications
-DROP TRIGGER IF EXISTS before_notifications_insert$$
-CREATE TRIGGER before_notifications_insert
-BEFORE INSERT ON notifications
-FOR EACH ROW
-BEGIN
-  IF NEW.id IS NULL OR NEW.id = '' THEN
-    SET NEW.id = gen_short_uuid();
-  END IF;
-END$$
-
--- screenshots
-DROP TRIGGER IF EXISTS before_screenshots_insert$$
-CREATE TRIGGER before_screenshots_insert
-BEFORE INSERT ON screenshots
-FOR EACH ROW
-BEGIN
-  IF NEW.id IS NULL OR NEW.id = '' THEN
-    SET NEW.id = gen_short_uuid();
-  END IF;
-END$$
-
--- recordings
-DROP TRIGGER IF EXISTS before_recordings_insert$$
-CREATE TRIGGER before_recordings_insert
-BEFORE INSERT ON recordings
-FOR EACH ROW
-BEGIN
-  IF NEW.id IS NULL OR NEW.id = '' THEN
-    SET NEW.id = gen_short_uuid();
-  END IF;
-END$$
-
--- settings
-DROP TRIGGER IF EXISTS before_settings_insert$$
-CREATE TRIGGER before_settings_insert
-BEFORE INSERT ON settings
-FOR EACH ROW
-BEGIN
-  IF NEW.id IS NULL OR NEW.id = '' THEN
-    SET NEW.id = gen_short_uuid();
-  END IF;
-END$$
-
 DELIMITER ;
 
 CREATE TABLE `user` (
@@ -204,7 +25,7 @@ CREATE TABLE `user` (
     country VARCHAR(50) NOT NULL,
     role ENUM('teacher', 'admin', 'super-admin') DEFAULT 'teacher',
     status ENUM('active', 'inactive') DEFAULT 'active',
-    timezone VARCHAR(50) DEFAULT 'Asia/Manila' AFTER role;
+    timezone VARCHAR(50) DEFAULT 'Asia/Manila',
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 );
@@ -326,11 +147,39 @@ CREATE TABLE message (
     sender_id CHAR(10) NOT NULL,
     receiver_id CHAR(10) NOT NULL,
     message TEXT NOT NULL,
+    is_read TINYINT(1) DEFAULT 0,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     CONSTRAINT fk_sender FOREIGN KEY (sender_id) REFERENCES `user`(id)
         ON DELETE CASCADE ON UPDATE CASCADE,
     CONSTRAINT fk_receiver FOREIGN KEY (receiver_id) REFERENCES `user`(id)
         ON DELETE CASCADE ON UPDATE CASCADE
+);
+
+CREATE TABLE teacher_applications (
+    id CHAR(10) PRIMARY KEY,
+    first_name VARCHAR(100) NOT NULL,
+    last_name VARCHAR(100) NOT NULL,
+    email VARCHAR(150) UNIQUE NOT NULL,
+    phone VARCHAR(50),
+    degree VARCHAR(100),
+    major VARCHAR(150),
+    english_level VARCHAR(50),
+    experience TEXT,
+    motivation TEXT,
+    availability TEXT,
+    internet_speed VARCHAR(100),
+    computer_specs TEXT,
+    has_webcam TINYINT(1) DEFAULT 0,
+    has_headset TINYINT(1) DEFAULT 0,
+    has_backup_internet TINYINT(1) DEFAULT 0,
+    has_backup_power TINYINT(1) DEFAULT 0,
+    teaching_environment TEXT,
+    resume_file VARCHAR(255),
+    intro_video_file VARCHAR(255),
+    speed_test_file VARCHAR(255),
+    status ENUM('pending', 'approved', 'rejected') DEFAULT 'pending',
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 );
 
 
@@ -342,7 +191,7 @@ CREATE TABLE books (
         path VARCHAR(512) NOT NULL,
         uploaded_by CHAR(10),
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-        FOREIGN KEY (uploaded_by) REFERENCES user(id) ON DELETE SET NULL
+        FOREIGN KEY (uploaded_by) REFERENCES `user`(id) ON DELETE SET NULL
       ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 CREATE TABLE book_assignments (
@@ -414,6 +263,183 @@ CREATE TABLE settings (
     `value` VARCHAR(255),
     updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 );
+
+DELIMITER $$
+
+DROP TRIGGER IF EXISTS before_user_insert$$
+CREATE TRIGGER before_user_insert
+BEFORE INSERT ON `user`
+FOR EACH ROW
+BEGIN
+  IF NEW.id IS NULL OR NEW.id = '' THEN
+    SET NEW.id = gen_short_uuid();
+  END IF;
+END$$
+
+DROP TRIGGER IF EXISTS before_students_insert$$
+CREATE TRIGGER before_students_insert
+BEFORE INSERT ON students
+FOR EACH ROW
+BEGIN
+  IF NEW.id IS NULL OR NEW.id = '' THEN
+    SET NEW.id = gen_short_uuid();
+  END IF;
+  IF NEW.student_identification IS NULL OR NEW.student_identification = '' THEN
+    SET NEW.student_identification = CONCAT('STD', SUBSTRING(gen_short_uuid(), 1, 7));
+  END IF;
+END$$
+
+DROP TRIGGER IF EXISTS before_schedules_insert$$
+CREATE TRIGGER before_schedules_insert
+BEFORE INSERT ON schedules
+FOR EACH ROW
+BEGIN
+  IF NEW.id IS NULL OR NEW.id = '' THEN
+    SET NEW.id = gen_short_uuid();
+  END IF;
+END$$
+
+DROP TRIGGER IF EXISTS before_tokens_insert$$
+CREATE TRIGGER before_tokens_insert
+BEFORE INSERT ON tokens
+FOR EACH ROW
+BEGIN
+  IF NEW.id IS NULL OR NEW.id = '' THEN
+    SET NEW.id = gen_short_uuid();
+  END IF;
+END$$
+
+DROP TRIGGER IF EXISTS before_classes_insert$$
+CREATE TRIGGER before_classes_insert
+BEFORE INSERT ON classes
+FOR EACH ROW
+BEGIN
+  IF NEW.id IS NULL OR NEW.id = '' THEN
+    SET NEW.id = gen_short_uuid();
+  END IF;
+END$$
+
+DROP TRIGGER IF EXISTS before_attendance_insert$$
+CREATE TRIGGER before_attendance_insert
+BEFORE INSERT ON attendance
+FOR EACH ROW
+BEGIN
+  IF NEW.id IS NULL OR NEW.id = '' THEN
+    SET NEW.id = gen_short_uuid();
+  END IF;
+END$$
+
+DROP TRIGGER IF EXISTS before_makeup_classes_insert$$
+CREATE TRIGGER before_makeup_classes_insert
+BEFORE INSERT ON makeup_classes
+FOR EACH ROW
+BEGIN
+  IF NEW.id IS NULL OR NEW.id = '' THEN
+    SET NEW.id = gen_short_uuid();
+  END IF;
+END$$
+
+DROP TRIGGER IF EXISTS before_substitute_classes_insert$$
+CREATE TRIGGER before_substitute_classes_insert
+BEFORE INSERT ON substitute_classes
+FOR EACH ROW
+BEGIN
+  IF NEW.id IS NULL OR NEW.id = '' THEN
+    SET NEW.id = gen_short_uuid();
+  END IF;
+END$$
+
+DROP TRIGGER IF EXISTS before_message_insert$$
+CREATE TRIGGER before_message_insert
+BEFORE INSERT ON message
+FOR EACH ROW
+BEGIN
+  IF NEW.id IS NULL OR NEW.id = '' THEN
+    SET NEW.id = gen_short_uuid();
+  END IF;
+END$$
+
+DROP TRIGGER IF EXISTS before_teacher_applications_insert$$
+CREATE TRIGGER before_teacher_applications_insert
+BEFORE INSERT ON teacher_applications
+FOR EACH ROW
+BEGIN
+  IF NEW.id IS NULL OR NEW.id = '' THEN
+    SET NEW.id = gen_short_uuid();
+  END IF;
+END$$
+
+DROP TRIGGER IF EXISTS before_books_insert$$
+CREATE TRIGGER before_books_insert
+BEFORE INSERT ON books
+FOR EACH ROW
+BEGIN
+  IF NEW.id IS NULL OR NEW.id = '' THEN
+    SET NEW.id = gen_short_uuid();
+  END IF;
+END$$
+
+DROP TRIGGER IF EXISTS before_book_assignments_insert$$
+CREATE TRIGGER before_book_assignments_insert
+BEFORE INSERT ON book_assignments
+FOR EACH ROW
+BEGIN
+  IF NEW.id IS NULL OR NEW.id = '' THEN
+    SET NEW.id = gen_short_uuid();
+  END IF;
+END$$
+
+DROP TRIGGER IF EXISTS before_payouts_insert$$
+CREATE TRIGGER before_payouts_insert
+BEFORE INSERT ON payouts
+FOR EACH ROW
+BEGIN
+  IF NEW.id IS NULL OR NEW.id = '' THEN
+    SET NEW.id = gen_short_uuid();
+  END IF;
+END$$
+
+DROP TRIGGER IF EXISTS before_notifications_insert$$
+CREATE TRIGGER before_notifications_insert
+BEFORE INSERT ON notifications
+FOR EACH ROW
+BEGIN
+  IF NEW.id IS NULL OR NEW.id = '' THEN
+    SET NEW.id = gen_short_uuid();
+  END IF;
+END$$
+
+DROP TRIGGER IF EXISTS before_screenshots_insert$$
+CREATE TRIGGER before_screenshots_insert
+BEFORE INSERT ON screenshots
+FOR EACH ROW
+BEGIN
+  IF NEW.id IS NULL OR NEW.id = '' THEN
+    SET NEW.id = gen_short_uuid();
+  END IF;
+END$$
+
+DROP TRIGGER IF EXISTS before_recordings_insert$$
+CREATE TRIGGER before_recordings_insert
+BEFORE INSERT ON recordings
+FOR EACH ROW
+BEGIN
+  IF NEW.id IS NULL OR NEW.id = '' THEN
+    SET NEW.id = gen_short_uuid();
+  END IF;
+END$$
+
+DROP TRIGGER IF EXISTS before_settings_insert$$
+CREATE TRIGGER before_settings_insert
+BEFORE INSERT ON settings
+FOR EACH ROW
+BEGIN
+  IF NEW.id IS NULL OR NEW.id = '' THEN
+    SET NEW.id = gen_short_uuid();
+  END IF;
+END$$
+
+DELIMITER ;
 
 INSERT INTO `user` (id, name, email, password, role, country) VALUES
 (LEFT(REPLACE(UUID(),'-',''),10), 'Teacher Mitch', 'teacher.mitch@richenglish.com', '$2b$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'teacher', 'PH'),

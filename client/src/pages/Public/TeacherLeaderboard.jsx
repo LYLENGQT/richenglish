@@ -194,26 +194,37 @@ const TeacherLeaderboard = () => {
       </header> */}
 
       {/* Hero Section */}
-      <section className="bg-gradient-to-r from-blue-600 to-blue-800 text-white py-20">
+      <section
+        className="bg-gradient-to-r from-blue-600 to-blue-800 text-white py-20"
+        data-aos="fade-up"
+      >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <h1 className="text-4xl md:text-6xl font-bold mb-6">
+          <h1
+            className="text-4xl md:text-6xl font-bold mb-6"
+            data-aos="fade-up"
+            data-aos-delay="100"
+          >
             🌟 Top 20 Teacher Rankings
           </h1>
-          <p className="text-xl text-blue-100 max-w-3xl mx-auto">
+          <p
+            className="text-xl text-blue-100 max-w-3xl mx-auto"
+            data-aos="fade-up"
+            data-aos-delay="200"
+          >
             Celebrating our outstanding teachers who excel in attendance, student satisfaction, and teaching excellence.
           </p>
         </div>
       </section>
 
       {/* Leaderboard Controls */}
-      <section className="py-8 bg-white border-b">
+      <section className="py-8 bg-white border-b" data-aos="fade-up">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex flex-col sm:flex-row justify-between items-center">
-            <div className="mb-4 sm:mb-0">
+            <div className="mb-4 sm:mb-0" data-aos="fade-up">
               <h2 className="text-2xl font-bold text-gray-900">Monthly Leaderboard</h2>
               <p className="text-gray-600">Auto-generated monthly rankings</p>
             </div>
-            <div className="flex space-x-4">
+            <div className="flex space-x-4" data-aos="fade-up" data-aos-delay="100">
               <select
                 value={selectedMonth}
                 onChange={(e) => setSelectedMonth(e.target.value)}
@@ -229,32 +240,34 @@ const TeacherLeaderboard = () => {
       </section>
 
       {/* Criteria Info */}
-      <section className="py-8 bg-gray-50">
+      <section className="py-8 bg-gray-50" data-aos="fade-up">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <h3 className="text-xl font-bold text-gray-900 mb-6 text-center">Ranking Criteria</h3>
+          <h3 className="text-xl font-bold text-gray-900 mb-6 text-center" data-aos="fade-up">
+            Ranking Criteria
+          </h3>
           <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-            <div className="text-center">
+            <div className="text-center" data-aos="fade-up" data-aos-delay="50">
               <div className="bg-blue-100 w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-3">
                 <CheckCircleIcon className="w-6 h-6 text-blue-600" />
               </div>
               <h4 className="font-bold text-gray-900 mb-2">Attendance Rate</h4>
               <p className="text-sm text-gray-600">Consistency in showing up for classes</p>
             </div>
-            <div className="text-center">
+            <div className="text-center" data-aos="fade-up" data-aos-delay="120">
               <div className="bg-green-100 w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-3">
                 <StarIcon className="w-6 h-6 text-green-600" />
               </div>
               <h4 className="font-bold text-gray-900 mb-2">Student Reviews</h4>
               <p className="text-sm text-gray-600">Average rating from student feedback</p>
             </div>
-            <div className="text-center">
+            <div className="text-center" data-aos="fade-up" data-aos-delay="190">
               <div className="bg-purple-100 w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-3">
                 <UserGroupIcon className="w-6 h-6 text-purple-600" />
               </div>
               <h4 className="font-bold text-gray-900 mb-2">Class Completion</h4>
               <p className="text-sm text-gray-600">Number of successfully completed classes</p>
             </div>
-            <div className="text-center">
+            <div className="text-center" data-aos="fade-up" data-aos-delay="260">
               <div className="bg-orange-100 w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-3">
                 <ChatBubbleLeftIcon className="w-6 h-6 text-orange-600" />
               </div>
@@ -266,10 +279,10 @@ const TeacherLeaderboard = () => {
       </section>
 
       {/* Leaderboard Table */}
-      <section className="py-12">
+      <section className="py-12" data-aos="fade-up">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="bg-white rounded-lg shadow-lg overflow-hidden">
-            <div className="px-6 py-4 bg-gray-50 border-b">
+          <div className="bg-white rounded-lg shadow-lg overflow-hidden" data-aos="fade-up">
+            <div className="px-6 py-4 bg-gray-50 border-b" data-aos="fade-up">
               <h3 className="text-lg font-bold text-gray-900">Top Teachers This Month</h3>
             </div>
             
@@ -302,7 +315,12 @@ const TeacherLeaderboard = () => {
                 </thead>
                 <tbody className="bg-white divide-y divide-gray-200">
                   {leaderboard.map((teacher) => (
-                    <tr key={teacher.id} className="hover:bg-gray-50">
+                    <tr
+                      key={teacher.id}
+                      className="hover:bg-gray-50"
+                      data-aos="fade-up"
+                      data-aos-delay={teacher.rank * 50}
+                    >
                       <td className="px-6 py-4 whitespace-nowrap">
                         <div className="flex items-center">
                           <div className={`w-8 h-8 rounded-full flex items-center justify-center text-white font-bold ${
@@ -378,17 +396,19 @@ const TeacherLeaderboard = () => {
       </section>
 
       {/* CTA Section */}
-      <section className="py-20 bg-white">
+      <section className="py-20 bg-white" data-aos="fade-up">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-6">
+          <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-6" data-aos="fade-up">
             Want to Join Our Top Teachers?
           </h2>
-          <p className="text-xl text-gray-600 mb-8">
+          <p className="text-xl text-gray-600 mb-8" data-aos="fade-up" data-aos-delay="100">
             Apply today and start your journey to becoming one of our top-performing teachers.
           </p>
           <Link 
             to="/apply" 
             className="bg-blue-600 text-white px-8 py-4 rounded-lg font-bold text-lg hover:bg-blue-700 transition-colors"
+            data-aos="fade-up"
+            data-aos-delay="200"
           >
             Apply to Teach
           </Link>

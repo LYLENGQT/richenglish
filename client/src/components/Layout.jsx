@@ -15,6 +15,7 @@ import {
   MagnifyingGlassIcon,
   Cog6ToothIcon,
   UsersIcon,
+  ClipboardDocumentCheckIcon,
 } from "@heroicons/react/24/outline";
 import useAuthStore from "../lib/zustand/authStore";
 import { logout } from "../lib/axios/auth";
@@ -160,6 +161,11 @@ const Layout = () => {
           name: "Assign Books",
           href: `/portal/${role}/assign-books`,
           icon: BookOpenIcon,
+        },
+        {
+          name: "Teacher Applications",
+          href: `/portal/${role}/applications`,
+          icon: ClipboardDocumentCheckIcon,
         },
         {
           name: "Curriculum Access",

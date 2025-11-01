@@ -60,6 +60,7 @@ const functionRoutes = require("./routes/functionRoutes");
 const messageRoutes = require("./routes/messageRoutes");
 const scheduleRoutes = require("./routes/scheduleRoues");
 const notificationRoutes = require("./routes/notificationsRoutes");
+const teacherApplicationRoutes = require("./routes/teacherApplicationRoutes");
 
 app.use("/api/auth", authRoutes);
 app.use("/api/students", studentsRoutes);
@@ -72,6 +73,7 @@ app.use("/api/message", messageRoutes);
 app.use("/api/schedule", scheduleRoutes);
 app.use("/api/notification", notificationRoutes);
 app.use("/api", functionRoutes);
+app.use("/api/teacher-applications", teacherApplicationRoutes);
 
 // Health check
 app.get("/api/health", (req, res) => {

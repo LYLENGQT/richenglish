@@ -1,4 +1,4 @@
-import { useRef } from 'react';
+import { useEffect, useRef } from 'react';
 import { XMarkIcon, PaperAirplaneIcon } from '@heroicons/react/24/outline';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useForm } from 'react-hook-form';
@@ -18,19 +18,37 @@ const MessageModal = ({ selectedTeacher, onClose }) => {
             return response.data;
         },
         enabled: !!selectedTeacher?.id,
-        refetchInterval: 5000,
+        onSuccess: () => {
+            if (selectedTeacher?.id) {
+                queryClient.setQueryData(['chatData'], (old = []) =>
+                    old.map((teacher) =>
+                        teacher.id === selectedTeacher.id
+                            ? { ...teacher, unreadCount: 0 }
+                            : teacher
+                    )
+                );
+            }
+        }
     });
+
+    useEffect(() => {
+        if (messagesEndRef.current) {
+            messagesEndRef.current.scrollIntoView({ behavior: 'smooth' });
+        }
+    }, [messages]);
 
     // Send message mutation
     const sendMessageMutation = useMutation({
         mutationFn: async (data) => {
-            return await api.post('/message', {
+            const response = await api.post('/message', {
                 text: data.message,
                 id: selectedTeacher.id
             });
+            return response.data;
         },
         onSuccess: () => {
             queryClient.invalidateQueries(['messages', selectedTeacher?.id]);
+            queryClient.invalidateQueries(['chatData']);
         }
     });
 
@@ -88,9 +106,11 @@ const MessageModal = ({ selectedTeacher, onClose }) => {
                                         }`}
                                     >
                                         <p>{msg.text}</p>
-                                        <p className="text-xs mt-1 opacity-70">
-                                            {new Date(msg.createdAt).toLocaleTimeString()}
-                                        </p>
+                                        {msg.createdAt && !Number.isNaN(new Date(msg.createdAt).getTime()) ? (
+                                            <p className="text-xs mt-1 opacity-70">
+                                                {new Date(msg.createdAt).toLocaleTimeString()}
+                                            </p>
+                                        ) : null}
                                     </div>
                                 </div>
                             ))}

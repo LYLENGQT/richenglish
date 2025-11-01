@@ -55,21 +55,32 @@ const About = () => {
       </header> */}
 
       {/* Hero Section */}
-      <section className="bg-gradient-to-r from-blue-600 to-blue-800 text-white py-20">
+      <section
+        className="bg-gradient-to-r from-blue-600 to-blue-800 text-white py-20"
+        data-aos="fade-up"
+      >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <h1 className="text-4xl md:text-6xl font-bold mb-6">
+          <h1
+            className="text-4xl md:text-6xl font-bold mb-6"
+            data-aos="fade-up"
+            data-aos-delay="100"
+          >
             About Rich English
           </h1>
-          <p className="text-xl text-blue-100 max-w-3xl mx-auto">
+          <p
+            className="text-xl text-blue-100 max-w-3xl mx-auto"
+            data-aos="fade-up"
+            data-aos-delay="200"
+          >
             Welcome to Rich English — Where Kindness Leads, English Follows, Growth Lasts.
           </p>
         </div>
       </section>
 
       {/* Mission Section */}
-      <section className="py-20 bg-gray-50">
+      <section className="py-20 bg-gray-50" data-aos="fade-up">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-16">
+          <div className="text-center mb-16" data-aos="fade-up">
             <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
               Our Mission
             </h2>
@@ -79,7 +90,7 @@ const About = () => {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-            <div className="text-center">
+            <div className="text-center" data-aos="zoom-in" data-aos-delay="50">
               <div className="bg-blue-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
                 <span className="text-2xl font-bold text-blue-600">R</span>
               </div>
@@ -89,7 +100,7 @@ const About = () => {
               </p>
             </div>
 
-            <div className="text-center">
+            <div className="text-center" data-aos="zoom-in" data-aos-delay="150">
               <div className="bg-green-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
                 <span className="text-2xl font-bold text-green-600">I</span>
               </div>
@@ -99,7 +110,7 @@ const About = () => {
               </p>
             </div>
 
-            <div className="text-center">
+            <div className="text-center" data-aos="zoom-in" data-aos-delay="250">
               <div className="bg-purple-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
                 <span className="text-2xl font-bold text-purple-600">C</span>
               </div>
@@ -109,7 +120,7 @@ const About = () => {
               </p>
             </div>
 
-            <div className="text-center">
+            <div className="text-center" data-aos="zoom-in" data-aos-delay="350">
               <div className="bg-orange-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
                 <span className="text-2xl font-bold text-orange-600">H</span>
               </div>
@@ -123,10 +134,10 @@ const About = () => {
       </section>
 
       {/* Vision Section */}
-      <section className="py-20 bg-white">
+      <section className="py-20 bg-white" data-aos="fade-up">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
-            <div>
+            <div data-aos="fade-right">
               <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-6">
                 Our Vision
               </h2>
@@ -153,7 +164,11 @@ const About = () => {
               </div>
             </div>
             
-            <div className="bg-gradient-to-br from-blue-50 to-purple-50 p-8 rounded-2xl">
+            <div
+              className="bg-gradient-to-br from-blue-50 to-purple-50 p-8 rounded-2xl"
+              data-aos="fade-left"
+              data-aos-delay="150"
+            >
               <h3 className="text-2xl font-bold text-gray-900 mb-6">Why Choose Rich English?</h3>
               <div className="space-y-4">
                 <div className="flex items-start">
@@ -184,22 +199,22 @@ const About = () => {
       </section>
 
       {/* Stats Section */}
-      <section className="py-20 bg-blue-600 text-white">
+      <section className="py-20 bg-blue-600 text-white" data-aos="fade-up">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 md:grid-cols-4 gap-8 text-center">
-            <div>
+            <div data-aos="fade-up" data-aos-delay="50">
               <div className="text-4xl font-bold mb-2">1000+</div>
               <div className="text-blue-100">Active Students</div>
             </div>
-            <div>
+            <div data-aos="fade-up" data-aos-delay="120">
               <div className="text-4xl font-bold mb-2">50+</div>
               <div className="text-blue-100">Expert Teachers</div>
             </div>
-            <div>
+            <div data-aos="fade-up" data-aos-delay="190">
               <div className="text-4xl font-bold mb-2">10+</div>
               <div className="text-blue-100">Years Experience</div>
             </div>
-            <div>
+            <div data-aos="fade-up" data-aos-delay="260">
               <div className="text-4xl font-bold mb-2">98%</div>
               <div className="text-blue-100">Success Rate</div>
             </div>
@@ -208,15 +223,26 @@ const About = () => {
       </section>
 
       {/* CTA Section */}
-      <section className="py-20 bg-gray-50">
+      <section className="py-20 bg-gray-50" data-aos="fade-up">
         <div className="max-w-4xl mx-auto text-center px-4 sm:px-6 lg:px-8">
-          <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-6">
+          <h2
+            className="text-3xl md:text-4xl font-bold text-gray-900 mb-6"
+            data-aos="fade-up"
+          >
             Ready to Start Your English Journey?
           </h2>
-          <p className="text-xl text-gray-600 mb-8">
+          <p
+            className="text-xl text-gray-600 mb-8"
+            data-aos="fade-up"
+            data-aos-delay="100"
+          >
             Join our community of learners and experience the R.I.C.H. approach to English learning.
           </p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
+          <div
+            className="flex flex-col sm:flex-row gap-4 justify-center"
+            data-aos="fade-up"
+            data-aos-delay="200"
+          >
             <Link 
               to="/login" 
               className="bg-blue-600 text-white px-8 py-4 rounded-lg font-bold text-lg hover:bg-blue-700 transition-colors"

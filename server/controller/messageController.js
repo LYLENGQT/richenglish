@@ -7,6 +7,7 @@ const {
 const Teacher = require("../models/Users");
 const Message = require("../models/Message");
 const { StatusCodes } = require("http-status-codes");
+const { getIO } = require("../lib/socket");
 
 const getTeachers = async (req, res) => {
   const { id } = req.user;
@@ -16,8 +17,19 @@ const getTeachers = async (req, res) => {
   if (!teacher) throw new BadRequestError("Invalid Credentials");
 
   const others = await Teacher.findAll(id);
+  const unreadCounts = await Message.getUnreadCountsBySender(id);
 
-  res.status(StatusCodes.OK).json(others);
+  const unreadMap = unreadCounts.reduce((acc, { senderId, unreadCount }) => {
+    acc[senderId] = unreadCount;
+    return acc;
+  }, {});
+
+  const enriched = others.map((teacher) => ({
+    ...teacher,
+    unreadCount: unreadMap[teacher.id] || 0,
+  }));
+
+  res.status(StatusCodes.OK).json(enriched);
 };
 
 const getMessage = async (req, res) => {
@@ -31,6 +43,8 @@ const getMessage = async (req, res) => {
     chatPartnerId
   );
 
+  await Message.markMessagesAsRead(currentUser, chatPartnerId);
+
   res.status(StatusCodes.OK).json(messages);
 };
 
@@ -40,7 +54,10 @@ const sendMessage = async (req, res) => {
 
   const send = await Message.createMessage(currentUser, chatPartnerId, text);
 
-  const message = await Message.getMessagebyId(send.insertId);
+  const [message] = await Message.getMessagebyId(send.insertId);
+
+  const io = getIO();
+  io.to(chatPartnerId).emit("receiveMessage", message);
 
   res.status(StatusCodes.OK).json(message);
 };

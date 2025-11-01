@@ -1,10 +1,11 @@
-import React from "react";
+import React, { useEffect } from "react";
 import {
   BrowserRouter as Router,
   Routes,
   Route,
-  Navigate,
+  useLocation,
 } from "react-router-dom";
+import AOS from "aos";
 
 // import Dashboard from '@/pages/Dashboard';
 // import AdminDashboard from '@/pages/AdminDashboard';
@@ -96,16 +97,59 @@ import PayoutDetailSuper from "@/pages/SuperAdmin/Details/PayoutDetail";
 import ScreenshotDetailSuper from "@/pages/SuperAdmin/Details/ScreenshotDetail";
 import RecordingDetailSuper from "@/pages/SuperAdmin/Details/RecordingDetail";
 import SettingsDetailSuper from "@/pages/SuperAdmin/Details/SettingsDetail";
+import SuperAdminTeacherApplications from "@/pages/SuperAdmin/TeacherApplications";
 
 // components
 import ProtectedRoute from "./components/ProtecTedRoute";
 import Layout from "./components/Layout";
 
-function App() {
+function AppContainer() {
+  const location = useLocation();
+
+  useEffect(() => {
+    if (typeof window === "undefined") {
+      return undefined;
+    }
+
+    const getResponsiveConfig = () => ({
+      duration: window.innerWidth < 768 ? 600 : 1000,
+      offset: window.innerWidth < 768 ? 80 : 120,
+    });
+
+    AOS.init({
+      easing: "ease-out-cubic",
+      once: true,
+      ...getResponsiveConfig(),
+    });
+
+    const handleResize = () => {
+      if (typeof window === "undefined") {
+        return;
+      }
+
+      AOS.init({
+        easing: "ease-out-cubic",
+        once: true,
+        ...getResponsiveConfig(),
+      });
+
+      AOS.refreshHard();
+    };
+
+    window.addEventListener("resize", handleResize);
+
+    return () => {
+      window.removeEventListener("resize", handleResize);
+    };
+  }, []);
+
+  useEffect(() => {
+    AOS.refresh();
+  }, [location.pathname]);
+
   return (
-    <Router>
-      <div className="min-h-screen bg-gray-50">
-        <Routes>
+    <div className="min-h-screen bg-gray-50">
+      <Routes>
           <Route path="/" element={<LandingPage />} />
           <Route path="/faq" element={<FAQ />} />
           <Route path="/about" element={<About />} />
@@ -302,6 +346,10 @@ function App() {
                 element={<SuperAdminCurriculum />}
               />
               <Route
+                path="/portal/super-admin/applications"
+                element={<SuperAdminTeacherApplications />}
+              />
+              <Route
                 path="/portal/super-admin/curriculum/:id"
                 element={<CurriculumDetailSuper />}
               />
@@ -381,8 +429,15 @@ function App() {
           </Route>
 
           <Route path="*" element={<NotFound />} />
-        </Routes>
-      </div>
+      </Routes>
+    </div>
+  );
+}
+
+function App() {
+  return (
+    <Router>
+      <AppContainer />
     </Router>
   );
 }

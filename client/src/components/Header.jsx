@@ -9,12 +9,9 @@ const Header = () => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center py-6">
           <div className="flex items-center">
-            <div className="flex-shrink-0">
-              <h1 className="text-2xl font-bold text-blue-600">Rich English</h1>
-            </div>
-            <div className="hidden lg:block ml-4 md">
-              <span className="text-sm text-gray-500">Where Kindness Leads, English Follows, Growth Lasts</span>
-            </div>
+            <Link to="/" className="text-2xl font-bold text-blue-600 transition hover:text-blue-700">
+              Rich English
+            </Link>
           </div>
           
           {/* Mobile menu button */}
@@ -47,9 +44,9 @@ const Header = () => {
         {/* Mobile navigation */}
         <div className={`${isOpen ? 'block' : 'hidden'} md:hidden absolute top-full left-0 right-0 bg-white shadow-lg z-50`}>
           <div className="px-2 pt-2 pb-3 space-y-1">
-            <div className=" lg:hidden ml-3">
-              <span className="text-sm text-gray-500">Where Kindness Leads, English Follows, Growth Lasts</span>
-            </div>
+            <Link to="/" className="block px-3 pb-2 text-base font-semibold text-blue-600">
+              Rich English
+            </Link>
             <Link to="/" className="block px-3 py-2 text-gray-700 hover:text-blue-600 transition-colors">Home</Link>
             <Link to="/about" className="block px-3 py-2 text-gray-700 hover:text-blue-600 transition-colors">About</Link>
             <Link to="/apply" className="block px-3 py-2 text-gray-700 hover:text-blue-600 transition-colors">Apply</Link>

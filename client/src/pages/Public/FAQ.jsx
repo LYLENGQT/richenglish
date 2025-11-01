@@ -153,22 +153,38 @@ const FAQ = () => {
       </header> */}
 
       {/* Hero Section */}
-      <section className="bg-gradient-to-r from-blue-600 to-blue-800 text-white py-20">
+      <section
+        className="bg-gradient-to-r from-blue-600 to-blue-800 text-white py-20"
+        data-aos="fade-up"
+      >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <h1 className="text-4xl md:text-6xl font-bold mb-6">
+          <h1
+            className="text-4xl md:text-6xl font-bold mb-6"
+            data-aos="fade-up"
+            data-aos-delay="100"
+          >
             Frequently Asked Questions
           </h1>
-          <p className="text-xl text-blue-100 max-w-3xl mx-auto">
+          <p
+            className="text-xl text-blue-100 max-w-3xl mx-auto"
+            data-aos="fade-up"
+            data-aos-delay="200"
+          >
             Find answers to common questions about Rich English, our teaching approach, and how to get started.
           </p>
         </div>
       </section>
 
       {/* FAQ Content */}
-      <section className="py-20">
+      <section className="py-20" data-aos="fade-up">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
           {faqs.map((category, categoryIndex) => (
-            <div key={categoryIndex} className="mb-16">
+            <div
+              key={categoryIndex}
+              className="mb-16"
+              data-aos="fade-up"
+              data-aos-delay={categoryIndex * 100}
+            >
               <h2 className="text-2xl md:text-3xl font-bold text-gray-900 mb-8 text-center">
                 {category.category}
               </h2>
@@ -179,7 +195,12 @@ const FAQ = () => {
                   const isOpen = openItems[globalIndex];
                   
                   return (
-                    <div key={questionIndex} className="bg-white rounded-lg shadow-md">
+                    <div
+                      key={questionIndex}
+                      className="bg-white rounded-lg shadow-md"
+                      data-aos="fade-up"
+                      data-aos-delay={questionIndex * 60}
+                    >
                       <button
                         onClick={() => toggleItem(globalIndex)}
                         className="w-full px-6 py-4 text-left flex justify-between items-center hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 rounded-lg"
@@ -213,15 +234,19 @@ const FAQ = () => {
       </section>
 
       {/* Contact Section */}
-      <section className="py-20 bg-white">
+      <section className="py-20 bg-white" data-aos="fade-up">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-6">
+          <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-6" data-aos="fade-up">
             Still Have Questions?
           </h2>
-          <p className="text-xl text-gray-600 mb-8">
+          <p className="text-xl text-gray-600 mb-8" data-aos="fade-up" data-aos-delay="100">
             Can't find the answer you're looking for? We're here to help!
           </p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
+          <div
+            className="flex flex-col sm:flex-row gap-4 justify-center"
+            data-aos="fade-up"
+            data-aos-delay="200"
+          >
             <Link 
               to="/contact" 
               className="bg-blue-600 text-white px-8 py-4 rounded-lg font-bold text-lg hover:bg-blue-700 transition-colors"
