@@ -5,14 +5,20 @@ const {
   getApplications,
   updateApplicationStatus,
 } = require("../controller/teacherApplicationController");
-const { authenticateToken } = require("../middleware/authMiddleware");
+const {
+  authenticateToken,
+  requireAdmin,
+} = require("../middleware/authMiddleware");
 
 router.post("/", createApplication);
 
 router.use(authenticateToken);
 
 router.get("/", getApplications);
-router.patch("/:id/status", updateApplicationStatus);
+router.patch(
+  "/:id/status",
+  requireAdmin("super-admin"),
+  updateApplicationStatus
+);
 
 module.exports = router;
-
