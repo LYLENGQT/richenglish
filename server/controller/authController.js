@@ -6,6 +6,9 @@ const {
   UnathoizedError,
 } = require("../errors");
 const { User } = require("../model/");
+const verifyToken = require("../helper/sign");
+const generateOTP = require("../helper/generateOTP");
+const { sendMail } = require("../lib/nodemailer");
 
 const login = async (req, res) => {
   const { email, password, remember } = req.body;
@@ -70,21 +73,70 @@ const logout = async (req, res) => {
 const refresh = async (req, res) => {
   const { token, refresh } = req.cookies;
 
-  const user = await Token.findUserByToken(refresh);
-
-  if (token) {
-    const revokeToken = await Token.revokeViaToken(token);
-  }
-
-  if (!user) {
+  if (!refresh || !token) {
     throw new BadRequestError("Invalid");
   }
 
-  res.status(StatusCodes.OK).json(user);
+  const isValidRefresh = await verifyToken(refresh, "refresh");
+
+  if (!isValidRefresh) {
+    throw new BadRequestError("Invalid");
+  }
+
+  const user = await User.findById(isValidRefresh.id);
+
+  const access_token = await user.generateAccessToken();
+
+  res.cookie("token", access_token, {
+    httpOnly: true,
+    secure: true,
+    sameSite: "None",
+    maxAge: 86400000,
+  });
+
+  res
+    .status(StatusCodes.OK)
+    .json({ id: user.id, name: user.name, email: user.email, role: user.role });
+};
+
+const forgotPassword = async (req, res) => {
+  const { email } = req.body;
+
+  const user = await User.findOne({ email: email });
+  if (!user) throw new BadRequestError("Invalid");
+
+  const otp = generateOTP().toString();
+  user.reset.otp = String(otp);
+  user.reset.expiration = new Date(Date.now() + 10 * 30000); // 5mins
+
+  await user.save();
+
+  await sendMail(email, `Forgot Password`, `${otp}`);
+  res.status(StatusCodes.OK).json({ message: "email sent" });
+};
+
+const resetPassword = async (req, res) => {
+  const { otp, newPassword, confirmPassword } = req.body;
+
+  const user = await User.findOne({ "reset.otp": otp });
+  if (!user) throw new BadRequestError("Invalid");
+
+  const isExpired = await user.isOTPExpired();
+  if (isExpired) throw new BadRequestError("OTP expired");
+
+  user.password = newPassword;
+  reset.expiration = null;
+  reset.otp = null;
+
+  await user.save();
+
+  res.status(StatusCodes.OK).json({ message: "Password reset successfully" });
 };
 
 module.exports = {
   login,
   logout,
   refresh,
+  forgotPassword,
+  resetPassword,
 };

@@ -6,6 +6,7 @@ const cors = require("cors");
 const helmet = require("helmet");
 const cookieParser = require("cookie-parser");
 const http = require("http");
+const mongoose = require("mongoose");
 
 const customErrorMiddleware = require("./middleware/errorHandler");
 const { initSocket } = require("./lib/socket");
