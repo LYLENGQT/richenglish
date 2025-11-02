@@ -1,61 +1,70 @@
-const bcrypt = require("bcryptjs");
+const { StatusCodes } = require("http-status-codes");
 const {
   UnathenticatedError,
   BadRequestError,
   NotFoundError,
   UnathoizedError,
 } = require("../errors");
-const Teacher = require("../models/Users");
-const Token = require("../models/Tokens");
-const { signAndStoreToken } = require("../helper/sign");
-const { StatusCodes } = require("http-status-codes");
+const { User } = require("../model/");
 
 const login = async (req, res) => {
   const { email, password, remember } = req.body;
 
-  const teacher = await Teacher.findByEmail(email);
+  const user = await User.findOne({ email: email });
 
-  if (!teacher) throw new BadRequestError("Invalid Credentials");
+  if (!user) {
+    throw new BadRequestError("Invalid Email");
+  }
 
-  const isValidPassword = await bcrypt.compare(password, teacher.password);
+  const isPasswordCorrect = await user.checkPassword(password);
 
-  if (!isValidPassword) throw new BadRequestError("Invalid Credentials");
+  if (!isPasswordCorrect) {
+    throw new BadRequestError("Invalid Password");
+  }
 
-  const token = await signAndStoreToken(teacher);
-  const refresh = await signAndStoreToken(teacher, "refresh", "1m");
+  const token = await user.generateAccessToken();
 
   res.cookie("token", token, {
-    httpOnly: true, // prevents client-side JS access
-    secure: true, // send only over HTTPS
-    sameSite: "None", // mitigates CSRF
-    maxAge: 86400000, // 1 day in milliseconds
+    httpOnly: true,
+    secure: true,
+    sameSite: "None",
+    maxAge: 86400000,
   });
 
   if (remember) {
-    res.cookie("refresh", token, {
-      httpOnly: true, // prevents client-side JS access
-      secure: true, // send only over HTTPS
-      sameSite: "None", // mitigates CSRF
-      maxAge: 2592000000, // 1 month (30 days) in milliseconds
+    const refresh = await user.generateRefreshToken();
+
+    res.cookie("refresh", refresh, {
+      httpOnly: true,
+      secure: true,
+      sameSite: "None",
+      maxAge: 2592000000,
     });
   }
 
-  res.json({
-    id: teacher.id,
-    name: teacher.name,
-    email: teacher.email,
-    role: teacher.role,
-  });
+  res
+    .status(StatusCodes.OK)
+    .json({ id: user.id, name: user.name, email: user.email, role: user.role });
 };
 
 const logout = async (req, res) => {
-  const { token } = req.cookies;
+  res.cookie("token", "", {
+    httpOnly: true,
+    secure: true,
+    sameSite: "None",
+    expires: new Date(0),
+  });
 
-  const { email } = req.user;
+  res.cookie("refresh", "", {
+    httpOnly: true,
+    secure: true,
+    sameSite: "None",
+    expires: new Date(0),
+  });
 
-  const revokeToken = await Token.revoke(token, email);
-
-  res.status(StatusCodes.OK).json({ success: revokeToken });
+  res
+    .status(StatusCodes.OK)
+    .json({ success: true, message: "Logged out and tokens expired" });
 };
 
 const refresh = async (req, res) => {

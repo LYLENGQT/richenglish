@@ -1,44 +1,46 @@
-import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import React, { useState } from "react";
+import { Link } from "react-router-dom";
 import {
   EnvelopeIcon,
   PhoneIcon,
   MapPinIcon,
   ClockIcon,
-  ChatBubbleLeftIcon
-} from '@heroicons/react/24/outline';
-import Header from '../../components/Header'
-import Footer from '../../components/Footer';
+  ChatBubbleLeftIcon,
+} from "@heroicons/react/24/outline";
+import Header from "../../components/Header";
+import Footer from "../../components/Footer";
 
 const Contact = () => {
   const [formData, setFormData] = useState({
-    name: '',
-    email: '',
-    phone: '',
-    subject: '',
-    message: '',
-    inquiryType: 'general'
+    name: "",
+    email: "",
+    phone: "",
+    subject: "",
+    message: "",
+    inquiryType: "general",
   });
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
-      [name]: value
+      [name]: value,
     }));
   };
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    console.log('Contact form submitted:', formData);
-    alert('Thank you for your message! We will get back to you within 24 hours.');
+    console.log("Contact form submitted:", formData);
+    alert(
+      "Thank you for your message! We will get back to you within 24 hours."
+    );
     setFormData({
-      name: '',
-      email: '',
-      phone: '',
-      subject: '',
-      message: '',
-      inquiryType: 'general'
+      name: "",
+      email: "",
+      phone: "",
+      subject: "",
+      message: "",
+      inquiryType: "general",
     });
   };
 
@@ -85,21 +87,33 @@ const Contact = () => {
       </header> */}
 
       {/* Hero Section */}
-      <section className="bg-gradient-to-r from-blue-600 to-blue-800 text-white py-20">
+      <section
+        className="bg-gradient-to-r from-blue-600 to-blue-800 text-white py-20"
+        data-aos="fade-up"
+      >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <h1 className="text-4xl md:text-6xl font-bold mb-6">
+          <h1
+            className="text-4xl md:text-6xl font-bold mb-6"
+            data-aos="fade-up"
+            data-aos-delay="100"
+          >
             Contact Us
           </h1>
-          <p className="text-xl text-blue-100 max-w-3xl mx-auto">
-            Get in touch with our team. We're here to help you with any questions about Rich English.
+          <p
+            className="text-xl text-blue-100 max-w-3xl mx-auto"
+            data-aos="fade-up"
+            data-aos-delay="200"
+          >
+            Get in touch with our team. We're here to help you with any
+            questions about Rich English.
           </p>
         </div>
       </section>
 
       {/* Contact Information */}
-      <section className="py-20 bg-white">
+      <section className="py-20 bg-white" data-aos="fade-up">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-16">
+          <div className="text-center mb-16" data-aos="fade-up">
             <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
               Get in Touch
             </h2>
@@ -109,18 +123,29 @@ const Contact = () => {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-16">
-            <div className="text-center p-6 bg-gray-50 rounded-lg">
+            <div
+              className="text-center p-6 bg-gray-50 rounded-lg"
+              data-aos="fade-up"
+              data-aos-delay="50"
+            >
               <div className="bg-blue-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
                 <EnvelopeIcon className="w-8 h-8 text-blue-600" />
               </div>
               <h3 className="text-xl font-bold text-gray-900 mb-2">Email Us</h3>
               <p className="text-gray-600 mb-4">Send us an email anytime</p>
-              <a href="mailto:info@richenglish.com" className="text-blue-600 font-medium">
+              <a
+                href="mailto:info@richenglish.com"
+                className="text-blue-600 font-medium"
+              >
                 info@richenglish.com
               </a>
             </div>
 
-            <div className="text-center p-6 bg-gray-50 rounded-lg">
+            <div
+              className="text-center p-6 bg-gray-50 rounded-lg"
+              data-aos="fade-up"
+              data-aos-delay="150"
+            >
               <div className="bg-green-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
                 <PhoneIcon className="w-8 h-8 text-green-600" />
               </div>
@@ -131,36 +156,46 @@ const Contact = () => {
               </a>
             </div>
 
-            <div className="text-center p-6 bg-gray-50 rounded-lg">
+            <div
+              className="text-center p-6 bg-gray-50 rounded-lg"
+              data-aos="fade-up"
+              data-aos-delay="250"
+            >
               <div className="bg-purple-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
                 <ClockIcon className="w-8 h-8 text-purple-600" />
               </div>
-              <h3 className="text-xl font-bold text-gray-900 mb-2">Available 24/7</h3>
+              <h3 className="text-xl font-bold text-gray-900 mb-2">
+                Available 24/7
+              </h3>
               <p className="text-gray-600 mb-4">We're always here to help</p>
-              <p className="text-purple-600 font-medium">
-                Monday - Sunday
-              </p>
+              <p className="text-purple-600 font-medium">Monday - Sunday</p>
             </div>
           </div>
         </div>
       </section>
 
       {/* Contact Form */}
-      <section className="py-20 bg-gray-50">
+      <section className="py-20 bg-gray-50" data-aos="fade-up">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="bg-white rounded-lg shadow-lg p-8">
-            <div className="text-center mb-8">
+          <div className="bg-white rounded-lg shadow-lg p-8" data-aos="fade-up">
+            <div className="text-center mb-8" data-aos="fade-up">
               <h2 className="text-3xl font-bold text-gray-900 mb-4">
                 Send Us a Message
               </h2>
               <p className="text-gray-600">
-                Fill out the form below and we'll get back to you within 24 hours
+                Fill out the form below and we'll get back to you within 24
+                hours
               </p>
             </div>
 
-            <form onSubmit={handleSubmit} className="space-y-6">
+            <form
+              onSubmit={handleSubmit}
+              className="space-y-6"
+              data-aos="fade-up"
+              data-aos-delay="100"
+            >
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div>
+                <div data-aos="fade-up" data-aos-delay="150">
                   <label className="block text-sm font-medium text-gray-700 mb-2">
                     Full Name *
                   </label>
@@ -173,7 +208,7 @@ const Contact = () => {
                     required
                   />
                 </div>
-                <div>
+                <div data-aos="fade-up" data-aos-delay="200">
                   <label className="block text-sm font-medium text-gray-700 mb-2">
                     Email Address *
                   </label>
@@ -189,7 +224,7 @@ const Contact = () => {
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div>
+                <div data-aos="fade-up" data-aos-delay="250">
                   <label className="block text-sm font-medium text-gray-700 mb-2">
                     Phone Number
                   </label>
@@ -201,7 +236,7 @@ const Contact = () => {
                     className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   />
                 </div>
-                <div>
+                <div data-aos="fade-up" data-aos-delay="300">
                   <label className="block text-sm font-medium text-gray-700 mb-2">
                     Inquiry Type *
                   </label>
@@ -222,7 +257,7 @@ const Contact = () => {
                 </div>
               </div>
 
-              <div>
+              <div data-aos="fade-up" data-aos-delay="350">
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   Subject *
                 </label>
@@ -236,7 +271,7 @@ const Contact = () => {
                 />
               </div>
 
-              <div>
+              <div data-aos="fade-up" data-aos-delay="400">
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   Message *
                 </label>
@@ -251,7 +286,11 @@ const Contact = () => {
                 />
               </div>
 
-              <div className="text-center">
+              <div
+                className="text-center"
+                data-aos="fade-up"
+                data-aos-delay="450"
+              >
                 <button
                   type="submit"
                   className="bg-blue-600 text-white px-8 py-4 rounded-lg font-bold text-lg hover:bg-blue-700 transition-colors"
@@ -265,9 +304,9 @@ const Contact = () => {
       </section>
 
       {/* Additional Contact Methods */}
-      <section className="py-20 bg-white">
+      <section className="py-20 bg-white" data-aos="fade-up">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-16">
+          <div className="text-center mb-16" data-aos="fade-up">
             <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
               Other Ways to Connect
             </h2>
@@ -277,32 +316,51 @@ const Contact = () => {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-            <div className="bg-gradient-to-br from-blue-50 to-purple-50 p-8 rounded-lg">
+            <div
+              className="bg-gradient-to-br from-blue-50 to-purple-50 p-8 rounded-lg"
+              data-aos="fade-right"
+            >
               <div className="flex items-center mb-4">
                 <ChatBubbleLeftIcon className="w-8 h-8 text-blue-600 mr-3" />
-                <h3 className="text-xl font-bold text-gray-900">Live Chat Support</h3>
+                <h3 className="text-xl font-bold text-gray-900">
+                  Live Chat Support
+                </h3>
               </div>
               <p className="text-gray-600 mb-4">
-                Get instant help from our support team through our live chat feature.
+                Get instant help from our support team through our live chat
+                feature.
               </p>
               <button className="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition-colors">
                 Start Chat
               </button>
             </div>
 
-            <div className="bg-gradient-to-br from-green-50 to-blue-50 p-8 rounded-lg">
+            <div
+              className="bg-gradient-to-br from-green-50 to-blue-50 p-8 rounded-lg"
+              data-aos="fade-left"
+              data-aos-delay="150"
+            >
               <div className="flex items-center mb-4">
                 <MapPinIcon className="w-8 h-8 text-green-600 mr-3" />
-                <h3 className="text-xl font-bold text-gray-900">Social Media</h3>
+                <h3 className="text-xl font-bold text-gray-900">
+                  Social Media
+                </h3>
               </div>
               <p className="text-gray-600 mb-4">
-                Follow us on social media for updates, tips, and community support.
+                Follow us on social media for updates, tips, and community
+                support.
               </p>
               <div className="flex space-x-4">
-                <a href="#" className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors">
+                <a
+                  href="#"
+                  className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors"
+                >
                   Facebook
                 </a>
-                <a href="#" className="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-colors">
+                <a
+                  href="#"
+                  className="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-colors"
+                >
                   WhatsApp
                 </a>
               </div>
@@ -312,23 +370,34 @@ const Contact = () => {
       </section>
 
       {/* FAQ Quick Links */}
-      <section className="py-20 bg-gray-50">
+      <section className="py-20 bg-gray-50" data-aos="fade-up">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-6">
+          <h2
+            className="text-3xl md:text-4xl font-bold text-gray-900 mb-6"
+            data-aos="fade-up"
+          >
             Quick Help
           </h2>
-          <p className="text-xl text-gray-600 mb-8">
+          <p
+            className="text-xl text-gray-600 mb-8"
+            data-aos="fade-up"
+            data-aos-delay="100"
+          >
             Find answers to common questions before reaching out
           </p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Link 
-              to="/faq" 
+          <div
+            className="flex flex-col sm:flex-row gap-4 justify-center"
+            data-aos="fade-up"
+            data-aos-delay="200"
+          >
+            <Link
+              to="/faq"
               className="bg-blue-600 text-white px-8 py-4 rounded-lg font-bold text-lg hover:bg-blue-700 transition-colors"
             >
               View FAQ
             </Link>
-            <Link 
-              to="/apply" 
+            <Link
+              to="/apply"
               className="border-2 border-blue-600 text-blue-600 px-8 py-4 rounded-lg font-bold text-lg hover:bg-blue-600 hover:text-white transition-colors"
             >
               Apply to Teach

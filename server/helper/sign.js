@@ -1,58 +1,36 @@
 const jwt = require("jsonwebtoken");
-const Token = require("../models/Tokens");
-const JWT_SECRET = process.env.JWT_SECRET || "your_jwt_secret_key";
+const {
+  UnathenticatedError,
+  BadRequestError,
+  NotFoundError,
+  UnathoizedError,
+} = require("../errors");
 
-async function signAndStoreToken(
-  teacher,
-  tokenType = "access",
-  expiresIn = "24h"
-) {
-  const token = jwt.sign(
-    { id: teacher.id, email: teacher.email, role: teacher.role },
-    JWT_SECRET,
-    { expiresIn }
-  );
+const ACCESS_SECRET = process.env.ACCESS_SECRET;
+const REFRESH_SECRET = process.env.REFRESH_SECRET;
 
-  let expiresAt = new Date(Date.now() + parseExpiresIn(expiresIn));
-
-  await Token.create(teacher.id, tokenType, token, expiresAt);
-  return token;
-}
-
-async function verifyToken(token) {
+/**
+ * Verify either access or refresh token
+ * @param {string} token - The JWT token string
+ * @param {"access"|"refresh"} type - Token type to verify
+ * @returns {object} Decoded JWT payload
+ */
+async function verifyToken(token, type = "access") {
   try {
-    const payload = jwt.verify(token, JWT_SECRET);
+    if (!token) throw new BadRequestError("Token is required");
 
-    const tokenRecord = await Token.findValidTokenByTokenString(token);
-    if (!tokenRecord) {
-      throw new Error("Token is invalid or revoked");
-    }
+    const secret = type === "refresh" ? REFRESH_SECRET : ACCESS_SECRET;
 
+    const payload = jwt.verify(token, secret);
     return payload;
-  } catch (error) {
-    throw error;
+  } catch (err) {
+    if (err.name === "TokenExpiredError") {
+      throw new UnathenticatedError(`${type} token expired`);
+    } else if (err.name === "JsonWebTokenError") {
+      throw new UnathenticatedError(`Invalid ${type} token`);
+    }
+    throw err;
   }
 }
 
-function parseExpiresIn(expiresIn) {
-  const match = expiresIn.match(/^(\d+)([smhd])$/);
-  if (!match) {
-    return 24 * 60 * 60 * 1000;
-  }
-  const value = parseInt(match[1], 10);
-  const unit = match[2];
-  switch (unit) {
-    case "s":
-      return value * 1000;
-    case "m":
-      return value * 60 * 1000;
-    case "h":
-      return value * 60 * 60 * 1000;
-    case "d":
-      return value * 24 * 60 * 60 * 1000;
-    default:
-      return 24 * 60 * 60 * 1000;
-  }
-}
-
-module.exports = { signAndStoreToken, verifyToken, parseExpiresIn };
+module.exports = verifyToken;

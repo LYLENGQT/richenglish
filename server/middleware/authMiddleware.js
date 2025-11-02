@@ -1,10 +1,8 @@
 const { UnathenticatedError, BadRequestError } = require("../errors");
-const { verifyToken } = require("../helper/sign");
+const verifyToken = require("../helper/sign");
 
 const authenticateToken = async (req, res, next) => {
   try {
-    // const authHeader = req.headers["authorization"];
-    // const token = authHeader && authHeader.split(" ")[1];
     const { token, refresh } = req.cookies;
 
     if (!token) throw new BadRequestError("Access token required");

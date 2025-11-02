@@ -3,13 +3,13 @@ require("dotenv").config();
 
 const express = require("express");
 const cors = require("cors");
-const pool = require("./database/db");
 const helmet = require("helmet");
 const cookieParser = require("cookie-parser");
 const http = require("http");
 
 const customErrorMiddleware = require("./middleware/errorHandler");
 const { initSocket } = require("./lib/socket");
+const connectDB = require("./database/connectDB");
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -24,29 +24,6 @@ app.use(express.json());
 app.use(express.static("public"));
 app.use(helmet());
 app.use(cookieParser());
-
-// Initialize books table if not exists
-(async () => {
-  try {
-    await pool.execute(`
-      CREATE TABLE IF NOT EXISTS books (
-        id INT AUTO_INCREMENT PRIMARY KEY,
-        title VARCHAR(255) NOT NULL,
-        filename VARCHAR(255) NOT NULL,
-        original_filename VARCHAR(255) NULL,
-        path VARCHAR(512) NOT NULL,
-        uploaded_by INT,
-        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-      ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
-    `);
-    await pool.execute(`
-      ALTER TABLE books 
-      ADD COLUMN IF NOT EXISTS original_filename VARCHAR(255) NULL AFTER filename;
-    `);
-  } catch (err) {
-    console.error("Failed ensuring books table:", err);
-  }
-})();
 
 // Routes
 const authRoutes = require("./routes/authRoutes");
@@ -85,5 +62,6 @@ const server = http.createServer(app); // create http server
 initSocket(server); // initialize socket.io with server
 
 server.listen(PORT, () => {
+  connectDB();
   console.log(`Server running on port ${PORT}`);
 });

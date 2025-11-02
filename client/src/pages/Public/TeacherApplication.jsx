@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import React, { useState } from "react";
+import { Link } from "react-router-dom";
 import {
   AcademicCapIcon,
   ComputerDesktopIcon,
@@ -7,51 +7,54 @@ import {
   VideoCameraIcon,
   SpeakerWaveIcon,
   CheckCircleIcon,
-  ExclamationTriangleIcon
-} from '@heroicons/react/24/outline';
-import Header from '../../components/Header'
-import Footer from '../../components/Footer';
+  ExclamationTriangleIcon,
+} from "@heroicons/react/24/outline";
+import Header from "../../components/Header";
+import Footer from "../../components/Footer";
+
+const initialFormState = {
+  firstName: "",
+  lastName: "",
+  email: "",
+  phone: "",
+  degree: "",
+  major: "",
+  englishLevel: "",
+  experience: "",
+  motivation: "",
+  availability: "",
+  internetSpeed: "",
+  computerSpecs: "",
+  hasWebcam: false,
+  hasHeadset: false,
+  hasBackupInternet: false,
+  hasBackupPower: false,
+  teachingEnvironment: "",
+  resume: null,
+  introVideo: null,
+  speedTestScreenshot: null,
+};
 
 const TeacherApplication = () => {
-  const [formData, setFormData] = useState({
-    firstName: '',
-    lastName: '',
-    email: '',
-    phone: '',
-    degree: '',
-    major: '',
-    englishLevel: '',
-    experience: '',
-    motivation: '',
-    availability: '',
-    internetSpeed: '',
-    computerSpecs: '',
-    hasWebcam: false,
-    hasHeadset: false,
-    hasBackupInternet: false,
-    hasBackupPower: false,
-    teachingEnvironment: '',
-    resume: null,
-    introVideo: null,
-    speedTestScreenshot: null
-  });
+  const [formData, setFormData] = useState(() => ({ ...initialFormState }));
 
   const [currentStep, setCurrentStep] = useState(1);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const totalSteps = 4;
 
   const handleInputChange = (e) => {
     const { name, value, type, checked } = e.target;
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
-      [name]: type === 'checkbox' ? checked : value
+      [name]: type === "checkbox" ? checked : value,
     }));
   };
 
   const handleFileChange = (e) => {
     const { name, files } = e.target;
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
-      [name]: files[0]
+      [name]: files[0],
     }));
   };
 
@@ -67,54 +70,111 @@ const TeacherApplication = () => {
     }
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log('Application submitted:', formData);
-    alert('Application submitted successfully! You will receive an email within 1-3 days regarding the next step.');
+    if (isSubmitting) return;
+
+    try {
+      setIsSubmitting(true);
+      const response = await fetch("/api/teacher-applications", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          firstName: formData.firstName,
+          lastName: formData.lastName,
+          email: formData.email,
+          phone: formData.phone,
+          degree: formData.degree,
+          major: formData.major,
+          englishLevel: formData.englishLevel,
+          experience: formData.experience,
+          motivation: formData.motivation,
+          availability: formData.availability,
+          internetSpeed: formData.internetSpeed,
+          computerSpecs: formData.computerSpecs,
+          hasWebcam: !!formData.hasWebcam,
+          hasHeadset: !!formData.hasHeadset,
+          hasBackupInternet: !!formData.hasBackupInternet,
+          hasBackupPower: !!formData.hasBackupPower,
+          teachingEnvironment: formData.teachingEnvironment,
+          resumeFile: formData.resume ? formData.resume.name : "",
+          introVideoFile: formData.introVideo ? formData.introVideo.name : "",
+          speedTestFile: formData.speedTestScreenshot
+            ? formData.speedTestScreenshot.name
+            : "",
+        }),
+      });
+
+      if (!response.ok) {
+        const error = await response.json().catch(() => ({}));
+        throw new Error(
+          error?.msg || "Failed to submit application. Please try again later."
+        );
+      }
+
+      alert(
+        "Application submitted successfully! You will receive an email within 1-3 days regarding the next step."
+      );
+      setCurrentStep(1);
+      setFormData(() => ({ ...initialFormState }));
+    } catch (error) {
+      console.error("Teacher application error:", error);
+      alert(
+        error.message || "Failed to submit application. Please try again later."
+      );
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const requirements = [
     {
       icon: AcademicCapIcon,
       title: "Bachelor's Degree",
-      description: "Preferably LPT, Education graduate, English major, or any related course",
-      required: true
+      description:
+        "Preferably LPT, Education graduate, English major, or any related course",
+      required: true,
     },
     {
       icon: ComputerDesktopIcon,
       title: "Strong English Skills",
       description: "Both oral and written communication abilities",
-      required: true
+      required: true,
     },
     {
       icon: CheckCircleIcon,
       title: "Work Attitude",
-      description: "Ability to multitask, follow instructions, and maintain a positive work attitude",
-      required: true
-    }
+      description:
+        "Ability to multitask, follow instructions, and maintain a positive work attitude",
+      required: true,
+    },
   ];
 
   const systemRequirements = [
     {
       icon: ComputerDesktopIcon,
       title: "Desktop or Laptop",
-      specs: "CPU: Intel i3 or higher / AMD equivalent, OS: Windows 10 or higher, RAM: 8GB or more"
+      specs:
+        "CPU: Intel i3 or higher / AMD equivalent, OS: Windows 10 or higher, RAM: 8GB or more",
     },
     {
       icon: WifiIcon,
       title: "Internet Connection",
-      specs: "Fiber optic connection with 10–50 Mbps, Backup internet in case of outages"
+      specs:
+        "Fiber optic connection with 10–50 Mbps, Backup internet in case of outages",
     },
     {
       icon: VideoCameraIcon,
       title: "Webcam",
-      specs: "At least 720p quality"
+      specs: "At least 720p quality",
     },
     {
       icon: SpeakerWaveIcon,
       title: "Headset",
-      specs: "With noise cancellation feature"
-    }
+      specs: "With noise cancellation feature",
+    },
   ];
 
   return (
@@ -155,21 +215,33 @@ const TeacherApplication = () => {
       </header> */}
 
       {/* Hero Section */}
-      <section className="bg-gradient-to-r from-blue-600 to-blue-800 text-white py-20">
+      <section
+        className="bg-gradient-to-r from-blue-600 to-blue-800 text-white py-20"
+        data-aos="fade-up"
+      >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <h1 className="text-4xl md:text-6xl font-bold mb-6">
+          <h1
+            className="text-4xl md:text-6xl font-bold mb-6"
+            data-aos="fade-up"
+            data-aos-delay="100"
+          >
             Apply to Teach
           </h1>
-          <p className="text-xl text-blue-100 max-w-3xl mx-auto">
-            Join our team of expert teachers and help Korean and Chinese students master English with our R.I.C.H. approach.
+          <p
+            className="text-xl text-blue-100 max-w-3xl mx-auto"
+            data-aos="fade-up"
+            data-aos-delay="200"
+          >
+            Join our team of expert teachers and help Korean and Chinese
+            students master English with our R.I.C.H. approach.
           </p>
         </div>
       </section>
 
       {/* Requirements Section */}
-      <section className="py-20 bg-white">
+      <section className="py-20 bg-white" data-aos="fade-up">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-16">
+          <div className="text-center mb-16" data-aos="fade-up">
             <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
               Basic Qualifications
             </h2>
@@ -180,11 +252,18 @@ const TeacherApplication = () => {
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-16">
             {requirements.map((req, index) => (
-              <div key={index} className="text-center p-6 border border-gray-200 rounded-lg">
+              <div
+                key={index}
+                className="text-center p-6 border border-gray-200 rounded-lg"
+                data-aos="fade-up"
+                data-aos-delay={index * 120}
+              >
                 <div className="bg-blue-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
                   <req.icon className="w-8 h-8 text-blue-600" />
                 </div>
-                <h3 className="text-xl font-bold text-gray-900 mb-2">{req.title}</h3>
+                <h3 className="text-xl font-bold text-gray-900 mb-2">
+                  {req.title}
+                </h3>
                 <p className="text-gray-600">{req.description}</p>
                 {req.required && (
                   <span className="inline-block mt-2 px-3 py-1 bg-red-100 text-red-800 text-sm rounded-full">
@@ -196,7 +275,7 @@ const TeacherApplication = () => {
           </div>
 
           {/* System Requirements */}
-          <div className="text-center mb-16">
+          <div className="text-center mb-16" data-aos="fade-up">
             <h3 className="text-2xl md:text-3xl font-bold text-gray-900 mb-4">
               System Requirements
             </h3>
@@ -207,13 +286,20 @@ const TeacherApplication = () => {
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
             {systemRequirements.map((req, index) => (
-              <div key={index} className="bg-gray-50 p-6 rounded-lg">
+              <div
+                key={index}
+                className="bg-gray-50 p-6 rounded-lg"
+                data-aos="fade-up"
+                data-aos-delay={index * 140}
+              >
                 <div className="flex items-start">
                   <div className="bg-green-100 w-12 h-12 rounded-full flex items-center justify-center mr-4 flex-shrink-0">
                     <req.icon className="w-6 h-6 text-green-600" />
                   </div>
                   <div>
-                    <h4 className="text-lg font-bold text-gray-900 mb-2">{req.title}</h4>
+                    <h4 className="text-lg font-bold text-gray-900 mb-2">
+                      {req.title}
+                    </h4>
                     <p className="text-gray-600">{req.specs}</p>
                   </div>
                 </div>
@@ -224,25 +310,33 @@ const TeacherApplication = () => {
       </section>
 
       {/* Application Form */}
-      <section className="py-20 bg-gray-50">
+      <section className="py-20 bg-gray-50" data-aos="fade-up">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="bg-white rounded-lg shadow-lg p-8">
-            <div className="text-center mb-8">
+          <div className="bg-white rounded-lg shadow-lg p-8" data-aos="fade-up">
+            <div className="text-center mb-8" data-aos="fade-up">
               <h2 className="text-3xl font-bold text-gray-900 mb-4">
                 Teacher Application Form
               </h2>
               <div className="flex justify-center mb-4">
                 {[...Array(totalSteps)].map((_, index) => (
                   <div key={index} className="flex items-center">
-                    <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold ${
-                      index + 1 <= currentStep ? 'bg-blue-600 text-white' : 'bg-gray-300 text-gray-600'
-                    }`}>
+                    <div
+                      className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold ${
+                        index + 1 <= currentStep
+                          ? "bg-blue-600 text-white"
+                          : "bg-gray-300 text-gray-600"
+                      }`}
+                    >
                       {index + 1}
                     </div>
                     {index < totalSteps - 1 && (
-                      <div className={`w-16 h-1 mx-2 ${
-                        index + 1 < currentStep ? 'bg-blue-600' : 'bg-gray-300'
-                      }`} />
+                      <div
+                        className={`w-16 h-1 mx-2 ${
+                          index + 1 < currentStep
+                            ? "bg-blue-600"
+                            : "bg-gray-300"
+                        }`}
+                      />
                     )}
                   </div>
                 ))}
@@ -256,10 +350,14 @@ const TeacherApplication = () => {
               {/* Step 1: Personal Information */}
               {currentStep === 1 && (
                 <div className="space-y-6">
-                  <h3 className="text-xl font-bold text-gray-900 mb-4">Personal Information</h3>
+                  <h3 className="text-xl font-bold text-gray-900 mb-4">
+                    Personal Information
+                  </h3>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">First Name *</label>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        First Name *
+                      </label>
                       <input
                         type="text"
                         name="firstName"
@@ -270,7 +368,9 @@ const TeacherApplication = () => {
                       />
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">Last Name *</label>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Last Name *
+                      </label>
                       <input
                         type="text"
                         name="lastName"
@@ -281,7 +381,9 @@ const TeacherApplication = () => {
                       />
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">Email Address *</label>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Email Address *
+                      </label>
                       <input
                         type="email"
                         name="email"
@@ -292,7 +394,9 @@ const TeacherApplication = () => {
                       />
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">Phone Number *</label>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Phone Number *
+                      </label>
                       <input
                         type="tel"
                         name="phone"
@@ -309,10 +413,14 @@ const TeacherApplication = () => {
               {/* Step 2: Educational Background */}
               {currentStep === 2 && (
                 <div className="space-y-6">
-                  <h3 className="text-xl font-bold text-gray-900 mb-4">Educational Background</h3>
+                  <h3 className="text-xl font-bold text-gray-900 mb-4">
+                    Educational Background
+                  </h3>
                   <div className="space-y-6">
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">Degree *</label>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Degree *
+                      </label>
                       <select
                         name="degree"
                         value={formData.degree}
@@ -328,7 +436,9 @@ const TeacherApplication = () => {
                       </select>
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">Major/Field of Study *</label>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Major/Field of Study *
+                      </label>
                       <input
                         type="text"
                         name="major"
@@ -340,7 +450,9 @@ const TeacherApplication = () => {
                       />
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">English Proficiency Level *</label>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        English Proficiency Level *
+                      </label>
                       <select
                         name="englishLevel"
                         value={formData.englishLevel}
@@ -356,7 +468,9 @@ const TeacherApplication = () => {
                       </select>
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">Teaching Experience *</label>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Teaching Experience *
+                      </label>
                       <textarea
                         name="experience"
                         value={formData.experience}
@@ -374,10 +488,14 @@ const TeacherApplication = () => {
               {/* Step 3: Technical Requirements */}
               {currentStep === 3 && (
                 <div className="space-y-6">
-                  <h3 className="text-xl font-bold text-gray-900 mb-4">Technical Requirements</h3>
+                  <h3 className="text-xl font-bold text-gray-900 mb-4">
+                    Technical Requirements
+                  </h3>
                   <div className="space-y-6">
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">Internet Speed Test Result *</label>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Internet Speed Test Result *
+                      </label>
                       <input
                         type="text"
                         name="internetSpeed"
@@ -389,7 +507,9 @@ const TeacherApplication = () => {
                       />
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">Computer Specifications *</label>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Computer Specifications *
+                      </label>
                       <textarea
                         name="computerSpecs"
                         value={formData.computerSpecs}
@@ -401,7 +521,9 @@ const TeacherApplication = () => {
                       />
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">Teaching Environment Description *</label>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Teaching Environment Description *
+                      </label>
                       <textarea
                         name="teachingEnvironment"
                         value={formData.teachingEnvironment}
@@ -413,7 +535,9 @@ const TeacherApplication = () => {
                       />
                     </div>
                     <div className="space-y-4">
-                      <h4 className="text-lg font-medium text-gray-900">Equipment Checklist</h4>
+                      <h4 className="text-lg font-medium text-gray-900">
+                        Equipment Checklist
+                      </h4>
                       <div className="space-y-3">
                         <label className="flex items-center">
                           <input
@@ -453,7 +577,9 @@ const TeacherApplication = () => {
                             onChange={handleInputChange}
                             className="mr-3"
                           />
-                          <span>I have backup power supply (UPS/power station)</span>
+                          <span>
+                            I have backup power supply (UPS/power station)
+                          </span>
                         </label>
                       </div>
                     </div>
@@ -464,10 +590,14 @@ const TeacherApplication = () => {
               {/* Step 4: Additional Information & Files */}
               {currentStep === 4 && (
                 <div className="space-y-6">
-                  <h3 className="text-xl font-bold text-gray-900 mb-4">Additional Information & Files</h3>
+                  <h3 className="text-xl font-bold text-gray-900 mb-4">
+                    Additional Information & Files
+                  </h3>
                   <div className="space-y-6">
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">Why do you want to teach at Rich English? *</label>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Why do you want to teach at Rich English? *
+                      </label>
                       <textarea
                         name="motivation"
                         value={formData.motivation}
@@ -479,7 +609,9 @@ const TeacherApplication = () => {
                       />
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">Availability *</label>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Availability *
+                      </label>
                       <textarea
                         name="availability"
                         value={formData.availability}
@@ -491,9 +623,13 @@ const TeacherApplication = () => {
                       />
                     </div>
                     <div className="space-y-4">
-                      <h4 className="text-lg font-medium text-gray-900">Required Documents</h4>
+                      <h4 className="text-lg font-medium text-gray-900">
+                        Required Documents
+                      </h4>
                       <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">Resume/CV *</label>
+                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                          Resume/CV *
+                        </label>
                         <input
                           type="file"
                           name="resume"
@@ -504,7 +640,9 @@ const TeacherApplication = () => {
                         />
                       </div>
                       <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">1-Minute Self-Introduction Video *</label>
+                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                          1-Minute Self-Introduction Video *
+                        </label>
                         <input
                           type="file"
                           name="introVideo"
@@ -513,10 +651,14 @@ const TeacherApplication = () => {
                           className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                           required
                         />
-                        <p className="text-sm text-gray-500 mt-1">Please follow the provided guidelines for the video</p>
+                        <p className="text-sm text-gray-500 mt-1">
+                          Please follow the provided guidelines for the video
+                        </p>
                       </div>
                       <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">Internet Speed Test Screenshot *</label>
+                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                          Internet Speed Test Screenshot *
+                        </label>
                         <input
                           type="file"
                           name="speedTestScreenshot"
@@ -539,13 +681,13 @@ const TeacherApplication = () => {
                   disabled={currentStep === 1}
                   className={`px-6 py-3 rounded-lg font-medium ${
                     currentStep === 1
-                      ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
-                      : 'bg-gray-600 text-white hover:bg-gray-700'
+                      ? "bg-gray-300 text-gray-500 cursor-not-allowed"
+                      : "bg-gray-600 text-white hover:bg-gray-700"
                   }`}
                 >
                   Previous
                 </button>
-                
+
                 {currentStep < totalSteps ? (
                   <button
                     type="button"
@@ -557,9 +699,10 @@ const TeacherApplication = () => {
                 ) : (
                   <button
                     type="submit"
-                    className="bg-green-600 text-white px-6 py-3 rounded-lg font-medium hover:bg-green-700"
+                    disabled={isSubmitting}
+                    className="bg-green-600 text-white px-6 py-3 rounded-lg font-medium hover:bg-green-700 disabled:cursor-not-allowed disabled:opacity-60"
                   >
-                    Submit Application
+                    {isSubmitting ? "Submitting..." : "Submit Application"}
                   </button>
                 )}
               </div>
@@ -569,9 +712,9 @@ const TeacherApplication = () => {
       </section>
 
       {/* Process Section */}
-      <section className="py-20 bg-white">
+      <section className="py-20 bg-white" data-aos="fade-up">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-16">
+          <div className="text-center mb-16" data-aos="fade-up">
             <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
               Application Process
             </h2>
@@ -582,29 +725,61 @@ const TeacherApplication = () => {
 
           <div className="grid grid-cols-1 md:grid-cols-5 gap-8">
             {[
-              { step: 1, title: "Submit Application", description: "Send your resume, video, and documents" },
-              { step: 2, title: "Grammar Exam & Interview", description: "Test your English skills and interview" },
-              { step: 3, title: "Demo Class", description: "Show your teaching abilities" },
-              { step: 4, title: "Training", description: "Learn our teaching methods" },
-              { step: 5, title: "Start Teaching", description: "Begin your journey with Rich English" }
+              {
+                step: 1,
+                title: "Submit Application",
+                description: "Send your resume, video, and documents",
+              },
+              {
+                step: 2,
+                title: "Grammar Exam & Interview",
+                description: "Test your English skills and interview",
+              },
+              {
+                step: 3,
+                title: "Demo Class",
+                description: "Show your teaching abilities",
+              },
+              {
+                step: 4,
+                title: "Training",
+                description: "Learn our teaching methods",
+              },
+              {
+                step: 5,
+                title: "Start Teaching",
+                description: "Begin your journey with Rich English",
+              },
             ].map((item, index) => (
-              <div key={index} className="text-center">
+              <div
+                key={index}
+                className="text-center"
+                data-aos="fade-up"
+                data-aos-delay={index * 120}
+              >
                 <div className="bg-blue-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
-                  <span className="text-xl font-bold text-blue-600">{item.step}</span>
+                  <span className="text-xl font-bold text-blue-600">
+                    {item.step}
+                  </span>
                 </div>
-                <h3 className="text-lg font-bold text-gray-900 mb-2">{item.title}</h3>
+                <h3 className="text-lg font-bold text-gray-900 mb-2">
+                  {item.title}
+                </h3>
                 <p className="text-gray-600 text-sm">{item.description}</p>
               </div>
             ))}
           </div>
 
-          <div className="mt-12 text-center">
+          <div className="mt-12 text-center" data-aos="fade-up">
             <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-6 max-w-2xl mx-auto">
               <ExclamationTriangleIcon className="w-8 h-8 text-yellow-600 mx-auto mb-4" />
-              <h3 className="text-lg font-bold text-gray-900 mb-2">Important Note</h3>
+              <h3 className="text-lg font-bold text-gray-900 mb-2">
+                Important Note
+              </h3>
               <p className="text-gray-600">
-                You will receive an email within 1-3 days regarding the next step. 
-                If you do not receive a response, you may reapply after 7 days.
+                You will receive an email within 1-3 days regarding the next
+                step. If you do not receive a response, you may reapply after 7
+                days.
               </p>
             </div>
           </div>
