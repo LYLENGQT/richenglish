@@ -9,6 +9,15 @@ export const getAllBooks = async (teache_id) => {
   }
 };
 
+export const getAllBook = async () => {
+  try {
+    const res = await axios.get(`/books`);
+    return res.data;
+  } catch (error) {
+    throw error;
+  }
+};
+
 export const getOneBook = async (id) => {
   try {
     const res = await axios.get(`/books/${id}`);

@@ -11,6 +11,17 @@ export const dashboard = async () => {
   }
 };
 
+export const getAllTeacher = async () => {
+  try {
+    const teacher = await api.get("/teachers");
+    const data = teacher.data;
+
+    return data;
+  } catch (error) {
+    throw error;
+  }
+};
+
 export const students = async (id) => {
   try {
     const res = await api.get(`/students`, {

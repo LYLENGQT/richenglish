@@ -105,11 +105,7 @@ const Layout = () => {
           href: `/portal/${role}/reports`,
           icon: FolderOpenIcon,
         },
-        {
-          name: "Payout Summary",
-          href: `/portal/${role}/payouts`,
-          icon: BanknotesIcon,
-        },
+
         {
           name: "Screenshots",
           href: `/portal/${role}/screenshots`,
@@ -124,11 +120,6 @@ const Layout = () => {
           name: "Books Archive",
           href: `/portal/${role}/books`,
           icon: BookOpenIcon,
-        },
-        {
-          name: "Search",
-          href: `/portal/${role}/search`,
-          icon: MagnifyingGlassIcon,
         },
       ];
     }

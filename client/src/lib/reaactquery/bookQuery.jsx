@@ -1,5 +1,5 @@
 import { queryOptions } from "@tanstack/react-query";
-import { getAllBooks, getOneBook } from "../axios/books";
+import { getAllBooks, getOneBook, getAllBook } from "../axios/books";
 
 const bookQuery = (teacher_id) => {
   return queryOptions({
@@ -21,4 +21,14 @@ const getOneBookQuery = (id) => {
   });
 };
 
-export { bookQuery, getOneBookQuery };
+const bookAll = () => {
+  return queryOptions({
+    queryKey: ["book"],
+    queryFn: getAllBook,
+    staleTime: 1000 * 60 * 5,
+    refetchInterval: 1000 * 60 * 5,
+    refetchIntervalInBackground: true,
+  });
+};
+
+export { bookQuery, getOneBookQuery, bookAll };
