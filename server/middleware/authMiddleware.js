@@ -1,4 +1,8 @@
-const { UnathenticatedError, BadRequestError } = require("../errors");
+const {
+  UnathenticatedError,
+  BadRequestError,
+  UnathoizedError,
+} = require("../errors");
 const verifyToken = require("../helper/sign");
 
 const authenticateToken = async (req, res, next) => {
@@ -18,7 +22,7 @@ const authenticateToken = async (req, res, next) => {
 const requireAdmin = (...roles) => {
   return (req, res, next) => {
     if (!req.user || !roles.includes(req.user.role)) {
-      throw new UnauthorizedError("Unauthorized access to this route");
+      throw new UnathoizedError("Unauthorized access to this route");
     }
     next();
   };

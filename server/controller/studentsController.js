@@ -1,131 +1,95 @@
-const { StatusCodes } = require("http-status-codes");
-const pool = require("../database/db");
+const Student = require("../model/Students");
 const {
   UnathenticatedError,
   BadRequestError,
   NotFoundError,
   UnathoizedError,
 } = require("../errors");
-const Students = require("../models/Students");
+const { StatusCodes } = require("http-status-codes");
 
 const getStudents = async (req, res) => {
-  const { teacher_id } = req.query;
+  const query = {};
+  const allowedFilters = [
+    "name",
+    "nationality",
+    "manager_type",
+    "category_level",
+    "class_type",
+    "platform",
+  ];
 
-  if (teacher_id) {
-    const teacher_students = await Students.findQuery({ teacher_id });
+  allowedFilters.forEach((field) => {
+    if (req.query[field]) {
+      if (field === "name") {
+        query[field] = { $regex: req.query[field], $options: "i" };
+      } else {
+        query[field] = req.query[field];
+      }
+    }
+  });
 
-    return res
-      .status(StatusCodes.OK)
-      .json({ length: teacher_students.length, teacher_students });
-  }
+  const page = parseInt(req.query.page) || 1;
+  const limit = parseInt(req.query.limit) || 10;
+  const skip = (page - 1) * limit;
 
-  const students = await Students.findAll();
+  const students = await Student.find(query).skip(skip).limit(limit);
+  const total = await Student.countDocuments(query);
 
-  return res.status(StatusCodes.OK).json({ length: students.length, students });
+  return res.status(StatusCodes.OK).json({
+    students,
+    pagination: {
+      total,
+      page,
+      limit,
+      totalPages: Math.ceil(total / limit),
+    },
+  });
 };
 
 const addStudent = async (req, res) => {
   try {
-    const {
-      name,
-      age,
-      nationality,
-      manager_type,
-      email,
-      book,
-      category_level,
-      class_type,
-      platform,
-      platform_link,
-      teacher_id,
-    } = req.body;
-
-    const [result] = await pool.execute(
-      `
-      INSERT INTO students (name, age, nationality, manager_type, email, book, 
-                           category_level, class_type, platform, platform_link, teacher_id)
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-    `,
-      [
-        name,
-        age,
-        nationality,
-        manager_type,
-        email,
-        book,
-        category_level,
-        class_type,
-        platform,
-        platform_link,
-        teacher_id,
-      ]
-    );
-
-    res.json({ id: result.insertId, message: "Student created successfully" });
+    const student = new Student(req.body);
+    await student.save();
+    res.status(StatusCodes.CREATED).json({ student });
   } catch (error) {
-    console.error("Error creating student:", error);
-    res.status(500).json({ error: "Server error" });
-  }
-};
-
-const deleteStudent = async (req, res) => {
-  try {
-    const { id } = req.params;
-    await pool.execute("DELETE FROM students WHERE id = ?", [id]);
-    res.json({ message: "Student deleted successfully" });
-  } catch (error) {
-    console.error("Error deleting student:", error);
-    res.status(500).json({ error: "Server error" });
+    throw new BadRequestError(error.message);
   }
 };
 
 const updateStudent = async (req, res) => {
   try {
     const { id } = req.params;
-    const {
-      name,
-      age,
-      nationality,
-      manager_type,
-      email,
-      book,
-      category_level,
-      class_type,
-      platform,
-      platform_link,
-      teacher_id,
-    } = req.body;
+    const student = await Student.findByIdAndUpdate(id, req.body, {
+      new: true,
+      runValidators: true,
+    });
 
-    console.log(req.user);
+    if (!student) throw new NotFoundError("Student not found");
 
-    await pool.execute(
-      `
-      UPDATE students 
-      SET name=?, age=?, nationality=?, manager_type=?, email=?, book=?,
-          category_level=?, class_type=?, platform=?, platform_link=?, teacher_id=?
-      WHERE id=?
-    `,
-      [
-        name,
-        age,
-        nationality,
-        manager_type,
-        email,
-        book,
-        category_level,
-        class_type,
-        platform,
-        platform_link,
-        teacher_id,
-        id,
-      ]
-    );
-
-    res.json({ message: "Student updated successfully" });
+    res.status(StatusCodes.OK).json({ student });
   } catch (error) {
-    console.error("Error updating student:", error);
-    res.status(500).json({ error: "Server error" });
+    throw new BadRequestError(error.message);
   }
 };
 
-module.exports = { getStudents, addStudent, deleteStudent, updateStudent };
+const deleteStudent = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const student = await Student.findByIdAndDelete(id);
+
+    if (!student) throw new NotFoundError("Student not found");
+
+    res
+      .status(StatusCodes.OK)
+      .json({ message: "Student deleted successfully" });
+  } catch (error) {
+    throw new BadRequestError(error.message);
+  }
+};
+
+module.exports = {
+  getStudents,
+  addStudent,
+  updateStudent,
+  deleteStudent,
+};
