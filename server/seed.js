@@ -1,5 +1,5 @@
 const mongoose = require("mongoose");
-const { Student } = require("./model/");
+const { Student, Book } = require("./model/");
 
 const MONGODB_URI =
   process.env.MONGODB_URI || "mongodb://localhost:27017/RichEnglish";
@@ -199,33 +199,73 @@ const studentsData = [
   },
 ];
 
-async function seedDatabase() {
+const bookData = [
+  {
+    title: "Business English Communication 2",
+    filename: "business_eng2.pdf",
+    original_filename: "business_eng2_orig.pdf",
+    path: "/uploads/books/business_eng2.pdf",
+    uploaded_by: "67264a4bf57e8a6c3f2d8a03",
+  },
+  {
+    title: "Everyone, Speak! Intermediate 2",
+    filename: "everyone_speak_int2.pdf",
+    original_filename: "everyone_speak_int2_orig.pdf",
+    path: "/uploads/books/everyone_speak_int2.pdf",
+    uploaded_by: "67264a4bf57e8a6c3f2d8a03",
+  },
+  {
+    title: "Let's Go 3(5th Ed)",
+    filename: "letsgo3.pdf",
+    original_filename: "letsgo3_original.pdf",
+    path: "/uploads/books/letsgo3.pdf",
+    uploaded_by: "67264a4bf57e8a6c3f2d8a03",
+  },
+  {
+    title: "Oxford Phonics World 3",
+    filename: "oxford_phonics_3.pdf",
+    original_filename: "oxford_phonics_3_orig.pdf",
+    path: "/uploads/books/oxford_phonics_3.pdf",
+    uploaded_by: "67264a4bf57e8a6c3f2d8a03",
+  },
+  {
+    title: "Reading Sketch 1",
+    filename: "reading_sketch_1.pdf",
+    original_filename: "reading_sketch_1_orig.pdf",
+    path: "/uploads/books/reading_sketch_1.pdf",
+    uploaded_by: "67264a4bf57e8a6c3f2d8a03",
+  },
+];
+
+async function seedDatabase(model, data) {
   try {
     await mongoose.connect(MONGODB_URI);
     console.log("✅ Connected to MongoDB");
+    const modelName = model.modelName || "UnknownModel";
+    console.log(`✅ Using model: ${modelName}`);
 
-    const result = await Student.deleteMany({});
-    console.log(`🗑️ Deleted ${result.deletedCount} existing students`);
-
-    const createdStudents = [];
-
-    for (const studentData of studentsData) {
-      const student = new Student(studentData);
-      await student.save();
-      createdStudents.push(student);
-    }
-
-    console.log(`✅ Successfully inserted ${createdStudents.length} students`);
-    console.log("\n📋 Created Students:");
-    createdStudents.forEach((s) =>
-      console.log(`  - ${s.name} (ID: ${s.student_identification})`)
+    const result = await model.deleteMany({});
+    console.log(
+      `🗑️ Deleted ${result.deletedCount} existing ${modelName} records`
     );
+
+    const created = await model.insertMany(data);
+    console.log(
+      `✅ Successfully inserted ${created.length} ${modelName} records`
+    );
+
+    created.forEach((doc, i) => {
+      const display = doc.name || doc.title || doc._id || `Item ${i + 1}`;
+      console.log(`  - ${display}`);
+    });
   } catch (err) {
     console.error("❌ Error seeding database:", err);
   } finally {
-    await mongoose.connection.close();
-    console.log("🔌 Database connection closed");
+    if (mongoose.connection.readyState === 1) {
+      await mongoose.connection.close();
+      console.log("🔌 Database connection closed");
+    }
   }
 }
 
-seedDatabase();
+seedDatabase(Book, bookData);

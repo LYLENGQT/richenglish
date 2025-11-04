@@ -28,11 +28,11 @@ const Books = () => {
   return (
     <div>
       <div className="bg-white rounded-lg shadow p-4 flex items-center gap-4">
-        {data?.length === 0 ? (
+        {data?.books.length === 0 ? (
           <p className="text-muted-foreground">No books found.</p>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {data?.map((book) => (
+            {data?.books.map((book) => (
               <div
                 key={book.id}
                 className="border rounded-lg p-4 shadow-sm hover:shadow-md transition"
@@ -42,7 +42,7 @@ const Books = () => {
                   {new Date(book.created_at).toLocaleDateString()}
                 </p>
                 <Link
-                  to={`/portal/teacher/books/${book.id}`}
+                  to={`/portal/teacher/books/${book._id}`}
                   className="text-blue-600 text-sm mt-2 inline-block hover:underline"
                 >
                   View Details →

@@ -3,5 +3,6 @@ const SuperAdmin = require("./SuperAdmin");
 const Admin = require("./Admin");
 const Teacher = require("./Teacher");
 const Student = require("./Students");
+const Book = require("./Book");
 
-module.exports = { User, SuperAdmin, Admin, Teacher, Student };
+module.exports = { User, SuperAdmin, Admin, Teacher, Student, Book };
