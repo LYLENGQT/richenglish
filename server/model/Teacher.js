@@ -25,6 +25,8 @@ const teacherSchema = new Schema({
   speedTestScreenshot: { type: String },
   assignedAdmin: { type: Schema.Types.ObjectId, ref: "User" },
   zoom_link: { type: String },
+  accepted: { type: Boolean, default: false },
+  birth_day: { type: Date },
 });
 
 const Teacher = models.Teacher || User.discriminator("teacher", teacherSchema);

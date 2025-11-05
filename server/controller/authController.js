@@ -25,6 +25,10 @@ const login = async (req, res) => {
     throw new BadRequestError("Invalid Password");
   }
 
+  if (user.role === "teacher" && user.accepted === false) {
+    throw new BadRequestError("Invalid Account not accepted yet");
+  }
+
   const token = await user.generateAccessToken();
 
   res.cookie("token", token, {
