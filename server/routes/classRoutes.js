@@ -21,7 +21,7 @@ router
 router
   .route("/:id")
   .get(getClassById)
-  .patch(requireAdmin("super-admin"), updateClass)
-  .delete(requireAdmin("super-admin"), deleteClass);
+  .patch(requireAdmin("super-admin", "admin"), updateClass)
+  .delete(requireAdmin("super-admin", "admin"), deleteClass);
 
 module.exports = router;

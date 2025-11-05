@@ -6,6 +6,9 @@ const Student = require("./Students");
 const Book = require("./Book");
 const Class = require("./Class");
 const Message = require("./Message");
+const Attendance = require("./Attendance");
+const Recording = require("./Recording");
+const Screenshot = require("./ScreenShot");
 
 module.exports = {
   User,
@@ -16,4 +19,7 @@ module.exports = {
   Book,
   Class,
   Message,
+  Attendance,
+  Recording,
+  Screenshot,
 };

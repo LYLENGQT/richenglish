@@ -347,6 +347,101 @@ const usersData = [
     timezone: "Asia/Manila",
   },
 ];
+const attendanceData = [
+  {
+    _id: ObjectId("690b44e65a127980ae2dd001"),
+    teacher_id: ObjectId("67264a4bf57e8a6c3f2d8a01"),
+    student_id: ObjectId("6907c86dc8dc2fdecb6e577a"),
+    class_id: ObjectId("690b33af5a127980ae2dcdbc"),
+    date: new Date("2025-11-05T00:00:00.000Z"),
+    duration: 60,
+    start_time: "10:00",
+    end_time: "11:00",
+    minutes_attended: 55,
+    notes: "Student joined 5 minutes late but participated actively.",
+    screenshots: [
+      ObjectId("690b45075a127980ae2dd010"),
+      ObjectId("690b451a5a127980ae2dd011"),
+    ],
+    recording: ObjectId("690b45315a127980ae2dd012"),
+    createdAt: new Date("2025-11-05T11:05:00.000Z"),
+    updatedAt: new Date("2025-11-05T11:10:00.000Z"),
+  },
+  {
+    _id: ObjectId("690b44e65a127980ae2dd002"),
+    teacher_id: ObjectId("67264a4bf57e8a6c3f2d8a01"),
+    student_id: ObjectId("6907c86dc8dc2fdecb6e577a"),
+    class_id: ObjectId("690b33af5a127980ae2dcdbd"),
+    date: new Date("2025-11-06T00:00:00.000Z"),
+    duration: 60,
+    start_time: "14:00",
+    end_time: "15:00",
+    minutes_attended: 60,
+    notes:
+      "Perfect attendance. Student performed well in pronunciation drills.",
+    screenshots: [
+      ObjectId("690b45565a127980ae2dd013"),
+      ObjectId("690b456e5a127980ae2dd014"),
+    ],
+    recording: ObjectId("690b45795a127980ae2dd015"),
+    createdAt: new Date("2025-11-06T15:10:00.000Z"),
+    updatedAt: new Date("2025-11-06T15:12:00.000Z"),
+  },
+];
+
+const screenshotData = [
+  {
+    class_id: "690b33af5a127980ae2dcdbc",
+    path: "/uploads/screenshots/class1/screenshot1.png",
+    filename: "screenshot1.png",
+    drive_link: "https://drive.google.com/file/d/1abc123/view",
+    uploaded_by: "67264a4bf57e8a6c3f2d8a01", // User _id (Teacher)
+    createdAt: "2025-11-05T11:00:00.000Z",
+    updatedAt: "2025-11-05T11:00:00.000Z",
+  },
+  {
+    class_id: "690b33af5a127980ae2dcdbc",
+    path: "/uploads/screenshots/class1/screenshot2.png",
+    filename: "screenshot2.png",
+    drive_link: "https://drive.google.com/file/d/1xyz456/view",
+    uploaded_by: "6907c86dc8dc2fdecb6e577a", // User _id (Student)
+    createdAt: "2025-11-05T11:05:00.000Z",
+    updatedAt: "2025-11-05T11:05:00.000Z",
+  },
+  {
+    class_id: "690b33af5a127980ae2dcdbe",
+    path: "/uploads/screenshots/class2/screenshot1.png",
+    filename: "screenshot1.png",
+    drive_link: "https://drive.google.com/file/d/2pqr789/view",
+    uploaded_by: "67264a4bf57e8a6c3f2d8a01", // User _id (Teacher)
+    createdAt: "2025-11-06T16:00:00.000Z",
+    updatedAt: "2025-11-06T16:00:00.000Z",
+  },
+];
+
+const recordingsData = [
+  {
+    class_id: "6730f19a3c2f5b45d8a9c101",
+    uploaded_by: "67264a4bf57e8a6c3f2d8a01",
+    path: "/uploads/recordings/class101_session1.mp4",
+    filename: "class101_session1.mp4",
+    drive_link: "https://drive.google.com/file/d/1A2B3C4D5E6F7G8H9I/view",
+  },
+  {
+    class_id: "6730f19a3c2f5b45d8a9c102",
+    uploaded_by: "67264a4bf57e8a6c3f2d8a02",
+    path: "/uploads/recordings/class102_session2.mp4",
+    filename: "class102_session2.mp4",
+    drive_link: "https://drive.google.com/file/d/2B3C4D5E6F7G8H9I0J/view",
+  },
+  {
+    class_id: "6730f19a3c2f5b45d8a9c103",
+    uploaded_by: "67264a4bf57e8a6c3f2d8a03",
+    path: "/uploads/recordings/class103_session3.mp4",
+    filename: "class103_session3.mp4",
+    drive_link: "https://drive.google.com/file/d/3C4D5E6F7G8H9I0J1K/view",
+  },
+];
 
 async function seedDatabase(model, data) {
   try {
