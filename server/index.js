@@ -32,12 +32,12 @@ const studentsRoutes = require("./routes/studentRoutes");
 const attendanceRoutes = require("./routes/attendanceRoutes");
 const teacherRoutes = require("./routes/teacherRoutes");
 const bookRoutes = require("./routes/booksRoutes");
-const makeupClass = require("./routes/makeUpClassRoutes");
 const functionRoutes = require("./routes/functionRoutes");
 const messageRoutes = require("./routes/messageRoutes");
 const scheduleRoutes = require("./routes/scheduleRoues");
 const notificationRoutes = require("./routes/notificationsRoutes");
 const classRoutes = require("./routes/classRoutes");
+const payoutRoutes = require("./routes/payoutRoutes");
 
 app.use("/api/class", classRoutes);
 app.use("/api/auth", authRoutes);
@@ -45,10 +45,10 @@ app.use("/api/students", studentsRoutes);
 app.use("/api/attendance", attendanceRoutes);
 app.use("/api/teachers", teacherRoutes);
 app.use("/api/books", bookRoutes);
-app.use("/api/makeup-classes", makeupClass);
 app.use("/api/message", messageRoutes);
 app.use("/api/schedule", scheduleRoutes);
 app.use("/api/notification", notificationRoutes);
+app.use("/api/payout", payoutRoutes);
 app.use("/api", functionRoutes);
 
 // Health check

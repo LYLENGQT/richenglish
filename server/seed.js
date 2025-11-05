@@ -8,6 +8,9 @@ const {
   Book,
   Class,
   Message,
+  Payout,
+  Screenshot,
+  Recording,
 } = require("./model/");
 
 const MONGODB_URI =
@@ -349,29 +352,26 @@ const usersData = [
 ];
 const attendanceData = [
   {
-    _id: ObjectId("690b44e65a127980ae2dd001"),
-    teacher_id: ObjectId("67264a4bf57e8a6c3f2d8a01"),
-    student_id: ObjectId("6907c86dc8dc2fdecb6e577a"),
-    class_id: ObjectId("690b33af5a127980ae2dcdbc"),
+    _id: "690b44e65a127980ae2dd001",
+    teacher_id: "67264a4bf57e8a6c3f2d8a01",
+    student_id: "6907c86dc8dc2fdecb6e577a",
+    class_id: "690b33af5a127980ae2dcdbc",
     date: new Date("2025-11-05T00:00:00.000Z"),
     duration: 60,
     start_time: "10:00",
     end_time: "11:00",
     minutes_attended: 55,
     notes: "Student joined 5 minutes late but participated actively.",
-    screenshots: [
-      ObjectId("690b45075a127980ae2dd010"),
-      ObjectId("690b451a5a127980ae2dd011"),
-    ],
-    recording: ObjectId("690b45315a127980ae2dd012"),
+    screenshots: ["690b45075a127980ae2dd010", "690b451a5a127980ae2dd011"],
+    recording: "690b45315a127980ae2dd012",
     createdAt: new Date("2025-11-05T11:05:00.000Z"),
     updatedAt: new Date("2025-11-05T11:10:00.000Z"),
   },
   {
-    _id: ObjectId("690b44e65a127980ae2dd002"),
-    teacher_id: ObjectId("67264a4bf57e8a6c3f2d8a01"),
-    student_id: ObjectId("6907c86dc8dc2fdecb6e577a"),
-    class_id: ObjectId("690b33af5a127980ae2dcdbd"),
+    _id: "690b44e65a127980ae2dd002",
+    teacher_id: "67264a4bf57e8a6c3f2d8a01",
+    student_id: "6907c86dc8dc2fdecb6e577a",
+    class_id: "690b33af5a127980ae2dcdbd",
     date: new Date("2025-11-06T00:00:00.000Z"),
     duration: 60,
     start_time: "14:00",
@@ -379,11 +379,8 @@ const attendanceData = [
     minutes_attended: 60,
     notes:
       "Perfect attendance. Student performed well in pronunciation drills.",
-    screenshots: [
-      ObjectId("690b45565a127980ae2dd013"),
-      ObjectId("690b456e5a127980ae2dd014"),
-    ],
-    recording: ObjectId("690b45795a127980ae2dd015"),
+    screenshots: ["690b45565a127980ae2dd013", "690b456e5a127980ae2dd014"],
+    recording: "690b45795a127980ae2dd015",
     createdAt: new Date("2025-11-06T15:10:00.000Z"),
     updatedAt: new Date("2025-11-06T15:12:00.000Z"),
   },
@@ -443,6 +440,36 @@ const recordingsData = [
   },
 ];
 
+const payoutData = [
+  {
+    _id: "690b45df2c1f876b42cd9001",
+    teacher_id: "67264a4bf57e8a6c3f2d8a01",
+    start_date: "2025-11-01T00:00:00.000Z",
+    end_date: "2025-11-15T00:00:00.000Z",
+    duration: 600,
+    total_class: 10,
+    status: "pending",
+  },
+  {
+    _id: "690b45df2c1f876b42cd9002",
+    teacher_id: "67264a4bf57e8a6c3f2d8a01",
+    start_date: "2025-10-15T00:00:00.000Z",
+    end_date: "2025-10-31T00:00:00.000Z",
+    duration: 540,
+    total_class: 9,
+    status: "completed",
+  },
+  {
+    _id: "690b45df2c1f876b42cd9003",
+    teacher_id: "67264a4bf57e8a6c3f2d8a01",
+    start_date: "2025-11-16T00:00:00.000Z",
+    end_date: "2025-11-30T00:00:00.000Z",
+    duration: 480,
+    total_class: 8,
+    status: "processing",
+  },
+];
+
 async function seedDatabase(model, data) {
   try {
     await mongoose.connect(MONGODB_URI);
@@ -474,4 +501,4 @@ async function seedDatabase(model, data) {
   }
 }
 
-seedDatabase(User, usersData);
+seedDatabase(Recording, recordingsData);

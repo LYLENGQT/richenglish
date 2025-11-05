@@ -9,6 +9,7 @@ const Message = require("./Message");
 const Attendance = require("./Attendance");
 const Recording = require("./Recording");
 const Screenshot = require("./ScreenShot");
+const Payout = require("./Payout");
 
 module.exports = {
   User,
@@ -22,4 +23,5 @@ module.exports = {
   Attendance,
   Recording,
   Screenshot,
+  Payout,
 };
