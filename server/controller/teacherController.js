@@ -1,160 +1,154 @@
 const { StatusCodes } = require("http-status-codes");
-const pool = require("../database/db");
-const {
-  UnathenticatedError,
-  BadRequestError,
-  NotFoundError,
-  UnathoizedError,
-} = require("../errors");
+const { Teacher } = require("../model");
 
+// Create (teacher application)
 const teacherApplication = async (req, res) => {
-  try {
-    const {
-      firstName,
-      lastName,
-      email,
-      phone,
-      degree,
-      major,
-      englishLevel,
-      experience,
-      motivation,
-      availability,
-      internetSpeed,
-      computerSpecs,
-      hasWebcam,
-      hasHeadset,
-      hasBackupInternet,
-      hasBackupPower,
-      teachingEnvironment,
-      resume,
-      introVideo,
-      speedTestScreenshot,
-    } = req.body;
+  const {
+    firstName,
+    lastName,
+    email,
+    password,
+    phone,
+    degree,
+    major,
+    englishLevel,
+    experience,
+    motivation,
+    availability,
+    internetSpeed,
+    computerSpecs,
+    hasWebcam,
+    hasHeadset,
+    hasBackupInternet,
+    hasBackupPower,
+    teachingEnvironment,
+    resume,
+    introVideo,
+    speedTestScreenshot,
+  } = req.body;
 
-    // In a real application, you would save files to storage and store file paths
-    // For now, we'll just store the application data
-    const [result] = await pool.execute(
-      `
-      INSERT INTO teacher_applications (
-        first_name, last_name, email, phone, degree, major, english_level,
-        experience, motivation, availability, internet_speed, computer_specs,
-        has_webcam, has_headset, has_backup_internet, has_backup_power,
-        teaching_environment, resume_path, intro_video_path, speed_test_screenshot_path,
-        status, created_at
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'pending', NOW())
-    `,
-      [
-        firstName,
-        lastName,
-        email,
-        phone,
-        degree,
-        major,
-        englishLevel,
-        experience,
-        motivation,
-        availability,
-        internetSpeed,
-        computerSpecs,
-        hasWebcam,
-        hasHeadset,
-        hasBackupInternet,
-        hasBackupPower,
-        teachingEnvironment,
-        resume,
-        introVideo,
-        speedTestScreenshot,
-      ]
-    );
+  const existing = await Teacher.findOne({ email });
+  if (existing)
+    return res
+      .status(StatusCodes.BAD_REQUEST)
+      .json({ error: "Email already registered" });
 
-    res.json({
-      id: result.insertId,
-      message:
-        "Application submitted successfully! You will receive an email within 1-3 days regarding the next step.",
-    });
-  } catch (error) {
-    console.error("Error submitting teacher application:", error);
-    res.status(500).json({ error: "Server error" });
-  }
+  const teacher = await Teacher.create({
+    name: `${firstName} ${lastName}`,
+    email,
+    password,
+    role: "teacher",
+    firstName,
+    lastName,
+    phone,
+    degree,
+    major,
+    englishLevel,
+    experience,
+    motivation,
+    availability,
+    internetSpeed,
+    computerSpecs,
+    hasWebcam,
+    hasHeadset,
+    hasBackupInternet,
+    hasBackupPower,
+    teachingEnvironment,
+    resume,
+    introVideo,
+    speedTestScreenshot,
+  });
+
+  res.status(StatusCodes.CREATED).json({
+    id: teacher._id,
+    message:
+      "Application submitted successfully! You will receive an email within 1–3 days regarding the next step.",
+  });
 };
 
 const getTeachers = async (req, res) => {
-  try {
-    const [rows] = await pool.execute(`
-      SELECT id, name, email, role, created_at, updated_at 
-      FROM teachers 
-      ORDER BY name
-    `);
-    res.json(rows);
-  } catch (error) {
-    console.error("Error fetching teachers:", error);
-    res.status(500).json({ error: "Server error" });
-  }
+  const page = parseInt(req.query.page) || 1;
+  const limit = parseInt(req.query.limit) || 10;
+  const skip = (page - 1) * limit;
+
+  const total = await Teacher.countDocuments({ role: "teacher" });
+  const teachers = await Teacher.find({ role: "teacher" })
+    .skip(skip)
+    .limit(limit)
+    .sort({ createdAt: -1 });
+
+  res.json({
+    total,
+    page,
+    pages: Math.ceil(total / limit),
+    teachers,
+  });
+};
+
+const getTeacher = async (req, res) => {
+  const { id } = req.params;
+  const teacher = await Teacher.findById(id);
+  if (!teacher)
+    return res
+      .status(StatusCodes.NOT_FOUND)
+      .json({ error: "Teacher not found" });
+  res.json(teacher);
 };
 
 const createTeacher = async (req, res) => {
-  try {
-    const { name, email, password, role } = req.body;
+  const { name, email, password } = req.body;
 
-    // Hash password
-    const hashedPassword = await bcrypt.hash(password, 10);
+  const existing = await Teacher.findOne({ email });
+  if (existing)
+    return res
+      .status(StatusCodes.BAD_REQUEST)
+      .json({ error: "Email already exists" });
 
-    const [result] = await pool.execute(
-      `
-      INSERT INTO user (name, email, password, role)
-      VALUES (?, ?, ?, ?)
-    `,
-      [name, email, hashedPassword, role]
-    );
+  const teacher = await Teacher.create({
+    name,
+    email,
+    password,
+    role: "teacher",
+  });
 
-    res.json({ id: result.insertId, message: "Teacher created successfully" });
-  } catch (error) {
-    console.error("Error creating teacher:", error);
-    res.status(500).json({ error: "Server error" });
-  }
+  res
+    .status(StatusCodes.CREATED)
+    .json({ id: teacher._id, message: "Teacher created successfully" });
 };
 
 const updateTeacher = async (req, res) => {
-  try {
-    const { id } = req.params;
-    const { name, email, password, role } = req.body;
+  const { id } = req.params;
+  const updates = req.body;
 
-    let query = "UPDATE user SET name=?, email=?, role=?";
-    let params = [name, email, role];
+  const teacher = await Teacher.findByIdAndUpdate(id, updates, {
+    new: true,
+    runValidators: true,
+  });
 
-    // Only update password if provided
-    if (password && password.trim() !== "") {
-      const hashedPassword = await bcrypt.hash(password, 10);
-      query += ", password=?";
-      params.push(hashedPassword);
-    }
+  if (!teacher)
+    return res
+      .status(StatusCodes.NOT_FOUND)
+      .json({ error: "Teacher not found" });
 
-    query += " WHERE id=?";
-    params.push(id);
-
-    await pool.execute(query, params);
-    res.json({ message: "Teacher updated successfully" });
-  } catch (error) {
-    console.error("Error updating teacher:", error);
-    res.status(500).json({ error: "Server error" });
-  }
+  res.json({ message: "Teacher updated successfully", teacher });
 };
 
 const deleteTeacher = async (req, res) => {
-  try {
-    const { id } = req.params;
-    await pool.execute("DELETE FROM user WHERE id = ?", [id]);
-    res.json({ message: "Teacher deleted successfully" });
-  } catch (error) {
-    console.error("Error deleting teacher:", error);
-    res.status(500).json({ error: "Server error" });
-  }
+  const { id } = req.params;
+
+  const teacher = await Teacher.findByIdAndDelete(id);
+  if (!teacher)
+    return res
+      .status(StatusCodes.NOT_FOUND)
+      .json({ error: "Teacher not found" });
+
+  res.json({ message: "Teacher deleted successfully" });
 };
 
 module.exports = {
   teacherApplication,
   getTeachers,
+  getTeacher,
   createTeacher,
   updateTeacher,
   deleteTeacher,

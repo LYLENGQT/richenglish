@@ -10,6 +10,7 @@ const Attendance = require("./Attendance");
 const Recording = require("./Recording");
 const Screenshot = require("./ScreenShot");
 const Payout = require("./Payout");
+const Notification = require("./Notification");
 
 module.exports = {
   User,
@@ -24,4 +25,5 @@ module.exports = {
   Recording,
   Screenshot,
   Payout,
+  Notification,
 };

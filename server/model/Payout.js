@@ -23,6 +23,10 @@ const payoutSchema = new mongoose.Schema(
       type: Number,
       required: true,
     },
+    incentives: {
+      type: Number,
+      default: 0,
+    },
     status: {
       type: String,
       enum: ["pending", "processing", "completed"],

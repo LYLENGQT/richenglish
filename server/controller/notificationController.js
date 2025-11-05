@@ -2,35 +2,38 @@ const {
   UnauthenticatedError,
   BadRequestError,
   NotFoundError,
-  UnauthorizedError,
 } = require("../errors");
 const { StatusCodes } = require("http-status-codes");
-const Notification = require("../models/Notification");
+const { Notification } = require("../model");
 
 const getNotification = async (req, res) => {
   const userId = req.user?.id;
   if (!userId) throw new UnauthenticatedError("User not authenticated");
 
-  const notifications = await Notification.findNotification(userId);
-  res.status(StatusCodes.OK).json(notifications);
+  const notifications = await Notification.find({ user_id: userId }).sort({
+    createdAt: -1,
+  });
+
+  res.status(StatusCodes.OK).json({ notifications });
 };
 
 const createNotification = async (req, res) => {
-  const { id, type, message } = req.body;
   const userId = req.user?.id;
   if (!userId) throw new UnauthenticatedError("User not authenticated");
 
-  if (!id || !type || !message) {
-    throw new BadRequestError("Missing required fields: id, type, message");
+  const { type, message } = req.body;
+
+  if (!type || !message) {
+    throw new BadRequestError("Missing required fields: type, message");
   }
 
-  const result = await Notification.createNotification({
-    id,
+  const notification = await Notification.create({
     user_id: userId,
     type,
     message,
   });
-  res.status(StatusCodes.CREATED).json(result);
+
+  res.status(StatusCodes.CREATED).json({ notification });
 };
 
 const updateNotification = async (req, res) => {
@@ -41,11 +44,16 @@ const updateNotification = async (req, res) => {
     throw new BadRequestError("Both id and is_read are required");
   }
 
-  const result = await Notification.updateNotification({ id, is_read });
-  if (!result.success)
+  const notification = await Notification.findByIdAndUpdate(
+    id,
+    { is_read },
+    { new: true }
+  );
+
+  if (!notification)
     throw new NotFoundError(`Notification with id ${id} not found`);
 
-  res.status(StatusCodes.OK).json({ success: true });
+  res.status(StatusCodes.OK).json({ notification });
 };
 
 module.exports = {

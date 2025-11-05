@@ -11,6 +11,7 @@ const {
   Payout,
   Screenshot,
   Recording,
+  Notification,
 } = require("./model/");
 
 const MONGODB_URI =
@@ -448,6 +449,7 @@ const payoutData = [
     end_date: "2025-11-15T00:00:00.000Z",
     duration: 600,
     total_class: 10,
+    incentives: 0,
     status: "pending",
   },
   {
@@ -457,6 +459,7 @@ const payoutData = [
     end_date: "2025-10-31T00:00:00.000Z",
     duration: 540,
     total_class: 9,
+    incentives: 0,
     status: "completed",
   },
   {
@@ -466,7 +469,46 @@ const payoutData = [
     end_date: "2025-11-30T00:00:00.000Z",
     duration: 480,
     total_class: 8,
+    incentives: 0,
     status: "processing",
+  },
+];
+
+const notificationsData = [
+  {
+    user_id: "672871d3f4a19b2a8b21c1e4", // ObjectId of the teacher
+    type: "offline_alert",
+    message: "You have an offline student who missed today’s class.",
+    is_read: false,
+    created_at: new Date("2025-11-03T09:00:00Z"),
+  },
+  {
+    user_id: "672871d3f4a19b2a8b21c1e4",
+    type: "schedule_update",
+    message: "Your class schedule for Friday has been updated.",
+    is_read: true,
+    created_at: new Date("2025-11-02T15:00:00Z"),
+  },
+  {
+    user_id: "672871d3f4a19b2a8b21c1e4",
+    type: "payout_notice",
+    message: "Your payout for October has been processed successfully.",
+    is_read: false,
+    created_at: new Date("2025-11-01T10:30:00Z"),
+  },
+  {
+    user_id: "672871d3f4a19b2a8b21c1e4",
+    type: "offline_alert",
+    message: "Student Alice Kim has not logged in for the past 3 days.",
+    is_read: false,
+    created_at: new Date("2025-11-04T06:45:00Z"),
+  },
+  {
+    user_id: "672871d3f4a19b2a8b21c1e4",
+    type: "payout_notice",
+    message: "You earned an additional ₱500 incentive for perfect attendance.",
+    is_read: true,
+    created_at: new Date("2025-11-03T14:20:00Z"),
   },
 ];
 
@@ -501,4 +543,4 @@ async function seedDatabase(model, data) {
   }
 }
 
-seedDatabase(Recording, recordingsData);
+seedDatabase(Payout, payoutData);

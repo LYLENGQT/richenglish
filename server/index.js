@@ -43,7 +43,7 @@ app.use("/api/class", classRoutes);
 app.use("/api/auth", authRoutes);
 app.use("/api/students", studentsRoutes);
 app.use("/api/attendance", attendanceRoutes);
-app.use("/api/teachers", teacherRoutes);
+app.use("/api/teacher", teacherRoutes);
 app.use("/api/books", bookRoutes);
 app.use("/api/message", messageRoutes);
 app.use("/api/schedule", scheduleRoutes);
