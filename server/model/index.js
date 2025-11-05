@@ -4,5 +4,6 @@ const Admin = require("./Admin");
 const Teacher = require("./Teacher");
 const Student = require("./Students");
 const Book = require("./Book");
+const Class = require("./Class");
 
-module.exports = { User, SuperAdmin, Admin, Teacher, Student, Book };
+module.exports = { User, SuperAdmin, Admin, Teacher, Student, Book, Class };

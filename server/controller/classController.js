@@ -1,80 +1,110 @@
 const { StatusCodes } = require("http-status-codes");
-const pool = require("../database/db");
 const {
   UnathenticatedError,
   BadRequestError,
   NotFoundError,
   UnathoizedError,
 } = require("../errors");
-const ClassModel = require("../models/Class");
+const { Class } = require("../model");
 
-const getClass = async (req, res) => {
-  try {
-    // const [rows] = await pool.execute(`
-    //   SELECT c.*, s.name as student_name, s.nationality, s.manager_type,
-    //          t.name as teacher_name
-    //   FROM classes c
-    //   JOIN students s ON c.student_id = s.id
-    //   JOIN teachers t ON c.teacher_id = t.id
-    //   ORDER BY c.start_time
-    // `);
-    // res.json(rows);
+const createClass = async (req, res) => {
+  const newClass = await Class.create(req.body);
+  return res
+    .status(StatusCodes.CREATED)
+    .json({ message: "Class created successfully", class: newClass });
+};
 
-    const { id, role } = req.user;
+const getClasses = async (req, res) => {
+  const query = {};
+  const allowedFilters = [
+    "teacher_id",
+    "student_id",
+    "type",
+    "start_date",
+    "end_date",
+    "platform_link",
+  ];
 
-    if (role === "teacher") {
-      const classes = await ClassModel.findAllDynamic(id);
-
-      return res.status(StatusCodes.OK).json(classes);
+  allowedFilters.forEach((field) => {
+    if (req.query[field]) {
+      if (field === "start_date" || field === "end_date") {
+        query[field] = new Date(req.query[field]);
+      } else {
+        query[field] = req.query[field];
+      }
     }
+  });
 
-    const classes = await ClassModel.findAll();
+  const page = parseInt(req.query.page) || 1;
+  const limit = parseInt(req.query.limit) || 10;
+  const skip = (page - 1) * limit;
 
-    return res.status(StatusCodes.OK).json(classes);
-  } catch (error) {
-    console.error("Error fetching classes:", error);
-    res.status(500).json({ error: "Server error" });
-  }
+  const classes = await Class.find(query)
+    .populate("teacher_id", "name")
+    .populate("student_id", "name")
+    .skip(skip)
+    .limit(limit)
+    .sort({ start_date: 1, start_time: 1 });
+
+  const total = await Class.countDocuments(query);
+
+  return res.status(StatusCodes.OK).json({
+    classes,
+    pagination: {
+      total,
+      page,
+      limit,
+      totalPages: Math.ceil(total / limit),
+    },
+  });
 };
 
-const addClass = async (req, res) => {
-  try {
-    const {
-      student_id,
-      teacher_id,
-      start_time,
-      end_time,
-      duration_minutes,
-      days_of_week,
-      start_date,
-      end_date,
-      status,
-    } = req.body;
+const getClassById = async (req, res) => {
+  const { id } = req.params;
+  const foundClass = await Class.findById(id)
+    .populate("teacher_id", "name")
+    .populate("student_id", "name");
 
-    const [result] = await pool.execute(
-      `
-      INSERT INTO classes (student_id, teacher_id, start_time, end_time, 
-                          duration_minutes, days_of_week, start_date, end_date, status)
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
-    `,
-      [
-        student_id,
-        teacher_id,
-        start_time,
-        end_time,
-        duration_minutes,
-        days_of_week,
-        start_date,
-        end_date,
-        status || "active",
-      ]
-    );
-
-    res.json({ id: result.insertId, message: "Class created successfully" });
-  } catch (error) {
-    console.error("Error creating class:", error);
-    res.status(500).json({ error: "Server error" });
+  if (!foundClass) {
+    throw new NotFoundError("Class not found");
   }
+
+  return res.status(StatusCodes.OK).json(foundClass);
 };
 
-module.exports = { getClass, addClass };
+const updateClass = async (req, res) => {
+  const { id } = req.params;
+  const updated = await Class.findByIdAndUpdate(id, req.body, {
+    new: true,
+    runValidators: true,
+  });
+
+  if (!updated) {
+    throw new NotFoundError("Class not found");
+  }
+
+  return res
+    .status(StatusCodes.OK)
+    .json({ message: "Class updated successfully", class: updated });
+};
+
+const deleteClass = async (req, res) => {
+  const { id } = req.params;
+  const deleted = await Class.findByIdAndDelete(id);
+
+  if (!deleted) {
+    throw new NotFoundError("Class not found");
+  }
+
+  return res
+    .status(StatusCodes.OK)
+    .json({ message: "Class deleted successfully" });
+};
+
+module.exports = {
+  createClass,
+  getClasses,
+  getClassById,
+  updateClass,
+  deleteClass,
+};

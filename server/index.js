@@ -6,9 +6,9 @@ const cors = require("cors");
 const helmet = require("helmet");
 const cookieParser = require("cookie-parser");
 const http = require("http");
-const mongoose = require("mongoose");
 
 const customErrorMiddleware = require("./middleware/errorHandler");
+const notFoundMiddleware = require("./middleware/notFoundMiddleware");
 const { initSocket } = require("./lib/socket");
 const connectDB = require("./database/connectDB");
 
@@ -29,7 +29,6 @@ app.use(cookieParser());
 // Routes
 const authRoutes = require("./routes/authRoutes");
 const studentsRoutes = require("./routes/studentRoutes");
-const classRoutes = require("./routes/classRoutes");
 const attendanceRoutes = require("./routes/attendanceRoutes");
 const teacherRoutes = require("./routes/teacherRoutes");
 const bookRoutes = require("./routes/booksRoutes");
@@ -38,10 +37,11 @@ const functionRoutes = require("./routes/functionRoutes");
 const messageRoutes = require("./routes/messageRoutes");
 const scheduleRoutes = require("./routes/scheduleRoues");
 const notificationRoutes = require("./routes/notificationsRoutes");
+const classRoutes = require("./routes/classRoutes");
 
+app.use("/api/class", classRoutes);
 app.use("/api/auth", authRoutes);
 app.use("/api/students", studentsRoutes);
-app.use("/api/classes", classRoutes);
 app.use("/api/attendance", attendanceRoutes);
 app.use("/api/teachers", teacherRoutes);
 app.use("/api/books", bookRoutes);
@@ -57,6 +57,7 @@ app.get("/api/health", (req, res) => {
 });
 
 app.use(customErrorMiddleware);
+app.use(notFoundMiddleware);
 
 // --- Socket.IO integration ---
 const server = http.createServer(app); // create http server

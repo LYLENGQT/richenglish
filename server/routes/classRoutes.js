@@ -1,10 +1,27 @@
 const express = require("express");
 const router = express.Router();
-const { getClass, addClass } = require("../controller/classController");
-const { authenticateToken } = require("../middleware/authMiddleware");
+const {
+  createClass,
+  getClasses,
+  getClassById,
+  updateClass,
+  deleteClass,
+} = require("../controller/classController");
+const {
+  authenticateToken,
+  requireAdmin,
+} = require("../middleware/authMiddleware");
 
 router.use(authenticateToken);
 
-router.route("/").get(getClass).post(addClass);
+router
+  .route("/")
+  .get(getClasses)
+  .post(requireAdmin("super-admin", "admin"), createClass);
+router
+  .route("/:id")
+  .get(getClassById)
+  .patch(requireAdmin("super-admin"), updateClass)
+  .delete(requireAdmin("super-admin"), deleteClass);
 
 module.exports = router;
