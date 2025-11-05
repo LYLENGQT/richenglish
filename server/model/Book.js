@@ -26,7 +26,7 @@ const bookSchema = new mongoose.Schema(
       maxlength: 512,
     },
     uploaded_by: {
-      type: String,
+      type: mongoose.Schema.Types.ObjectId,
       ref: "User",
       default: null,
     },

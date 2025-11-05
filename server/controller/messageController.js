@@ -1,21 +1,19 @@
 const {
-  UnathenticatedError,
+  UnauthenticatedError,
   BadRequestError,
   NotFoundError,
-  UnathoizedError,
+  UnauthorizedError,
 } = require("../errors");
-const Teacher = require("../models/Users");
-const Message = require("../models/Message");
+const { User, Message } = require("../model");
 const { StatusCodes } = require("http-status-codes");
 
-const getTeachers = async (req, res) => {
+const getUsers = async (req, res) => {
   const { id } = req.user;
 
-  const teacher = await Teacher.findById(id);
+  const user = await User.findById(id);
+  if (!user) throw new BadRequestError("Invalid credentials");
 
-  if (!teacher) throw new BadRequestError("Invalid Credentials");
-
-  const others = await Teacher.findAll(id);
+  const others = await User.find({ _id: { $ne: id } });
 
   res.status(StatusCodes.OK).json(others);
 };
@@ -24,12 +22,17 @@ const getMessage = async (req, res) => {
   const { id: chatPartnerId } = req.params;
   const { id: currentUser } = req.user;
 
-  if (!chatPartnerId || !currentUser) throw new BadRequestError("Invalid");
+  console.log(chatPartnerId, currentUser);
 
-  const messages = await Message.getMessagesBetweenUsers(
-    currentUser,
-    chatPartnerId
-  );
+  if (!chatPartnerId || !currentUser)
+    throw new BadRequestError("Invalid parameters");
+
+  const messages = await Message.find({
+    $or: [
+      { sender_id: currentUser, receiver_id: chatPartnerId },
+      { sender_id: chatPartnerId, receiver_id: currentUser },
+    ],
+  }).sort({ created_at: 1 }); // oldest → newest
 
   res.status(StatusCodes.OK).json(messages);
 };
@@ -38,11 +41,19 @@ const sendMessage = async (req, res) => {
   const { text, id: chatPartnerId } = req.body;
   const { id: currentUser } = req.user;
 
-  const send = await Message.createMessage(currentUser, chatPartnerId, text);
+  if (!text || !chatPartnerId)
+    throw new BadRequestError("Missing message text or receiver");
 
-  const message = await Message.getMessagebyId(send.insertId);
+  const receiver = await User.findById(chatPartnerId);
+  if (!receiver) throw new NotFoundError("Receiver not found");
 
-  res.status(StatusCodes.OK).json(message);
+  const message = await Message.create({
+    sender_id: currentUser,
+    receiver_id: chatPartnerId,
+    message: text,
+  });
+
+  res.status(StatusCodes.CREATED).json(message);
 };
 
-module.exports = { getTeachers, getMessage, sendMessage };
+module.exports = { getUsers, getMessage, sendMessage };

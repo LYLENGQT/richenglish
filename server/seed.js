@@ -1,5 +1,14 @@
 const mongoose = require("mongoose");
-const { Student, Book } = require("./model/");
+const {
+  User,
+  SuperAdmin,
+  Admin,
+  Teacher,
+  Student,
+  Book,
+  Class,
+  Message,
+} = require("./model/");
 
 const MONGODB_URI =
   process.env.MONGODB_URI || "mongodb://localhost:27017/RichEnglish";
@@ -199,6 +208,44 @@ const studentsData = [
   },
 ];
 
+const classData = [
+  {
+    teacher_id: "67264a4bf57e8a6c3f2d8a01",
+    student_id: "6907c86dc8dc2fdecb6e577a",
+    type: "schedule",
+    start_date: "2025-11-05T00:00:00.000Z",
+    end_date: "2025-11-05T00:00:00.000Z",
+    start_time: "10:00",
+    end_time: "11:00",
+    duration: 60,
+    platform_link: "https://zoom.us/j/1234567890",
+  },
+  {
+    teacher_id: "67264a4bf57e8a6c3f2d8a01",
+    student_id: "6907c86dc8dc2fdecb6e577a",
+    type: "reoccurring",
+    reoccurringDays: ["M", "W", "F"],
+    start_time: "14:00",
+    end_time: "15:00",
+    duration: 60,
+    platform_link: "https://zoom.us/j/2345678901",
+  },
+  {
+    teacher_id: "67264a4bf57e8a6c3f2d8a01",
+    student_id: "6907c86dc8dc2fdecb6e577a",
+    type: "makeupClass",
+    start_date: "2025-11-06T00:00:00.000Z",
+    end_date: "2025-11-06T00:00:00.000Z",
+    start_time: "16:00",
+    end_time: "17:00",
+    duration: 60,
+    platform_link: "https://zoom.us/j/3456789012",
+    reason: "Student was absent on 2025-11-03",
+    note: "Make-up for missed grammar lesson",
+    original_class_id: "67264a4bf57e8a6c3f2d8a10",
+  },
+];
+
 const bookData = [
   {
     title: "Business English Communication 2",
@@ -237,6 +284,70 @@ const bookData = [
   },
 ];
 
+const usersData = [
+  {
+    _id: "67264a4bf57e8a6c3f2d8a01",
+    name: "Teacher Mitch",
+    email: "teacher.mitch@richenglish.com",
+    password: "$2a$10$wLnW5BeVuMfOU6SNzqBCe.YNe4GSymyeThq.3.zLuFsJXDjx.jhl2",
+    role: "teacher",
+    country: "PH",
+    status: "active",
+    timezone: "Asia/Manila",
+    firstName: "Mitch",
+    lastName: "Santos",
+    phone: "09171234567",
+    degree: "BA English",
+    major: "Linguistics",
+    englishLevel: "C1",
+    experience: "2 years",
+    motivation: "I love teaching English to kids.",
+    availability: "Mon–Fri, 8AM–5PM",
+    internetSpeed: "100 Mbps",
+    computerSpecs: "Intel i5, 16GB RAM",
+    hasWebcam: true,
+    hasHeadset: true,
+    hasBackupInternet: true,
+    hasBackupPower: true,
+    teachingEnvironment: "Quiet room with proper lighting",
+    resume: "https://drive.google.com/file/d/teacher-resume-id/view",
+    introVideo: "https://drive.google.com/file/d/teacher-intro-id/view",
+    speedTestScreenshot:
+      "https://drive.google.com/file/d/teacher-speedtest-id/view",
+    zoom_link: "https://zoom.us/j/123456789",
+    reset: {
+      expiration: "2025-11-02T20:27:55.658Z",
+      otp: "346712",
+    },
+    updatedAt: "2025-11-02T20:23:20.208Z",
+    verification: {
+      isVerified: false,
+    },
+    accepted: true,
+  },
+  {
+    _id: "67264a4bf57e8a6c3f2d8a02",
+    name: "Admin User",
+    email: "admin@richenglish.com",
+    password: "$2b$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi",
+    role: "admin",
+    country: "PH",
+    status: "active",
+    timezone: "Asia/Manila",
+    assignedTeachers: ["67264a4bf57e8a6c3f2d8a01"],
+  },
+  {
+    _id: "67264a4bf57e8a6c3f2d8a03",
+    name: "Super Admin",
+    email: "richenglish@admin.com",
+    password: "$2b$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi",
+    role: "super-admin",
+    country: "PH",
+    status: "active",
+    timezone: "Asia/Manila",
+  },
+];
+
 async function seedDatabase(model, data) {
   try {
     await mongoose.connect(MONGODB_URI);
@@ -268,4 +379,4 @@ async function seedDatabase(model, data) {
   }
 }
 
-seedDatabase(Book, bookData);
+seedDatabase(User, usersData);

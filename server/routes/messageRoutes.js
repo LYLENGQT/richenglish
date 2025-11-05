@@ -1,7 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const {
-  getTeachers,
+  getUsers,
   getMessage,
   sendMessage,
 } = require("../controller/messageController");
@@ -9,7 +9,7 @@ const { authenticateToken } = require("../middleware/authMiddleware");
 
 router.use(authenticateToken);
 
-router.get("/get-teachers", getTeachers);
+router.get("/get-user", getUsers);
 router.route("/:id").get(getMessage);
 router.route("/").post(sendMessage);
 
