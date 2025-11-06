@@ -32,7 +32,7 @@ const studentsRoutes = require("./routes/studentRoutes");
 const attendanceRoutes = require("./routes/attendanceRoutes");
 const teacherRoutes = require("./routes/teacherRoutes");
 const bookRoutes = require("./routes/booksRoutes");
-const functionRoutes = require("./routes/functionRoutes");
+const dashboardRoutes = require("./routes/dashboardRoutes");
 const messageRoutes = require("./routes/messageRoutes");
 const scheduleRoutes = require("./routes/scheduleRoues");
 const notificationRoutes = require("./routes/notificationsRoutes");
@@ -51,7 +51,7 @@ app.use("/api/schedule", scheduleRoutes);
 app.use("/api/notification", notificationRoutes);
 app.use("/api/payout", payoutRoutes);
 app.use("/api/book-assign", bookAssignRoutes);
-app.use("/api", functionRoutes);
+app.use("/api/dashboard", dashboardRoutes);
 
 app.get("/api/health", (req, res) => {
   res.json({ status: "OK", timestamp: new Date().toISOString() });
