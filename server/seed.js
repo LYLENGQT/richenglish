@@ -12,6 +12,7 @@ const {
   Screenshot,
   Recording,
   Notification,
+  BookAssign,
 } = require("./model/");
 
 const MONGODB_URI =
@@ -223,6 +224,7 @@ const classData = [
     end_time: "11:00",
     duration: 60,
     platform_link: "https://zoom.us/j/1234567890",
+    book_id: "690b34193f66e20f635bc62a",
   },
   {
     teacher_id: "67264a4bf57e8a6c3f2d8a01",
@@ -233,6 +235,7 @@ const classData = [
     end_time: "15:00",
     duration: 60,
     platform_link: "https://zoom.us/j/2345678901",
+    book_id: "690b34193f66e20f635bc62a",
   },
   {
     teacher_id: "67264a4bf57e8a6c3f2d8a01",
@@ -512,6 +515,39 @@ const notificationsData = [
   },
 ];
 
+const bookAssignmentData = [
+  {
+    student_id: "67286fd7c4a19b2a8b21a9d3",
+    teacher_id: "672871d3f4a19b2a8b21c1e4",
+    book_id: "672874a8e4f89c2b8b21e5f1",
+    assigned_by: "67264a4bf57e8a6c3f2d8a03", // Admin
+  },
+  {
+    student_id: "67286fe8c4a19b2a8b21a9d8",
+    teacher_id: "672871d3f4a19b2a8b21c1e4",
+    book_id: "672874b0e4f89c2b8b21e5f5",
+    assigned_by: "67264a4bf57e8a6c3f2d8a03", // Super Admin
+  },
+  {
+    student_id: "67287012c4a19b2a8b21aa10",
+    teacher_id: "67287212f4a19b2a8b21c2f8",
+    book_id: "672874c2e4f89c2b8b21e601",
+    assigned_by: "67264a4bf57e8a6c3f2d8a02", // Admin
+  },
+  {
+    student_id: "67287033c4a19b2a8b21aa22",
+    teacher_id: "67287212f4a19b2a8b21c2f8",
+    book_id: "672874d4e4f89c2b8b21e60a",
+    assigned_by: "67264a4bf57e8a6c3f2d8a03", // Super Admin
+  },
+  {
+    student_id: "67287055c4a19b2a8b21aa36",
+    teacher_id: "67287301f4a19b2a8b21c410",
+    book_id: "672874e9e4f89c2b8b21e615",
+    assigned_by: "67264a4bf57e8a6c3f2d8a02", // Admin
+  },
+];
+
 async function seedDatabase(model, data) {
   try {
     await mongoose.connect(MONGODB_URI);
@@ -543,4 +579,4 @@ async function seedDatabase(model, data) {
   }
 }
 
-seedDatabase(Payout, payoutData);
+seedDatabase(BookAssign, bookAssignmentData);

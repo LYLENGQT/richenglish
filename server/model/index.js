@@ -11,6 +11,7 @@ const Recording = require("./Recording");
 const Screenshot = require("./ScreenShot");
 const Payout = require("./Payout");
 const Notification = require("./Notification");
+const BookAssign = require("./BookAssign");
 
 module.exports = {
   User,
@@ -26,4 +27,5 @@ module.exports = {
   Screenshot,
   Payout,
   Notification,
+  BookAssign,
 };

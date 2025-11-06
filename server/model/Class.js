@@ -4,6 +4,11 @@ const { Schema, model } = mongoose;
 const classSchema = new Schema({
   teacher_id: { type: Schema.Types.ObjectId, ref: "User", required: true },
   student_id: { type: Schema.Types.ObjectId, ref: "Student", required: true },
+  book_id: {
+    type: Schema.Types.ObjectId,
+    ref: "Book",
+    required: false,
+  },
 
   type: {
     type: String,

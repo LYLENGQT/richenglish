@@ -38,6 +38,7 @@ const scheduleRoutes = require("./routes/scheduleRoues");
 const notificationRoutes = require("./routes/notificationsRoutes");
 const classRoutes = require("./routes/classRoutes");
 const payoutRoutes = require("./routes/payoutRoutes");
+const bookAssignRoutes = require("./routes/bookAssignRoutes");
 
 app.use("/api/class", classRoutes);
 app.use("/api/auth", authRoutes);
@@ -49,9 +50,9 @@ app.use("/api/message", messageRoutes);
 app.use("/api/schedule", scheduleRoutes);
 app.use("/api/notification", notificationRoutes);
 app.use("/api/payout", payoutRoutes);
+app.use("/api/book-assign", bookAssignRoutes);
 app.use("/api", functionRoutes);
 
-// Health check
 app.get("/api/health", (req, res) => {
   res.json({ status: "OK", timestamp: new Date().toISOString() });
 });
