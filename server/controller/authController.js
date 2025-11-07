@@ -113,6 +113,8 @@ const forgotPassword = async (req, res) => {
   user.reset.otp = String(otp);
   user.reset.expiration = new Date(Date.now() + 10 * 30000); // 5mins
 
+  console.log(otp);
+
   await user.save();
 
   await sendMail(email, `Forgot Password`, `${otp}`);
@@ -120,7 +122,27 @@ const forgotPassword = async (req, res) => {
 };
 
 const resetPassword = async (req, res) => {
-  const { otp, newPassword, confirmPassword } = req.body;
+  const { newPassword, confirmPassword } = req.body;
+  const { id } = req.user;
+
+  const user = await User.findById(id);
+
+  if (!user) throw new BadRequestError("Invalid");
+
+  if (newPassword !== confirmPassword)
+    throw new BadRequestError("Password and Confirm Password doesn't match");
+
+  user.password = newPassword;
+  user.reset.expiration = null;
+  user.reset.otp = null;
+
+  await user.save();
+
+  res.status(StatusCodes.OK).json({ message: "Password reset successfully" });
+};
+
+const verifyOTP = async (req, res) => {
+  const { otp } = req.body;
 
   const user = await User.findOne({ "reset.otp": otp });
   if (!user) throw new BadRequestError("Invalid");
@@ -128,13 +150,34 @@ const resetPassword = async (req, res) => {
   const isExpired = await user.isOTPExpired();
   if (isExpired) throw new BadRequestError("OTP expired");
 
-  user.password = newPassword;
-  reset.expiration = null;
-  reset.otp = null;
+  const access_token = await user.generateAccessToken();
+
+  res.cookie("token", access_token, {
+    httpOnly: true,
+    secure: true,
+    sameSite: "None",
+    maxAge: 86400000,
+  });
+
+  res.status(StatusCodes.OK).json({ message: "Valid OTP" });
+};
+
+const resendOTP = async (req, res) => {
+  const { email } = req.body;
+
+  const user = await User.findOne({ email: email });
+  if (!user) throw new BadRequestError("Invalid");
+
+  const otp = generateOTP().toString();
+  user.reset.otp = String(otp);
+  user.reset.expiration = new Date(Date.now() + 10 * 30000); // 5mins
+
+  console.log(otp);
 
   await user.save();
 
-  res.status(StatusCodes.OK).json({ message: "Password reset successfully" });
+  await sendMail(email, `Forgot Password`, `${otp}`);
+  res.status(StatusCodes.OK).json({ message: "email sent" });
 };
 
 module.exports = {
@@ -143,4 +186,6 @@ module.exports = {
   refresh,
   forgotPassword,
   resetPassword,
+  verifyOTP,
+  resendOTP,
 };

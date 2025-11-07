@@ -26,6 +26,9 @@ import Login from "@/pages/Public/Login";
 import TeacherApplication from "@/pages/Public/TeacherApplication";
 import TeacherLeaderboard from "@/pages/Public/TeacherLeaderboard";
 import NotFound from "@/pages/Public/NotFound";
+import ForgotPassword from "@/pages/Public/ForgotPassword";
+import OTP from "@/pages/Public/OTP";
+import ResetPassword from "@/pages/Public/ResetPassword";
 
 // teacher portal
 import TeacherDashboard from "@/pages/Teacher/Dashboard";
@@ -111,7 +114,10 @@ function App() {
           <Route path="/about" element={<About />} />
           <Route path="/contact" element={<Contact />} />
           <Route path="/apply" element={<TeacherApplication />} />
-          <Route path="leaderboard" element={<TeacherLeaderboard />} />
+          <Route path="/leaderboard" element={<TeacherLeaderboard />} />
+          <Route path="/forgot-password" element={<ForgotPassword />} />
+          <Route path="/otp" element={<OTP />} />
+          <Route path="/reset-password" element={<ResetPassword />} />
 
           <Route path="/login" element={<Login />} />
 
