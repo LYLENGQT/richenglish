@@ -156,4 +156,19 @@ const dashboardStats = async (req, res) => {
   throw new UnauthorizedError("Role not authorized for dashboard stats");
 };
 
-module.exports = { dashboardStats };
+const teacherListDropDown = async (req, res) => {
+  const teachers = await Teacher.find({
+    role: "teacher",
+    accepted: true,
+  }).select("_id name");
+
+  res.status(StatusCodes.OK).json(teachers);
+};
+
+const studentListDropDown = async (req, res) => {
+  const students = await Student.find({}).select("_id name");
+
+  res.status(StatusCodes.OK).json(students);
+};
+
+module.exports = { dashboardStats, teacherListDropDown, studentListDropDown };
