@@ -1,3 +1,4 @@
+require("dotenv").config();
 const mongoose = require("mongoose");
 const {
   User,
@@ -13,7 +14,9 @@ const {
   Recording,
   Notification,
   BookAssign,
+  Attendance,
 } = require("./model/");
+const ScreenShot = require("./model/ScreenShot");
 
 const MONGODB_URI =
   process.env.MONGODB_URI || "mongodb://localhost:27017/RichEnglish";
@@ -579,4 +582,27 @@ async function seedDatabase(model, data) {
   }
 }
 
-seedDatabase(BookAssign, bookAssignmentData);
+(async () => {
+  try {
+    await mongoose.connect(MONGODB_URI);
+    console.log("✅ Connected to MongoDB");
+
+    await seedDatabase(User, usersData);
+    await seedDatabase(Student, studentsData);
+    await seedDatabase(Class, classData);
+    await seedDatabase(Book, bookData);
+    await seedDatabase(Attendance, attendanceData);
+    await seedDatabase(Notification, notificationsData);
+    await seedDatabase(Screenshot, screenshotData);
+    await seedDatabase(Recording, recordingsData);
+    await seedDatabase(Payout, payoutData);
+    await seedDatabase(BookAssign, bookAssignmentData);
+
+    console.log("🎉 All seeding completed successfully!");
+  } catch (err) {
+    console.error("❌ Error during seeding:", err);
+  } finally {
+    await mongoose.disconnect();
+    console.log("🔌 Database connection closed");
+  }
+})();
