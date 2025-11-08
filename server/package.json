@@ -25,6 +25,8 @@
     "mysql2": "^3.6.5",
     "nodemailer": "^7.0.10",
     "socket.io": "^4.8.1",
+    "swagger-jsdoc": "^6.2.8",
+    "swagger-ui-express": "^5.0.1",
     "uuid": "^13.0.0"
   },
   "devDependencies": {
