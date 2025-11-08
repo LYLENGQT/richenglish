@@ -26,7 +26,6 @@ app.use(express.static("public"));
 app.use(helmet());
 app.use(cookieParser());
 
-// Swagger Documentation
 app.use(
   "/api-docs",
   swaggerUi.serve,
@@ -37,13 +36,11 @@ app.use(
   })
 );
 
-// Swagger JSON endpoint
 app.get("/api-docs.json", (req, res) => {
   res.setHeader("Content-Type", "application/json");
   res.send(swaggerSpec);
 });
 
-// Routes
 const authRoutes = require("./routes/authRoutes");
 const studentsRoutes = require("./routes/studentRoutes");
 const attendanceRoutes = require("./routes/attendanceRoutes");
@@ -51,46 +48,23 @@ const teacherRoutes = require("./routes/teacherRoutes");
 const bookRoutes = require("./routes/booksRoutes");
 const dashboardRoutes = require("./routes/dashboardRoutes");
 const messageRoutes = require("./routes/messageRoutes");
-const scheduleRoutes = require("./routes/scheduleRoues");
 const notificationRoutes = require("./routes/notificationsRoutes");
 const classRoutes = require("./routes/classRoutes");
 const payoutRoutes = require("./routes/payoutRoutes");
 const bookAssignRoutes = require("./routes/bookAssignRoutes");
 
-app.use("/api/class", classRoutes);
-app.use("/api/auth", authRoutes);
-app.use("/api/students", studentsRoutes);
-app.use("/api/attendance", attendanceRoutes);
-app.use("/api/teacher", teacherRoutes);
-app.use("/api/books", bookRoutes);
-app.use("/api/message", messageRoutes);
-app.use("/api/schedule", scheduleRoutes);
-app.use("/api/notification", notificationRoutes);
-app.use("/api/payout", payoutRoutes);
-app.use("/api/book-assign", bookAssignRoutes);
-app.use("/api/dashboard", dashboardRoutes);
+app.use("/api/v1/class", classRoutes);
+app.use("/api/v1/auth", authRoutes);
+app.use("/api/v1/students", studentsRoutes);
+app.use("/api/v1/attendance", attendanceRoutes);
+app.use("/api/v1/teacher", teacherRoutes);
+app.use("/api/v1/books", bookRoutes);
+app.use("/api/v1/message", messageRoutes);
+app.use("/api/v1/notification", notificationRoutes);
+app.use("/api/v1/payout", payoutRoutes);
+app.use("/api/v1/book-assign", bookAssignRoutes);
+app.use("/api/v1/dashboard", dashboardRoutes);
 
-/**
- * @swagger
- * /api/health:
- *   get:
- *     summary: Health check endpoint
- *     tags: [Health]
- *     responses:
- *       200:
- *         description: Server is running
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 status:
- *                   type: string
- *                   example: OK
- *                 timestamp:
- *                   type: string
- *                   format: date-time
- */
 app.get("/api/health", (req, res) => {
   res.json({ status: "OK", timestamp: new Date().toISOString() });
 });
