@@ -17,11 +17,5 @@
     "english-teaching"
   ],
   "author": "Rich English",
-  "license": "MIT",
-  "devDependencies": {
-    "concurrently": "^8.2.2"
-  },
-  "dependencies": {
-    "sequelize": "^6.37.7"
-  }
+  "license": "MIT"
 }
