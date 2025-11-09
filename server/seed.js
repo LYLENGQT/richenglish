@@ -589,14 +589,6 @@ async function seedDatabase(model, data) {
 
     await seedDatabase(User, usersData);
     await seedDatabase(Student, studentsData);
-    await seedDatabase(Class, classData);
-    await seedDatabase(Book, bookData);
-    await seedDatabase(Attendance, attendanceData);
-    await seedDatabase(Notification, notificationsData);
-    await seedDatabase(Screenshot, screenshotData);
-    await seedDatabase(Recording, recordingsData);
-    await seedDatabase(Payout, payoutData);
-    await seedDatabase(BookAssign, bookAssignmentData);
 
     console.log("🎉 All seeding completed successfully!");
   } catch (err) {
