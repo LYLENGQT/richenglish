@@ -11,6 +11,7 @@ const customErrorMiddleware = require("./middleware/errorHandler");
 const notFoundMiddleware = require("./middleware/notFoundMiddleware");
 const { initSocket } = require("./lib/socket");
 const connectDB = require("./database/connectDB");
+const path = require("path");
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -22,7 +23,7 @@ app.use(
   })
 );
 app.use(express.json());
-app.use(express.static("public"));
+app.use(express.static(path.join(__dirname, "dist")));
 app.use(helmet());
 app.use(cookieParser());
 
@@ -100,6 +101,10 @@ app.use("/api/v1/screen-shot", screenShotRoutes);
 
 app.get("/api/health", (req, res) => {
   res.json({ status: "OK", timestamp: new Date().toISOString() });
+});
+
+app.get("*", (req, res) => {
+  res.sendFile(path.join(__dirname, "dist", "index.html"));
 });
 
 app.use(customErrorMiddleware);
