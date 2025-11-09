@@ -11,6 +11,7 @@ const {
   authenticateToken,
   requireAdmin,
 } = require("../middleware/authMiddleware");
+const cache = require("../middleware/cacheMiddleware");
 
 router.use(authenticateToken);
 /**
@@ -189,11 +190,11 @@ router.use(authenticateToken);
 
 router
   .route("/")
-  .get(getAllBookAssignments)
+  .get(cache("book-assignments:"), getAllBookAssignments)
   .post(requireAdmin("super-admin", "admin"), createBookAssignment);
 router
   .route("/:id")
-  .get(getBookAssignment)
+  .get(cache("book-assignment:"), getBookAssignment)
   .patch(requireAdmin("super-admin", "admin"), updateBookAssignment)
   .delete(requireAdmin("super-admin", "admin"), deleteBookAssignment);
 

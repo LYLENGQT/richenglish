@@ -12,6 +12,7 @@ const {
   authenticateToken,
   requireAdmin,
 } = require("../middleware/authMiddleware");
+const cache = require("../middleware/cacheMiddleware");
 
 /**
  * @swagger
@@ -147,7 +148,7 @@ router.use(authenticateToken);
  */
 router
   .route("/")
-  .get(requireAdmin("super-admin", "admin"), getTeachers)
+  .get(requireAdmin("super-admin", "admin"), cache("teachers:"), getTeachers)
   .post(requireAdmin("super-admin", "admin"), createTeacher);
 
 /**
@@ -218,6 +219,6 @@ router
   .route("/:id")
   .patch(requireAdmin("super-admin", "admin"), updateTeacher)
   .delete(requireAdmin("super-admin"), deleteTeacher)
-  .get(getTeacher);
+  .get(cache("teacher:"), getTeacher);
 
 module.exports = router;

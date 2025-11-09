@@ -12,6 +12,7 @@ const {
   authenticateToken,
   requireAdmin,
 } = require("../middleware/authMiddleware");
+const cache = require("../middleware/cacheMiddleware");
 
 const router = express.Router();
 
@@ -39,12 +40,12 @@ router.use(authenticateToken);
 
 router
   .route("/")
-  .get(getAllScreenshots)
+  .get(cache("screenshots:"), getAllScreenshots)
   .post(upload.single("file"), createScreenshot);
 
 router
   .route("/:id")
-  .get(getScreenshot)
+  .get(cache("screenshot:"), getScreenshot)
   .patch(requireAdmin, updateScreenshot)
   .delete(requireAdmin, deleteScreenshot);
 

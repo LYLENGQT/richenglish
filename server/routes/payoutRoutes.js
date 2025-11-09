@@ -11,6 +11,7 @@ const {
   authenticateToken,
   requireAdmin,
 } = require("../middleware/authMiddleware");
+const cache = require("../middleware/cacheMiddleware");
 
 router.use(authenticateToken);
 
@@ -203,7 +204,7 @@ router.use(authenticateToken);
  */
 router
   .route("/")
-  .get(requireAdmin("super-admin"), getPayouts)
+  .get(requireAdmin("super-admin"), cache("payouts:"), getPayouts)
   .post(requireAdmin("super-admin"), addPayout);
 
 /**
@@ -317,7 +318,7 @@ router
  */
 router
   .route("/:id")
-  .get(getPayout)
+  .get(cache("payout:"), getPayout)
   .patch(requireAdmin("super-admin"), updatePayout)
   .delete(requireAdmin("super-admin"), deletePayout);
 

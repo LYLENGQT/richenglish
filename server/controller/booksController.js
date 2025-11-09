@@ -10,12 +10,16 @@ const {
   UnathoizedError,
 } = require("../errors");
 const { uploadFile } = require("../lib/googleapi");
+const redisClient = require("../database/redis");
+const clearCache = require("../helper/clearCache");
 
 const uploadsDir = path.join(__dirname, "../uploads/books");
 fs.mkdirSync(uploadsDir, { recursive: true });
 
 const addBook = async (req, res) => {
-  if (!req.file) throw new BadRequestError("No file uploaded");
+  if (!req.file) {
+    throw new BadRequestError("No file uploaded");
+  }
 
   const title = req.body.title || req.file.originalname.replace(/\.pdf$/i, "");
   const storedPath = path
@@ -37,10 +41,24 @@ const addBook = async (req, res) => {
     },
   });
 
+  await clearCache("books:");
+
   res.status(StatusCodes.CREATED).json({ id: book.id, title: book.title });
 };
 
 const getBooks = async (req, res) => {
+  const cacheKey = "books:" + JSON.stringify(req.query);
+
+  try {
+    const cached = await redisClient.get(cacheKey);
+    if (cached) {
+      console.log("⚡ Redis Cache Hit:", cacheKey);
+      return res.status(StatusCodes.OK).json(JSON.parse(cached));
+    }
+  } catch (err) {
+    console.error("Redis get error:", err);
+  }
+
   const query = {};
   const allowedFilters = ["title", "filename", "uploaded_by"];
 
@@ -61,7 +79,7 @@ const getBooks = async (req, res) => {
   const books = await Book.find(query).skip(skip).limit(limit).lean();
   const total = await Book.countDocuments(query);
 
-  return res.status(StatusCodes.OK).json({
+  const result = {
     books,
     pagination: {
       total,
@@ -69,21 +87,52 @@ const getBooks = async (req, res) => {
       limit,
       totalPages: Math.ceil(total / limit),
     },
-  });
+  };
+
+  try {
+    await redisClient.setEx(cacheKey, 300, JSON.stringify(result));
+  } catch (err) {
+    console.error("Redis setEx error:", err);
+  }
+
+  return res.status(StatusCodes.OK).json(result);
 };
 
 const getBook = async (req, res) => {
-  const book = await Book.findOne({ _id: req.params.id }).lean();
-  if (!book) throw new NotFoundError("Book not found");
+  const { id } = req.params;
+  const cacheKey = `book:${id}`;
+
+  try {
+    const cached = await redisClient.get(cacheKey);
+    if (cached) {
+      console.log("⚡ Redis Cache Hit:", cacheKey);
+      return res.status(StatusCodes.OK).json(JSON.parse(cached));
+    }
+  } catch (err) {
+    console.error("Redis get error:", err);
+  }
+
+  const book = await Book.findOne({ _id: id }).lean();
+
+  if (!book) {
+    throw new NotFoundError("Book not found");
+  }
+
+  try {
+    await redisClient.setEx(cacheKey, 300, JSON.stringify(book));
+  } catch (err) {
+    console.error("Redis setEx error:", err);
+  }
 
   res.status(StatusCodes.OK).json(book);
 };
 
 const updateBook = async (req, res) => {
+  const { id } = req.params;
   const { title, filename, original_filename, path: filePath } = req.body;
 
   const book = await Book.findOneAndUpdate(
-    { id: req.params.id },
+    { _id: id },
     {
       title,
       filename,
@@ -94,27 +143,50 @@ const updateBook = async (req, res) => {
     { new: true }
   );
 
-  if (!book) throw new NotFoundError("Book not found");
+  if (!book) {
+    throw new NotFoundError("Book not found");
+  }
+
+  await clearCache("books:");
+  await clearCache(`book:${id}`);
 
   res.status(StatusCodes.OK).json({ message: "Book updated", book });
 };
 
 const deleteBook = async (req, res) => {
-  const book = await Book.findOneAndDelete({ id: req.params.id });
-  if (!book) throw new NotFoundError("Book not found");
+  const { id } = req.params;
+
+  const book = await Book.findOneAndDelete({ _id: id });
+
+  if (!book) {
+    throw new NotFoundError("Book not found");
+  }
 
   const filePath = path.join(__dirname, "..", book.path);
-  if (fs.existsSync(filePath)) fs.unlinkSync(filePath);
+  if (fs.existsSync(filePath)) {
+    fs.unlinkSync(filePath);
+  }
+
+  await clearCache("books:");
+  await clearCache(`book:${id}`);
 
   res.status(StatusCodes.OK).json({ message: "Book deleted" });
 };
 
 const streamBook = async (req, res) => {
-  const book = await Book.findOne({ _id: req.params.id });
-  if (!book) throw new NotFoundError("Book not found");
+  const { id } = req.params;
+
+  const book = await Book.findOne({ _id: id });
+
+  if (!book) {
+    throw new NotFoundError("Book not found");
+  }
 
   const filePath = path.join(__dirname, "..", book.path);
-  if (!fs.existsSync(filePath)) throw new NotFoundError("File not found");
+
+  if (!fs.existsSync(filePath)) {
+    throw new NotFoundError("File not found");
+  }
 
   res.setHeader("Content-Type", "application/pdf");
   res.setHeader("Content-Disposition", "inline");

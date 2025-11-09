@@ -11,6 +11,7 @@ const {
   authenticateToken,
   requireAdmin,
 } = require("../middleware/authMiddleware");
+const cache = require("../middleware/cacheMiddleware");
 
 router.use(authenticateToken);
 
@@ -110,7 +111,7 @@ router.use(authenticateToken);
  */
 router
   .route("/")
-  .get(getClasses)
+  .get(cache("classes:"), getClasses)
   .post(requireAdmin("super-admin", "admin"), createClass);
 
 /**
@@ -199,6 +200,10 @@ router
  *       404:
  *         description: Class not found
  */
-router.route("/:id").get(getClassById).patch(updateClass).delete(deleteClass);
+router
+  .route("/:id")
+  .get(cache("class:"), getClassById)
+  .patch(updateClass)
+  .delete(deleteClass);
 
 module.exports = router;

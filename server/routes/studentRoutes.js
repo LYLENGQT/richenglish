@@ -2,6 +2,7 @@ const express = require("express");
 const router = express.Router();
 const {
   getStudents,
+  getStudent,
   addStudent,
   updateStudent,
   deleteStudent,
@@ -10,6 +11,7 @@ const {
   authenticateToken,
   requireAdmin,
 } = require("../middleware/authMiddleware");
+const cache = require("../middleware/cacheMiddleware");
 
 router.use(authenticateToken);
 
@@ -118,7 +120,7 @@ router.use(authenticateToken);
  */
 router
   .route("/")
-  .get(getStudents)
+  .get(cache("students:"), getStudents)
   .post(requireAdmin("super-admin"), addStudent);
 
 /**
@@ -170,6 +172,10 @@ router
  *       404:
  *         description: Student not found
  */
-router.route("/:id").patch(updateStudent).delete(deleteStudent);
+router
+  .route("/:id")
+  .get(cache("student:"), getStudent)
+  .patch(updateStudent)
+  .delete(deleteStudent);
 
 module.exports = router;

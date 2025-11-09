@@ -13,6 +13,7 @@ const {
 const multer = require("multer");
 const fs = require("fs");
 const path = require("path");
+const cache = require("../middleware/cacheMiddleware");
 
 const uploadsDir = path.join(__dirname, "../uploads/books");
 fs.mkdirSync(uploadsDir, { recursive: true });
@@ -249,8 +250,8 @@ router.use(authenticateToken);
 router
   .route("/")
   .post(requireAdmin("admin", "super-admin"), upload.single("file"), addBook)
-  .get(getBooks);
+  .get(cache("books:"), getBooks);
 router.get("/:id/stream", streamBook);
-router.get("/:id", getBook);
+router.get("/:id", cache("book:"), getBook);
 
 module.exports = router;

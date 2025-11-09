@@ -11,17 +11,18 @@ const {
   authenticateToken,
   requireAdmin,
 } = require("../middleware/authMiddleware");
+const cache = require("../middleware/cacheMiddleware");
 
 router.use(authenticateToken);
 
 router
   .route("/")
-  .get(getAttendances)
+  .get(cache("attendances:"), getAttendances)
   .post(requireAdmin("admin", "super-admin"), addAttendance);
 
 router
   .route("/:id")
-  .get(getAttendance)
+  .get(cache("attendance:"), getAttendance)
   .patch(requireAdmin("admin", "super-admin"), updateAttendance)
   .delete(requireAdmin("admin", "super-admin"), deleteAttendance);
 
