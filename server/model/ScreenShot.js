@@ -1,5 +1,6 @@
 const mongoose = require("mongoose");
 const { Schema, model } = mongoose;
+const Drive = require("./DriveFile");
 
 const ScreenshotSchema = new Schema(
   {
@@ -15,10 +16,7 @@ const ScreenshotSchema = new Schema(
       type: String,
       required: true,
     },
-    drive_link: {
-      type: String,
-      required: true,
-    },
+    drive: Drive,
     uploaded_by: {
       type: Schema.Types.ObjectId,
       ref: "User",

@@ -1,4 +1,5 @@
 const mongoose = require("mongoose");
+const Drive = require("./DriveFile");
 
 const recordingSchema = new mongoose.Schema(
   {
@@ -20,10 +21,7 @@ const recordingSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
-    drive_link: {
-      type: String,
-      required: true,
-    },
+    drive: Drive,
   },
   { timestamps: true }
 );

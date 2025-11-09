@@ -12,6 +12,7 @@ const Screenshot = require("./ScreenShot");
 const Payout = require("./Payout");
 const Notification = require("./Notification");
 const BookAssign = require("./BookAssign");
+const Drive = require("./DriveFile");
 
 module.exports = {
   User,
@@ -28,4 +29,5 @@ module.exports = {
   Payout,
   Notification,
   BookAssign,
+  Drive,
 };

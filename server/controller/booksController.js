@@ -9,27 +9,32 @@ const {
   NotFoundError,
   UnathoizedError,
 } = require("../errors");
+const { uploadFile } = require("../lib/googleapi");
 
-// Ensure upload directory exists
 const uploadsDir = path.join(__dirname, "../uploads/books");
 fs.mkdirSync(uploadsDir, { recursive: true });
 
 const addBook = async (req, res) => {
   if (!req.file) throw new BadRequestError("No file uploaded");
 
-  const id = uuidv4().slice(0, 10);
   const title = req.body.title || req.file.originalname.replace(/\.pdf$/i, "");
   const storedPath = path
     .relative(__dirname, req.file.path)
     .replace(/\\/g, "/");
 
+  const drive = await uploadFile(req.file.path, "books", title + ".pdf");
+
   const book = await Book.create({
-    id,
     title,
     filename: req.file.filename,
     original_filename: req.file.originalname,
     path: storedPath,
     uploaded_by: req.user?.id || null,
+    drive: {
+      id: drive.id,
+      webViewLink: drive.webViewLink,
+      src: drive.src,
+    },
   });
 
   res.status(StatusCodes.CREATED).json({ id: book.id, title: book.title });

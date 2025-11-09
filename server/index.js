@@ -35,6 +35,35 @@ app.use(
     customSiteTitle: "School Management API Docs",
   })
 );
+// app.get("/auth/google", (req, res) => {
+//   const { google } = require("googleapis");
+//   const oauth2Client = new google.auth.OAuth2(
+//     process.env.GOOGLE_CLIENT_ID,
+//     process.env.GOOGLE_CLIENT_SECRET,
+//     "http://localhost:5000/oauth2callback" // temporary
+//   );
+
+//   const url = oauth2Client.generateAuthUrl({
+//     access_type: "offline", // important to get refresh token
+//     scope: ["https://www.googleapis.com/auth/drive.file"],
+//   });
+
+//   res.redirect(url); // you go to Google login page
+// });
+
+// app.get("/oauth2callback", async (req, res) => {
+//   const { code } = req.query;
+//   const { google } = require("googleapis");
+//   const oauth2Client = new google.auth.OAuth2(
+//     process.env.GOOGLE_CLIENT_ID,
+//     process.env.GOOGLE_CLIENT_SECRET,
+//     "http://localhost:5000/oauth2callback"
+//   );
+
+//   const { tokens } = await oauth2Client.getToken(code);
+//   console.log(tokens); // contains refresh_token
+//   res.send("✅ Check console for refresh token and save it in .env");
+// });
 
 app.get("/api-docs.json", (req, res) => {
   res.setHeader("Content-Type", "application/json");
@@ -52,6 +81,8 @@ const notificationRoutes = require("./routes/notificationsRoutes");
 const classRoutes = require("./routes/classRoutes");
 const payoutRoutes = require("./routes/payoutRoutes");
 const bookAssignRoutes = require("./routes/bookAssignRoutes");
+const recordingRoutes = require("./routes/recordingRoutes");
+const screenShotRoutes = require("./routes/screenShotRoutes");
 
 app.use("/api/v1/class", classRoutes);
 app.use("/api/v1/auth", authRoutes);
@@ -64,6 +95,8 @@ app.use("/api/v1/notification", notificationRoutes);
 app.use("/api/v1/payout", payoutRoutes);
 app.use("/api/v1/book-assign", bookAssignRoutes);
 app.use("/api/v1/dashboard", dashboardRoutes);
+app.use("/api/v1/recording", recordingRoutes);
+app.use("/api/v1/screen-shot", screenShotRoutes);
 
 app.get("/api/health", (req, res) => {
   res.json({ status: "OK", timestamp: new Date().toISOString() });

@@ -1,4 +1,5 @@
 const mongoose = require("mongoose");
+const Drive = require("./DriveFile");
 
 const bookSchema = new mongoose.Schema(
   {
@@ -25,6 +26,7 @@ const bookSchema = new mongoose.Schema(
       trim: true,
       maxlength: 512,
     },
+    drive: Drive,
     uploaded_by: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
