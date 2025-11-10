@@ -1,0 +1,79 @@
+const mongoose = require("mongoose");
+const bcrypt = require("bcryptjs");
+const jwt = require("jsonwebtoken");
+const crypto = require("crypto");
+
+const { Schema, model, models } = mongoose;
+
+const userBaseSchema = new Schema(
+  {
+    name: { type: String, required: true },
+    email: { type: String, required: true, unique: true },
+    password: { type: String },
+    country: { type: String },
+    role: {
+      type: String,
+      enum: ["teacher", "admin", "super-admin"],
+      default: "teacher",
+    },
+    status: { type: String, enum: ["active", "inactive"], default: "active" },
+    timezone: { type: String, default: "Asia/Manila" },
+    reset: {
+      otp: { type: String, default: null },
+      expiration: { type: Date },
+    },
+  },
+  { timestamps: true, discriminatorKey: "role" }
+);
+
+// Password hashing
+userBaseSchema.pre("save", async function () {
+  if (!this.isModified("password")) return;
+  const salt = await bcrypt.genSalt(10);
+  this.password = await bcrypt.hash(this.password, salt);
+});
+
+// Password validation
+userBaseSchema.methods.checkPassword = async function (inputPassword) {
+  return await bcrypt.compare(inputPassword, this.password);
+};
+
+// JWT generation
+userBaseSchema.methods.generateAccessToken = async function () {
+  return jwt.sign(
+    {
+      id: this._id,
+      name: this.name,
+      email: this.email,
+      role: this.role,
+    },
+    process.env.ACCESS_SECRET,
+    { expiresIn: "1d" }
+  );
+};
+
+userBaseSchema.methods.generateRefreshToken = async function () {
+  return jwt.sign({ id: this._id }, process.env.REFRESH_SECRET, {
+    expiresIn: "7d",
+  });
+};
+
+// Verification token
+userBaseSchema.methods.generateVerificationToken = async function () {
+  const random = crypto.randomBytes(40).toString("hex");
+  this.verification.token = random;
+  this.verification.expiration = new Date(Date.now() + 10 * 60 * 1000); // 10 min
+  return random;
+};
+
+userBaseSchema.methods.isVerificationTokenExpired = function () {
+  return this.verification.expiration < new Date();
+};
+
+userBaseSchema.methods.isOTPExpired = function () {
+  return this.reset.expiration < new Date();
+};
+
+const User = models.User || model("User", userBaseSchema);
+
+module.exports = User;

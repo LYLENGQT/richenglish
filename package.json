@@ -11,12 +11,14 @@
     "start": "cd server && npm start",
     "install-all": "npm install && cd server && npm install && cd ../client && npm install"
   },
-  "keywords": ["education", "teacher-portal", "english-teaching"],
+  "keywords": [
+    "education",
+    "teacher-portal",
+    "english-teaching"
+  ],
   "author": "Rich English",
   "license": "MIT",
   "devDependencies": {
-    "concurrently": "^8.2.2"
+    "concurrently": "^9.2.1"
   }
 }
-
-

@@ -1,117 +1,267 @@
-const pool = require('../database/db');
+const { StatusCodes } = require("http-status-codes");
+const { Teacher } = require("../model");
+const redisClient = require("../database/redis");
+const clearCache = require("../helper/clearCache");
+const { sendMail } = require("../lib/nodemailer");
 const {
   UnathenticatedError,
   BadRequestError,
   NotFoundError,
   UnathoizedError,
-} = require('../errors')
+} = require("../errors");
 
-const teacherApplication = async (req, res)=>{
-  try {
-    const {
-      firstName, lastName, email, phone, degree, major, englishLevel,
-      experience, motivation, availability, internetSpeed, computerSpecs,
-      hasWebcam, hasHeadset, hasBackupInternet, hasBackupPower,
-      teachingEnvironment, resume, introVideo, speedTestScreenshot
-    } = req.body;
+// Create (teacher application)
+const teacherApplication = async (req, res) => {
+  const {
+    firstName,
+    lastName,
+    email,
+    password,
+    phone,
+    degree,
+    major,
+    englishLevel,
+    experience,
+    motivation,
+    availability,
+    internetSpeed,
+    computerSpecs,
+    hasWebcam,
+    hasHeadset,
+    hasBackupInternet,
+    hasBackupPower,
+    teachingEnvironment,
+    resume,
+    introVideo,
+    speedTestScreenshot,
+  } = req.body;
 
-    // In a real application, you would save files to storage and store file paths
-    // For now, we'll just store the application data
-    const [result] = await pool.execute(`
-      INSERT INTO teacher_applications (
-        first_name, last_name, email, phone, degree, major, english_level,
-        experience, motivation, availability, internet_speed, computer_specs,
-        has_webcam, has_headset, has_backup_internet, has_backup_power,
-        teaching_environment, resume_path, intro_video_path, speed_test_screenshot_path,
-        status, created_at
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'pending', NOW())
-    `, [
-      firstName, lastName, email, phone, degree, major, englishLevel,
-      experience, motivation, availability, internetSpeed, computerSpecs,
-      hasWebcam, hasHeadset, hasBackupInternet, hasBackupPower,
-      teachingEnvironment, resume, introVideo, speedTestScreenshot
-    ]);
-
-    res.json({ 
-      id: result.insertId, 
-      message: 'Application submitted successfully! You will receive an email within 1-3 days regarding the next step.' 
-    });
-  } catch (error) {
-    console.error('Error submitting teacher application:', error);
-    res.status(500).json({ error: 'Server error' });
+  const existing = await Teacher.findOne({ email });
+  if (existing) {
+    throw new BadRequestError("Email already registered");
   }
-}
 
-const getTeachers = async (req, res)=>{
+  const teacher = await Teacher.create({
+    name: `${firstName} ${lastName}`,
+    email,
+    password,
+    role: "teacher",
+    firstName,
+    lastName,
+    phone,
+    degree,
+    major,
+    englishLevel,
+    experience,
+    motivation,
+    availability,
+    internetSpeed,
+    computerSpecs,
+    hasWebcam,
+    hasHeadset,
+    hasBackupInternet,
+    hasBackupPower,
+    teachingEnvironment,
+    resume,
+    introVideo,
+    speedTestScreenshot,
+  });
+
+  // Clear cache after creating new teacher
+  await clearCache("teachers:");
+
+  await sendMail(
+    email,
+    "Thank you for applying!",
+    `Hi ${firstName},\n\nThank you for submitting your teaching application. Our team will review your profile and get back to you within 1–3 days.\n\nBest regards,\nThe Recruitment Team`
+  );
+
+  res.status(StatusCodes.CREATED).json({
+    id: teacher._id,
+    message:
+      "Application submitted successfully! You will receive an email within 1–3 days regarding the next step.",
+  });
+};
+
+const getTeachers = async (req, res) => {
+  const cacheKey = "teachers:" + JSON.stringify(req.query);
+
+  // Try to get from cache
   try {
-    const [rows] = await pool.execute(`
-      SELECT id, name, email, role, created_at, updated_at 
-      FROM teachers 
-      ORDER BY name
-    `);
-    res.json(rows);
-  } catch (error) {
-    console.error('Error fetching teachers:', error);
-    res.status(500).json({ error: 'Server error' });
-  }
-}
-
-const createTeacher = async (req, res)=>{
-  try {
-    const { name, email, password, role } = req.body;
-    
-    // Hash password
-    const hashedPassword = await bcrypt.hash(password, 10);
-    
-    const [result] = await pool.execute(`
-      INSERT INTO teachers (name, email, password, role)
-      VALUES (?, ?, ?, ?)
-    `, [name, email, hashedPassword, role]);
-
-    res.json({ id: result.insertId, message: 'Teacher created successfully' });
-  } catch (error) {
-    console.error('Error creating teacher:', error);
-    res.status(500).json({ error: 'Server error' });
-  }
-}
-
-const updateTeacher = async (req, res)=>{
-  try {
-    const { id } = req.params;
-    const { name, email, password, role } = req.body;
-    
-    let query = 'UPDATE teachers SET name=?, email=?, role=?';
-    let params = [name, email, role];
-    
-    // Only update password if provided
-    if (password && password.trim() !== '') {
-      const hashedPassword = await bcrypt.hash(password, 10);
-      query += ', password=?';
-      params.push(hashedPassword);
+    const cached = await redisClient.get(cacheKey);
+    if (cached) {
+      console.log("⚡ Redis Cache Hit:", cacheKey);
+      return res.status(StatusCodes.OK).json(JSON.parse(cached));
     }
-    
-    query += ' WHERE id=?';
-    params.push(id);
-    
-    await pool.execute(query, params);
-    res.json({ message: 'Teacher updated successfully' });
-  } catch (error) {
-    console.error('Error updating teacher:', error);
-    res.status(500).json({ error: 'Server error' });
+  } catch (err) {
+    console.error("Redis get error:", err);
   }
-}
 
-const deleteTeacher = async (req, res)=>{
-  try {
-    const { id } = req.params;
-    await pool.execute('DELETE FROM teachers WHERE id = ?', [id]);
-    res.json({ message: 'Teacher deleted successfully' });
-  } catch (error) {
-    console.error('Error deleting teacher:', error);
-    res.status(500).json({ error: 'Server error' });
+  const query = {};
+  const allowedFilters = [
+    "country",
+    "degree",
+    "major",
+    "englishLevel",
+    "accepted",
+    "hasWebcam",
+    "hasBackupInternet",
+    "hasBackupPower",
+    "hasHeadset",
+  ];
+
+  allowedFilters.forEach((field) => {
+    if (req.query[field]) {
+      if (
+        [
+          "accepted",
+          "hasWebcam",
+          "hasBackupInternet",
+          "hasBackupPower",
+          "hasHeadset",
+        ].includes(field)
+      ) {
+        query[field] = req.query[field] === "true";
+      } else {
+        query[field] = req.query[field];
+      }
+    }
+  });
+
+  if (req.query.search) {
+    query.$or = [
+      { firstName: { $regex: req.query.search, $options: "i" } },
+      { lastName: { $regex: req.query.search, $options: "i" } },
+      { email: { $regex: req.query.search, $options: "i" } },
+    ];
   }
-}
+
+  const page = parseInt(req.query.page) || 1;
+  const limit = parseInt(req.query.limit) || 10;
+  const skip = (page - 1) * limit;
+
+  const teachers = await Teacher.find(query)
+    .skip(skip)
+    .limit(limit)
+    .sort({ createdAt: -1 });
+  const total = await Teacher.countDocuments(query);
+
+  const result = {
+    teachers,
+    pagination: {
+      total,
+      page,
+      limit,
+      totalPages: Math.ceil(total / limit),
+    },
+  };
+
+  // Cache the result for 5 minutes
+  try {
+    await redisClient.setEx(cacheKey, 300, JSON.stringify(result));
+  } catch (err) {
+    console.error("Redis setEx error:", err);
+  }
+
+  return res.status(StatusCodes.OK).json(result);
+};
+
+const getTeacher = async (req, res) => {
+  const { id } = req.params;
+  const cacheKey = `teacher:${id}`;
+
+  // Try to get from cache
+  try {
+    const cached = await redisClient.get(cacheKey);
+    if (cached) {
+      console.log("⚡ Redis Cache Hit:", cacheKey);
+      return res.status(StatusCodes.OK).json(JSON.parse(cached));
+    }
+  } catch (err) {
+    console.error("Redis get error:", err);
+  }
+
+  const teacher = await Teacher.findById(id);
+
+  if (!teacher) {
+    throw new NotFoundError("Teacher not found");
+  }
+
+  // Cache the result for 5 minutes
+  try {
+    await redisClient.setEx(cacheKey, 300, JSON.stringify(teacher));
+  } catch (err) {
+    console.error("Redis setEx error:", err);
+  }
+
+  res.json(teacher);
+};
+
+const createTeacher = async (req, res) => {
+  const { name, email, password } = req.body;
+
+  const existing = await Teacher.findOne({ email });
+  if (existing) {
+    throw new BadRequestError("Email already exists");
+  }
+
+  const teacher = await Teacher.create({
+    name,
+    email,
+    password,
+    role: "teacher",
+  });
+
+  // Clear cache after creating new teacher
+  await clearCache("teachers:");
+  await clearCache("teacher:");
+
+  res
+    .status(StatusCodes.CREATED)
+    .json({ id: teacher._id, message: "Teacher created successfully" });
+};
+
+const updateTeacher = async (req, res) => {
+  const { id } = req.params;
+  const updates = req.body;
+
+  const teacher = await Teacher.findByIdAndUpdate(id, updates, {
+    new: true,
+    runValidators: true,
+  });
+
+  if (!teacher) {
+    throw new NotFoundError("Teacher not found");
+  }
+
+  // Clear cache after updating
+  await clearCache("teachers:");
+  await clearCache(`teacher:${id}`);
+
+  res.json({ message: "Teacher updated successfully", teacher });
+};
+
+const deleteTeacher = async (req, res) => {
+  const { id } = req.params;
+
+  const teacher = await Teacher.findByIdAndDelete(id);
+
+  if (!teacher) {
+    throw new NotFoundError("Teacher not found");
+  }
+
+  // Clear cache after deleting
+  await clearCache("teachers:");
+  await clearCache(`teacher:${id}`);
+
+  res.json({ message: "Teacher deleted successfully" });
+};
 
 module.exports = {
-    teacherApplication, getTeachers, createTeacher, updateTeacher, deleteTeacher
-}
+  teacherApplication,
+  getTeachers,
+  getTeacher,
+  createTeacher,
+  updateTeacher,
+  deleteTeacher,
+};

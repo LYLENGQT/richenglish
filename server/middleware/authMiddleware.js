@@ -1,36 +1,34 @@
-const jwt = require('jsonwebtoken');
-const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key';
 const {
   UnathenticatedError,
   BadRequestError,
-  NotFoundError,
   UnathoizedError,
-} = require('../errors')
+} = require("../errors");
+const verifyToken = require("../helper/sign");
 
+const authenticateToken = async (req, res, next) => {
+  try {
+    const { token, refresh } = req.cookies;
 
-const authenticateToken = (req, res, next) => {
-  const authHeader = req.headers['authorization'];
-  const token = authHeader && authHeader.split(' ')[1];
+    if (!token) throw new BadRequestError("Access token required");
 
-  if (!token) throw new BadRequestError('Access token required')
-
-  jwt.verify(token, JWT_SECRET, (err, user) => {
-    if (err) throw new UnathenticatedError('Invalid token')
-
-      
+    const user = await verifyToken(token);
     req.user = user;
     next();
-  });
+  } catch (err) {
+    throw new UnathenticatedError(err.message || "Invalid token");
+  }
 };
 
-const requireAdmin = (req, res, next) => {
-  if (!req.user || req.user.role !== 'admin') {
-    return res.status(403).json({ error: 'Admin access required' });
-  }
-  next();
+const requireAdmin = (...roles) => {
+  return (req, res, next) => {
+    if (!req.user || !roles.includes(req.user.role)) {
+      throw new UnathoizedError("Unauthorized access to this route");
+    }
+    next();
+  };
 };
 
 module.exports = {
   authenticateToken,
-  requireAdmin
+  requireAdmin,
 };

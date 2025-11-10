@@ -1,43 +1,191 @@
-const pool = require('../database/db')
-const bcrypt = require('bcryptjs');
-const jwt = require('jsonwebtoken')
-const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key';
+const { StatusCodes } = require("http-status-codes");
 const {
   UnathenticatedError,
   BadRequestError,
   NotFoundError,
   UnathoizedError,
-} = require('../errors')
-const Teacher = require('../models/Teacher');
+} = require("../errors");
+const { User } = require("../model/");
+const verifyToken = require("../helper/sign");
+const generateOTP = require("../helper/generateOTP");
+const { sendMail } = require("../lib/nodemailer");
 
 const login = async (req, res) => {
-    const { email, password } = req.body;
-    
-    const teacher = await Teacher.findByEmail(email)
-    
-    if(!teacher) throw new BadRequestError("Invalid Credentials")
+  const { email, password, remember } = req.body;
 
-    const isValidPassword = await bcrypt.compare(password, teacher.password);
+  const user = await User.findOne({ email: email });
 
-    if (!isValidPassword) throw new BadRequestError("Invalid Credentials")
+  if (!user) {
+    throw new BadRequestError("Invalid Email");
+  }
 
-    const token = jwt.sign(
-      { id: teacher.id, email: teacher.email, role: teacher.role },
-      JWT_SECRET,
-      { expiresIn: '24h' }
-    );
+  const isPasswordCorrect = await user.checkPassword(password);
 
-    res.json({
-      token,
-      teacher: {
-        id: teacher.id,
-        name: teacher.name,
-        email: teacher.email,
-        role: teacher.role
-      }
+  if (!isPasswordCorrect) {
+    throw new BadRequestError("Invalid Password");
+  }
+
+  if (user.role === "teacher" && user.accepted === false) {
+    throw new BadRequestError("Invalid Account not accepted yet");
+  }
+
+  const token = await user.generateAccessToken();
+
+  res.cookie("token", token, {
+    httpOnly: true,
+    secure: true,
+    sameSite: "None",
+    maxAge: 86400000,
+  });
+
+  if (remember) {
+    const refresh = await user.generateRefreshToken();
+
+    res.cookie("refresh", refresh, {
+      httpOnly: true,
+      secure: true,
+      sameSite: "None",
+      maxAge: 2592000000,
     });
+  }
+
+  res
+    .status(StatusCodes.OK)
+    .json({ id: user.id, name: user.name, email: user.email, role: user.role });
+};
+
+const logout = async (req, res) => {
+  res.cookie("token", "", {
+    httpOnly: true,
+    secure: true,
+    sameSite: "None",
+    expires: new Date(0),
+  });
+
+  res.cookie("refresh", "", {
+    httpOnly: true,
+    secure: true,
+    sameSite: "None",
+    expires: new Date(0),
+  });
+
+  res
+    .status(StatusCodes.OK)
+    .json({ success: true, message: "Logged out and tokens expired" });
+};
+
+const refresh = async (req, res) => {
+  const { token, refresh } = req.cookies;
+
+  if (!refresh || !token) {
+    throw new BadRequestError("Invalid");
+  }
+
+  const isValidRefresh = await verifyToken(refresh, "refresh");
+
+  if (!isValidRefresh) {
+    throw new BadRequestError("Invalid");
+  }
+
+  const user = await User.findById(isValidRefresh.id);
+
+  const access_token = await user.generateAccessToken();
+
+  res.cookie("token", access_token, {
+    httpOnly: true,
+    secure: true,
+    sameSite: "None",
+    maxAge: 86400000,
+  });
+
+  res
+    .status(StatusCodes.OK)
+    .json({ id: user.id, name: user.name, email: user.email, role: user.role });
+};
+
+const forgotPassword = async (req, res) => {
+  const { email } = req.body;
+
+  const user = await User.findOne({ email: email });
+  if (!user) throw new BadRequestError("Invalid");
+
+  const otp = generateOTP().toString();
+  user.reset.otp = String(otp);
+  user.reset.expiration = new Date(Date.now() + 10 * 30000); // 5mins
+
+  console.log(otp);
+
+  await user.save();
+
+  await sendMail(email, `Forgot Password`, `${otp}`);
+  res.status(StatusCodes.OK).json({ message: "email sent" });
+};
+
+const resetPassword = async (req, res) => {
+  const { newPassword, confirmPassword } = req.body;
+  const { id } = req.user;
+
+  const user = await User.findById(id);
+
+  if (!user) throw new BadRequestError("Invalid");
+
+  if (newPassword !== confirmPassword)
+    throw new BadRequestError("Password and Confirm Password doesn't match");
+
+  user.password = newPassword;
+  user.reset.expiration = null;
+  user.reset.otp = null;
+
+  await user.save();
+
+  res.status(StatusCodes.OK).json({ message: "Password reset successfully" });
+};
+
+const verifyOTP = async (req, res) => {
+  const { otp } = req.body;
+
+  const user = await User.findOne({ "reset.otp": otp });
+  if (!user) throw new BadRequestError("Invalid");
+
+  const isExpired = await user.isOTPExpired();
+  if (isExpired) throw new BadRequestError("OTP expired");
+
+  const access_token = await user.generateAccessToken();
+
+  res.cookie("token", access_token, {
+    httpOnly: true,
+    secure: true,
+    sameSite: "None",
+    maxAge: 86400000,
+  });
+
+  res.status(StatusCodes.OK).json({ message: "Valid OTP" });
+};
+
+const resendOTP = async (req, res) => {
+  const { email } = req.body;
+
+  const user = await User.findOne({ email: email });
+  if (!user) throw new BadRequestError("Invalid");
+
+  const otp = generateOTP().toString();
+  user.reset.otp = String(otp);
+  user.reset.expiration = new Date(Date.now() + 10 * 30000); // 5mins
+
+  console.log(otp);
+
+  await user.save();
+
+  await sendMail(email, `Forgot Password`, `${otp}`);
+  res.status(StatusCodes.OK).json({ message: "email sent" });
 };
 
 module.exports = {
-  login
+  login,
+  logout,
+  refresh,
+  forgotPassword,
+  resetPassword,
+  verifyOTP,
+  resendOTP,
 };
