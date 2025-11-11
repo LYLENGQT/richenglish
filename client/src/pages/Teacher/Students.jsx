@@ -49,10 +49,11 @@ const Students = () => {
             "teacher_id",
             "updated_at",
             "created_at",
-            "manager_type",
             "class_type",
             "book_type",
-            "book",
+            "created_at",
+            "updated_at",
+            "__v",
           ]}
           pagination={true}
           actions={[

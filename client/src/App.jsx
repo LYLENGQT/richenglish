@@ -89,7 +89,7 @@ import SuperAdminRecordings from "@/pages/SuperAdmin/Recordings";
 import SuperAdminSearch from "@/pages/SuperAdmin/Search";
 import SuperAdminSettings from "@/pages/SuperAdmin/Settings";
 import ScheduleDetailSuper from "@/pages/SuperAdmin/Details/ScheduleDetail";
-import BookDetailSuper from "@/pages/SuperAdmin/BookDetail";
+import BookDetailSuper from "@/pages/SuperAdmin/Details/BookDetail";
 import AssignBookDetailSuper from "@/pages/SuperAdmin/Details/AssignBookDetail";
 import CurriculumDetailSuper from "@/pages/SuperAdmin/Details/CurriculumDetail";
 import AttendanceDetailSuper from "@/pages/SuperAdmin/Details/AttendanceDetail";

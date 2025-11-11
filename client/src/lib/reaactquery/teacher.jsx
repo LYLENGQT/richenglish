@@ -1,5 +1,5 @@
 import { queryOptions } from "@tanstack/react-query";
-import { dashboard, students } from "../axios/teacher";
+import { dashboard, getAllTeachers, students } from "../axios/teacher";
 import { classes } from "@/lib/axios/classes";
 
 const dashboardQuery = () => {
@@ -27,6 +27,16 @@ const classesQuery = () => {
   return queryOptions({
     queryKey: ["classes"],
     queryFn: classes,
+    staleTime: 1000 * 60 * 5,
+    refetchInterval: 1000 * 60 * 5,
+    refetchIntervalInBackground: true,
+  });
+};
+
+export const getTeacherQuery = () => {
+  return queryOptions({
+    queryKey: ["teachers"],
+    queryFn: getAllTeachers,
     staleTime: 1000 * 60 * 5,
     refetchInterval: 1000 * 60 * 5,
     refetchIntervalInBackground: true,
