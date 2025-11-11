@@ -1,3 +1,4 @@
+import axios from "axios";
 import api from "./axios";
 
 export const dashboard = async () => {
@@ -17,6 +18,16 @@ export const students = async (id) => {
       params: { teacher_id: id },
     });
     return res.data;
+  } catch (error) {
+    throw error;
+  }
+};
+
+export const getAllTeachers = async () => {
+  try {
+    const teachers = await axios.get("/teachers");
+
+    return teachers.data;
   } catch (error) {
     throw error;
   }

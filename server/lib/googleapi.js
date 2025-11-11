@@ -3,9 +3,10 @@ const fs = require("fs");
 const mime = require("mime-types");
 
 const FOLDER_MAP = {
-  screenshot: "1wfAHC5Kk7tH8LHVa3WU3Xj5hS0EYkC44",
-  recording: "1i_qla3_Bh_E11y6fyYjWzK8dAD8177l4",
-  books: "1ULrn1mvsRTW5qJoDCtRQ6Ba-BAG0yg9f",
+  screenshot: process.env.SCREEN_SHOT_FOLDER,
+  recording: process.env.RECORDING_FOLDER,
+  books: process.env.BOOKS_FOLDER,
+  application: process.env.APPLICATION_FOLDER,
 };
 
 /**
