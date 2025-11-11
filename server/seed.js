@@ -587,7 +587,7 @@ async function seedDatabase(model, data) {
     await mongoose.connect(MONGODB_URI);
     console.log("✅ Connected to MongoDB");
 
-    await seedDatabase(User, usersData);
+    // await seedDatabase(User, usersData);
     await seedDatabase(Student, studentsData);
 
     console.log("🎉 All seeding completed successfully!");

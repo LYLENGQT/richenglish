@@ -12,7 +12,6 @@ const clearCache = require("../helper/clearCache");
 const getStudents = async (req, res) => {
   const cacheKey = "students:" + JSON.stringify(req.query);
 
-  // Try to get from cache
   try {
     const cached = await redisClient.get(cacheKey);
     if (cached) {
@@ -27,7 +26,6 @@ const getStudents = async (req, res) => {
   const allowedFilters = [
     "name",
     "nationality",
-    "manager_type",
     "category_level",
     "class_type",
     "platform",
@@ -43,24 +41,35 @@ const getStudents = async (req, res) => {
     }
   });
 
-  const page = parseInt(req.query.page) || 1;
-  const limit = parseInt(req.query.limit) || 10;
-  const skip = (page - 1) * limit;
+  const hasFilters = Object.keys(query).length > 0;
 
-  const students = await Student.find(query).skip(skip).limit(limit);
-  const total = await Student.countDocuments(query);
+  let students, total, result;
 
-  const result = {
-    students,
-    pagination: {
-      total,
-      page,
-      limit,
-      totalPages: Math.ceil(total / limit),
-    },
-  };
+  if (!hasFilters) {
+    // No filters → return all students without pagination
+    students = await Student.find();
+    total = students.length;
+    result = { students, total };
+  } else {
+    // Apply filters + pagination
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 10;
+    const skip = (page - 1) * limit;
 
-  // Cache the result for 5 minutes
+    students = await Student.find(query).skip(skip).limit(limit);
+    total = await Student.countDocuments(query);
+
+    result = {
+      students,
+      pagination: {
+        total,
+        page,
+        limit,
+        totalPages: Math.ceil(total / limit),
+      },
+    };
+  }
+
   try {
     await redisClient.setEx(cacheKey, 300, JSON.stringify(result));
   } catch (err) {
@@ -137,7 +146,6 @@ const deleteStudent = async (req, res) => {
     throw new NotFoundError("Student not found");
   }
 
-  // Clear cache after deleting
   await clearCache("students:");
   await clearCache(`student:${id}`);
 
