@@ -23,7 +23,7 @@ Route::prefix('v1')->group(function () {
         Route::delete('logout', [AuthController::class, 'logout'])->middleware('auth:sanctum');
         Route::get('refresh', [AuthController::class, 'refresh']);
         Route::post('forgot-password', [AuthController::class, 'forgotPassword']);
-        Route::post('reset-password', [AuthController::class, 'resetPassword'])->middleware('auth:sanctum');
+        Route::post('reset-password', [AuthController::class, 'resetPassword']);
         Route::post('verify-otp', [AuthController::class, 'verifyOtp']);
         Route::post('resend-otp', [AuthController::class, 'resendOtp']);
     });

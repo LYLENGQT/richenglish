@@ -349,12 +349,13 @@ class TeacherController extends Controller
             $screenshotPath = $request->file('speed_test_screenshot')->store('teacher-applications/screenshots', 'public');
 
             // Create user with teacher role (not accepted yet)
+            // Match legacy: no status field set, defaults to 'active' in enum
+            // Password will be set when teacher is accepted
             $user = User::create([
                 'name' => $validated['first_name'] . ' ' . $validated['last_name'],
                 'email' => $validated['email'],
-                'password' => bcrypt(Str::random(16)), // Temporary password, will be reset
+                'password' => Hash::make(Str::random(16)), // Temporary password, will be reset when accepted
                 'role' => 'teacher',
-                'status' => 'pending',
                 'accepted' => false,
             ]);
 
@@ -372,20 +373,31 @@ class TeacherController extends Controller
                 'availability' => $validated['availability'],
                 'internet_speed' => $validated['internet_speed'],
                 'computer_specs' => $validated['computer_specs'],
-                'has_webcam' => $validated['has_webcam'] ?? false,
-                'has_headset' => $validated['has_headset'] ?? false,
-                'has_backup_internet' => $validated['has_backup_internet'] ?? false,
-                'has_backup_power' => $validated['has_backup_power'] ?? false,
+                'has_webcam' => filter_var($validated['has_webcam'] ?? false, FILTER_VALIDATE_BOOLEAN),
+                'has_headset' => filter_var($validated['has_headset'] ?? false, FILTER_VALIDATE_BOOLEAN),
+                'has_backup_internet' => filter_var($validated['has_backup_internet'] ?? false, FILTER_VALIDATE_BOOLEAN),
+                'has_backup_power' => filter_var($validated['has_backup_power'] ?? false, FILTER_VALIDATE_BOOLEAN),
                 'teaching_environment' => $validated['teaching_environment'],
                 'resume' => $resumePath,
                 'intro_video' => $introVideoPath,
                 'speed_test_screenshot' => $screenshotPath,
             ]);
 
-            // TODO: Send email notification to admin
-            // TODO: Send confirmation email to applicant
+            // Send confirmation email to applicant (matching legacy)
+            try {
+                Mail::raw(
+                    "Hi {$validated['first_name']},\n\nThank you for submitting your teaching application. Our team will review your profile and get back to you within 1–3 days.\n\nBest regards,\nThe Recruitment Team",
+                    function ($message) use ($validated) {
+                        $message->to($validated['email'])
+                            ->subject('Thank you for applying!');
+                    }
+                );
+            } catch (\Exception $e) {
+                \Log::warning('Failed to send teacher application confirmation email: ' . $e->getMessage());
+            }
 
             return response()->json([
+                'id' => $user->id,
                 'message' => 'Application submitted successfully! You will receive an email within 1-3 days regarding the next step.',
             ], 201);
         } catch (\Exception $e) {

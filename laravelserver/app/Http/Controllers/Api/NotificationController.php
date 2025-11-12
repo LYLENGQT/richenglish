@@ -27,6 +27,27 @@ class NotificationController extends Controller
         ]);
     }
 
+    public function store(Request $request): JsonResponse
+    {
+        $data = $request->validate([
+            'user_id' => ['required', 'exists:users,id'],
+            'title' => ['required', 'string', 'max:255'],
+            'message' => ['required', 'string'],
+            'type' => ['nullable', 'string', 'max:50'],
+        ]);
+
+        $notification = UserNotification::create($data);
+
+        return response()->json(['notification' => $notification], JsonResponse::HTTP_CREATED);
+    }
+
+    public function show(Request $request, UserNotification $notification): JsonResponse
+    {
+        abort_unless($notification->user_id === $request->user()->id, 403);
+
+        return response()->json($notification);
+    }
+
     public function markAsRead(Request $request, UserNotification $notification): JsonResponse
     {
         abort_unless($notification->user_id === $request->user()->id, 403);

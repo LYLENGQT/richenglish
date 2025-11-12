@@ -243,7 +243,7 @@ const handleLogout = () => {
                             </Link>
                         </div>
                     </nav>
-                </div>
+                            </div>
                 <div class="flex-shrink-0 flex border-t border-gray-200 p-4">
                     <div class="flex items-center">
                         <div class="ml-3">
@@ -256,9 +256,9 @@ const handleLogout = () => {
                             </button>
                         </div>
                     </div>
+                        </div>
+                    </div>
                 </div>
-            </div>
-        </div>
 
         <!-- Desktop sidebar -->
         <div class="hidden md:flex md:flex-shrink-0">
@@ -277,7 +277,7 @@ const handleLogout = () => {
                                     v-for="item in group.items"
                                     :key="item.name"
                                     :href="item.href"
-                                    :class="{
+                    :class="{
                                         'bg-blue-100 text-blue-900': isCurrentPath(item.href),
                                         'text-gray-600 hover:bg-gray-50 hover:text-gray-900': !isCurrentPath(item.href),
                                     }"
@@ -322,7 +322,7 @@ const handleLogout = () => {
                 <div class="py-6">
                     <div class="sm:mx-auto px-4 sm:px-6 md:px-8">
                         <div v-if="$slots.header" class="mb-6">
-                            <slot name="header" />
+                    <slot name="header" />
                         </div>
                         <slot />
                     </div>

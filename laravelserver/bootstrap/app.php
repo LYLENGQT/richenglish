@@ -41,5 +41,18 @@ return Application::configure(basePath: dirname(__DIR__))
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
-        //
+        // Handle authentication exceptions - redirect to login for web requests
+        $exceptions->respond(function (\Symfony\Component\HttpFoundation\Response $response, \Throwable $exception, \Illuminate\Http\Request $request) {
+            if ($exception instanceof \Illuminate\Auth\AuthenticationException) {
+                // For API requests, return JSON response
+                if ($request->expectsJson() || $request->is('api/*')) {
+                    return response()->json(['message' => 'Unauthenticated.'], 401);
+                }
+                
+                // For web/Inertia requests, redirect to login page
+                return redirect()->guest(route('login'));
+            }
+            
+            return $response;
+        });
     })->create();

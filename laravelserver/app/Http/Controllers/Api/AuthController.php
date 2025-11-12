@@ -148,15 +148,38 @@ class AuthController extends Controller
     public function resetPassword(Request $request): JsonResponse
     {
         $data = $request->validate([
+            'email' => ['required', 'email'],
             'newPassword' => ['required', 'string', 'min:8'],
             'confirmPassword' => ['required', 'string', 'same:newPassword'],
         ]);
 
+        // Try to get user from authenticated session first (if OTP was verified)
         /** @var User|null $user */
         $user = $request->user();
 
+        // If not authenticated, try to find user by email and check if they have a valid OTP session
         if (! $user) {
-            return response()->json(['message' => 'Unauthorized'], Response::HTTP_UNAUTHORIZED);
+            $user = User::where('email', $data['email'])->first();
+            
+            if (! $user) {
+                return response()->json(['message' => 'Invalid email'], Response::HTTP_BAD_REQUEST);
+            }
+
+            // Check if user has a valid OTP session (recently verified OTP)
+            // We'll check if they have an active access token from OTP verification
+            // Or we can use a session-based approach
+            // For now, we'll allow reset if they have a valid token in cookie
+            $tokenValue = $request->cookie('token');
+            if ($tokenValue) {
+                $token = \Laravel\Sanctum\PersonalAccessToken::findToken($tokenValue);
+                if ($token && $token->tokenable_id === $user->id && $token->name === 'access-token') {
+                    // Valid token from OTP verification
+                } else {
+                    return response()->json(['message' => 'Please verify OTP first'], Response::HTTP_UNAUTHORIZED);
+                }
+            } else {
+                return response()->json(['message' => 'Please verify OTP first'], Response::HTTP_UNAUTHORIZED);
+            }
         }
 
         $user->forceFill([
@@ -165,7 +188,18 @@ class AuthController extends Controller
             'reset_expires_at' => null,
         ])->save();
 
-        return response()->json(['message' => 'Password reset successfully']);
+        // Revoke the temporary access token used for password reset
+        if ($request->cookie('token')) {
+            $token = \Laravel\Sanctum\PersonalAccessToken::findToken($request->cookie('token'));
+            if ($token && $token->name === 'access-token') {
+                $token->delete();
+            }
+        }
+
+        $response = response()->json(['message' => 'Password reset successfully']);
+        $response->headers->setCookie($this->tokens->forget('token'));
+
+        return $response;
     }
 
     public function verifyOtp(Request $request): JsonResponse

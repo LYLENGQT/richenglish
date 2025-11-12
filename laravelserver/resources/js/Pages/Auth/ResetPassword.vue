@@ -47,6 +47,7 @@ const onSubmit = async (e) => {
 
     try {
         await api.post('/reset-password', {
+            email: email.value,
             newPassword: newPassword.value,
             confirmPassword: confirmPassword.value,
         });
