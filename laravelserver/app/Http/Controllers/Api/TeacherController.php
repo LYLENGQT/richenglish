@@ -10,6 +10,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 
@@ -348,6 +349,10 @@ class TeacherController extends Controller
             $introVideoPath = $request->file('intro_video')->store('teacher-applications/videos', 'public');
             $screenshotPath = $request->file('speed_test_screenshot')->store('teacher-applications/screenshots', 'public');
 
+            $resumeUrl = Storage::disk('public')->url($resumePath);
+            $introVideoUrl = Storage::disk('public')->url($introVideoPath);
+            $speedTestScreenshotUrl = Storage::disk('public')->url($screenshotPath);
+
             // Create user with teacher role (not accepted yet)
             // Match legacy: no status field set, defaults to 'active' in enum
             // Password will be set when teacher is accepted
@@ -357,6 +362,14 @@ class TeacherController extends Controller
                 'password' => Hash::make(Str::random(16)), // Temporary password, will be reset when accepted
                 'role' => 'teacher',
                 'accepted' => false,
+                'meta' => [
+                    'teacher_application_status' => 'pending',
+                    'teacher_application_files' => [
+                        'resume' => $resumePath,
+                        'intro_video' => $introVideoPath,
+                        'speed_test_screenshot' => $screenshotPath,
+                    ],
+                ],
             ]);
 
             // Create teacher profile
@@ -378,9 +391,9 @@ class TeacherController extends Controller
                 'has_backup_internet' => filter_var($validated['has_backup_internet'] ?? false, FILTER_VALIDATE_BOOLEAN),
                 'has_backup_power' => filter_var($validated['has_backup_power'] ?? false, FILTER_VALIDATE_BOOLEAN),
                 'teaching_environment' => $validated['teaching_environment'],
-                'resume' => $resumePath,
-                'intro_video' => $introVideoPath,
-                'speed_test_screenshot' => $screenshotPath,
+                'resume_url' => $resumeUrl,
+                'intro_video_url' => $introVideoUrl,
+                'speed_test_screenshot_url' => $speedTestScreenshotUrl,
             ]);
 
             // Send confirmation email to applicant (matching legacy)

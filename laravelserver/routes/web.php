@@ -39,6 +39,9 @@ Route::middleware(['auth'])->group(function () {
     })
         ->middleware('role:admin,super-admin,teacher')
         ->name('teachers.show');
+    Route::get('/teacher-applications', fn () => Inertia::render('TeacherApplications/Index'))
+        ->middleware('role:super-admin')
+        ->name('teacher-applications.index');
     Route::get('/admins/{user}', function ($user) {
         return Inertia::render('Admins/Show', ['userId' => $user]);
     })
@@ -102,6 +105,7 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/notifications', fn () => Inertia::render('Notifications/Index'))
         ->name('notifications.index');
     Route::get('/payouts', fn () => Inertia::render('Payouts/Index'))
+        ->middleware('role:super-admin')
         ->name('payouts.index');
     Route::get('/payouts/{payout}', function ($payout) {
         return Inertia::render('Payouts/Show', ['payoutId' => $payout]);

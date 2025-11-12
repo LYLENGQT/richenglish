@@ -9,6 +9,7 @@ import DialogHeader from '@/Components/ui/DialogHeader.vue';
 import DialogTitle from '@/Components/ui/DialogTitle.vue';
 import DialogDescription from '@/Components/ui/DialogDescription.vue';
 import DialogFooter from '@/Components/ui/DialogFooter.vue';
+import PdfViewer from '@/Components/PdfViewer.vue';
 import {
     ArrowLeftIcon,
     TrashIcon,
@@ -27,6 +28,8 @@ const page = usePage();
 const role = computed(() => page.props.auth?.user?.role ?? 'teacher');
 const isSuperAdmin = computed(() => role.value === 'super-admin');
 const canDelete = computed(() => ['admin', 'super-admin'].includes(role.value));
+const canDownload = computed(() => isSuperAdmin.value);
+const allowTextSelection = computed(() => isSuperAdmin.value);
 
 const loading = ref(false);
 const book = ref(null);
@@ -34,6 +37,13 @@ const deleteDialogOpen = ref(false);
 const pdfUrl = computed(() => {
     if (!book.value) return null;
     return `/api/v1/books/${book.value.id}/stream`;
+});
+const downloadUrl = computed(() => {
+    if (!book.value) return null;
+    if (book.value.path) {
+        return `/storage/${book.value.path}`;
+    }
+    return pdfUrl.value;
 });
 
 const fetchBook = async () => {
@@ -70,7 +80,9 @@ const formatDate = (date) => {
     });
 };
 
-onMounted(fetchBook);
+onMounted(() => {
+    fetchBook();
+});
 </script>
 
 <template>
@@ -95,8 +107,18 @@ onMounted(fetchBook);
                         </p>
                     </div>
                 </div>
-                <div class="flex items-center gap-3" v-if="canDelete">
+                <div class="flex items-center gap-3" v-if="canDownload || canDelete">
+                    <a
+                        v-if="canDownload && downloadUrl"
+                        :href="downloadUrl"
+                        target="_blank"
+                        rel="noopener"
+                        class="inline-flex items-center gap-2 rounded-md border border-gray-300 px-3 py-2 text-sm font-semibold text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
+                    >
+                        Download
+                    </a>
                     <Button
+                        v-if="canDelete"
                         @click="deleteDialogOpen = true"
                         variant="destructive"
                         :disabled="loading"
@@ -144,17 +166,17 @@ onMounted(fetchBook);
                             <h3 class="text-lg font-semibold text-gray-900 flex items-center gap-2">
                                 <BookOpenIcon class="h-5 w-5" />
                                 Book Content
+                                <span v-if="!allowTextSelection" class="ml-auto text-xs font-normal text-gray-500">
+                                    (Copy, highlight, and download are restricted)
+                                </span>
                             </h3>
                         </div>
                         <div class="px-6 py-4">
-                            <div v-if="pdfUrl" class="w-full" style="min-height: 800px;">
-                                <iframe
-                                    :src="pdfUrl"
-                                    class="w-full h-full border-0"
-                                    style="min-height: 800px;"
-                                    type="application/pdf"
-                                ></iframe>
-                            </div>
+                            <PdfViewer
+                                v-if="pdfUrl"
+                                :src="pdfUrl"
+                                :allow-text-selection="allowTextSelection"
+                            />
                             <div v-else class="text-center py-12 text-gray-500">
                                 PDF not available
                             </div>

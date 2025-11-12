@@ -1,8 +1,11 @@
 <script setup>
-import { ref, reactive, onMounted } from 'vue';
-import { Head, router } from '@inertiajs/vue3';
+import { ref, reactive, onMounted, computed } from 'vue';
+import { Head, router, usePage } from '@inertiajs/vue3';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
 import api from '@/lib/api';
+
+const page = usePage();
+const isSuperAdmin = computed(() => page.props.auth?.user?.role === 'super-admin');
 
 const loading = ref(false);
 const books = ref([]);
@@ -182,6 +185,7 @@ onMounted(fetchBooks);
                                                         View
                                                     </button>
                                                     <a
+                                                        v-if="isSuperAdmin"
                                                         :href="`/storage/${book.path}`"
                                                         target="_blank"
                                                         class="rounded-md border border-gray-300 px-3 py-1 text-xs font-semibold text-gray-700 hover:bg-gray-50"

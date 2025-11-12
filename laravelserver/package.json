@@ -27,6 +27,7 @@
     "dependencies": {
         "@heroicons/vue": "^2.2.0",
         "aos": "^2.3.4",
+        "pdfjs-dist": "^3.11.174",
         "radix-vue": "^1.9.17",
         "ziggy-js": "^2.6.0"
     }

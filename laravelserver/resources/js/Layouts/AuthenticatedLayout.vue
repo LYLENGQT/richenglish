@@ -17,6 +17,7 @@ import {
     MagnifyingGlassIcon,
     Cog6ToothIcon,
     UsersIcon,
+    ClipboardDocumentCheckIcon,
 } from '@heroicons/vue/24/outline';
 
 const page = usePage();
@@ -90,12 +91,6 @@ const getNavigation = (role) => {
                 ],
             },
             {
-                group: 'Financial',
-                items: [
-                    { name: 'Payout Summary', href: route('payouts.index'), icon: BanknotesIcon },
-                ],
-            },
-            {
                 group: 'Resources',
                 items: [
                     { name: 'Books Archive', href: route('books.index'), icon: BookOpenIcon },
@@ -122,6 +117,7 @@ const getNavigation = (role) => {
                 group: 'User Management',
                 items: [
                     { name: 'Teachers', href: route('teachers.index'), icon: UsersIcon },
+                    { name: 'Teacher Applications', href: route('teacher-applications.index'), icon: ClipboardDocumentCheckIcon },
                     { name: 'Admins', href: route('admins.index'), icon: UsersIcon },
                     { name: 'Students', href: route('students.index'), icon: UserGroupIcon },
                 ],

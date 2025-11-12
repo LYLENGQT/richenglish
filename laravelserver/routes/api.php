@@ -14,6 +14,7 @@ use App\Http\Controllers\Api\ReportController;
 use App\Http\Controllers\Api\SearchController;
 use App\Http\Controllers\Api\ScreenshotController;
 use App\Http\Controllers\Api\StudentController;
+use App\Http\Controllers\Api\TeacherApplicationReviewController;
 use App\Http\Controllers\Api\TeacherController;
 use Illuminate\Support\Facades\Route;
 
@@ -49,6 +50,12 @@ Route::prefix('v1')->group(function () {
         Route::get('teacher/{user}', [TeacherController::class, 'show']);
         Route::patch('teacher/{user}', [TeacherController::class, 'update'])->middleware('role:super-admin,admin');
         Route::delete('teacher/{user}', [TeacherController::class, 'destroy'])->middleware('role:super-admin');
+
+        // Teacher applications review - super admin only
+        Route::middleware('role:super-admin')->prefix('teacher-applications')->group(function () {
+            Route::get('/', [TeacherApplicationReviewController::class, 'index']);
+            Route::patch('{user}', [TeacherApplicationReviewController::class, 'update']);
+        });
 
         // Classes - Legacy: POST requires super-admin,admin; PATCH/DELETE are authenticated only
         Route::get('class', [ClassScheduleController::class, 'index']);
